@@ -1,0 +1,37 @@
+Package: graph4lg
+Type: Package
+Title: Build Graphs for Landscape Genetics Analysis
+Version: 0.1.1
+Date: 2019-07-18
+Author: Paul Savary
+Maintainer: Paul Savary <savarypaul660@gmail.com>
+Description: Build graphs for landscape genetics analysis. This set of 
+	functions can be used to import and convert spatial and genetic data 
+	initially in different formats, import landscape graphs created with 
+	'GRAPHAB' software (Foltete et al., 2012) <doi:10.1016/j.envsoft.2012.07.002>, 
+	make diagnosis plots of isolation by distance relationships in order to 
+	choose how to build genetic graphs, create graphs with a large range of 
+	pruning methods, weight their links with several genetic distances, plot 
+	and analyse graphs,	compare them with other graphs. It uses functions from 
+	other packages such as 'adegenet' 
+	(Jombart, 2008) <doi:10.1093/bioinformatics/btn129> and 'igraph' (Csardi
+	et Nepusz, 2006) <https://bit.ly/2028mcO>. It also implements methods 
+	commonly used in landscape genetics to create graphs, described by Dyer et 
+	Nason (2004) <doi:10.1111/j.1365-294X.2004.02177.x> and Greenbaum et 
+	Fefferman (2017) <doi:10.1111/mec.14059>, and to analyse distance data 
+	(van Strien et al., 2015) <doi:10.1038/hdy.2014.62>.
+Depends: R(>= 3.1.0)
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+Imports: stringr, adegenet, ade4, stats, Matrix, vegan, utils, methods,
+        pegas, Rdpack, MASS, igraph, doBy, ggplot2, mclust, tidyr, sp,
+        rgdal, sf, Imap, diveRsity, raster, ecodist
+RdMacros: Rdpack
+RoxygenNote: 6.1.1
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
+NeedsCompilation: no
+Packaged: 2019-07-19 10:23:15 UTC; psavary
+Repository: CRAN
+Date/Publication: 2019-07-23 09:30:02 UTC
