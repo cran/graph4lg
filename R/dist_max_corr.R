@@ -1,9 +1,9 @@
 #' Compute the distance at which the correlation between genetic distance
 #' and landscape distance is maximal
 #'
-#' @description The function enables to compute the distance at which the correlation
-#' between genetic distance and landscape distance is maximal, using a method
-#' similar to that employed by van Strien et al. (2015).
+#' @description The function enables to compute the distance at which the
+#' correlation between genetic distance and landscape distance is maximal,
+#' using a method similar to that employed by van Strien et al. (2015).
 #' Iteratively, distance threshold values are tested. For each value, all the
 #' population pairs separated by a landscape distance larger than the threshold
 #' are removed before the Mantel correlation coefficient between genetic
@@ -15,8 +15,8 @@
 #' @param mat_gd A symmetric \code{matrix} with pairwise genetic distances
 #' between populations or sample sites.
 #' @param mat_ld A symmetric \code{matrix} with pairwise landscape distances
-#' between populations or sample sites. These distances can be Euclidean distances,
-#' cost-distances or resistance distances, among others.
+#' between populations or sample sites. These distances can be
+#' Euclidean distances, cost-distances or resistance distances, among others.
 #' @param interv A numeric value indicating the interval between the different
 #' distance thresholds for which the correlation coefficients are computed.
 #' @param from (optional) The minimum distance threshold value at which the
@@ -75,6 +75,7 @@
 #'                          mat_ld = mat_dist,
 #'                          interv = 10000)
 
+
 dist_max_corr <- function(mat_gd, mat_ld,
                           interv,
                           from = NULL, to = NULL,
@@ -84,9 +85,9 @@ dist_max_corr <- function(mat_gd, mat_ld,
                           pts_col = "#999999"){
 
   # Check whether mat_gd and mat_ld are symmetric matrices
-  if(class(mat_gd) != "matrix"){
+  if(!inherits(mat_gd, "matrix")){
     stop("'mat_gd' must be an object of class 'matrix'.")
-  } else if (class(mat_ld) != "matrix"){
+  } else if (!inherits(mat_ld, "matrix")){
     stop("'mat_ld' must be an object of class 'matrix'.")
   } else if (!Matrix::isSymmetric(mat_gd)){
     stop("'mat_gd' must be a symmetric pairwise matrix.")
@@ -103,7 +104,7 @@ dist_max_corr <- function(mat_gd, mat_ld,
   }
 
   # Check whether interv is numeric
-  if (class(interv) != "numeric"){
+  if (!inherits(interv, "numeric")){
     stop("'interv' must be a numeric value.")
   }
 
@@ -191,11 +192,12 @@ dist_max_corr <- function(mat_gd, mat_ld,
 
   if(fig == TRUE){
 
-    if (class(pts_col) != "character"){
+    if (!inherits(pts_col, "character")){
       stop("'pts_col' must be a character string.")
     }
 
-    if (class(line_col) != "character"){
+
+    if (!inherits(line_col, "character")){
       stop("'line_col' must be a character string.")
     }
 
@@ -213,17 +215,21 @@ dist_max_corr <- function(mat_gd, mat_ld,
     print(plot_dmc)
   }
 
-  #message(paste("Distance threshold at which correlation reaches a maximum: ", dist_max, sep = ""))
-  #message(paste("Maximum correlation coefficient between mat_gd and mat_ld: ", cc_val[id_max], sep = ""))
+  #message(paste("Distance threshold at which correlation reaches
+  # a maximum: ", dist_max, sep = ""))
+  #message(paste("Maximum correlation coefficient between mat_gd and mat_ld:
+  # ", cc_val[id_max], sep = ""))
 
 
   if (fig == TRUE){
     res_list <- list(dist_max, cc_val, vec_t, plot_dmc)
-    names(res_list) <- c("distance at which correlation reaches a maximum", "correlation coefficients",
+    names(res_list) <- c("distance at which correlation reaches a maximum",
+                         "correlation coefficients",
                          "distance thresholds", "plot_dmc")
   } else {
     res_list <- list(dist_max, cc_val, vec_t)
-    names(res_list) <- c("distance at which correlation reaches a maximum", "correlation coefficients",
+    names(res_list) <- c("distance at which correlation reaches a maximum",
+                         "correlation coefficients",
                          "distance thresholds")
   }
 

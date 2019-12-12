@@ -1,22 +1,23 @@
 #' Visualize the topological differences between two spatial graphs on a map
 #'
-#' @description The function enables to compare two spatial graphs by plotting them highlighting
-#' the topological similarities and differences between them. Both graphs should
-#' share the same nodes and cannot be directed graphs.
+#' @description The function enables to compare two spatial graphs by
+#' plotting them highlighting the topological similarities and differences
+#' between them. Both graphs should share the same nodes and cannot
+#' be directed graphs.
 #'
 #' @param x A graph object of class \code{igraph}.
 #' Its nodes must have the same names as in graph \code{y}.
 #' @param y A graph object of class \code{igraph}.
 #' Its nodes must have the same names as in graph \code{x}.
 #' @param crds A \code{data.frame} with the spatial
-#' coordinates of the graph's nodes (both \code{x} and \code{y}).
+#' coordinates of the graph nodes (both \code{x} and \code{y}).
 #' It must have three columns:
 #' \itemize{
-#' \item{ID: Name of the graph's nodes (character string).
-#' The names must be the same as the nodes' names of the graphs of
+#' \item{ID: Name of the graph nodes (character string).
+#' The names must be the same as the node names of the graphs of
 #' class \code{igraph} (\code{igraph::V(graph)$name})}
-#' \item{x: Longitude of the graphs' nodes.}
-#' \item{y: Latitude of the graphs' nodes.}
+#' \item{x: Longitude of the graph nodes (numeric or integer).}
+#' \item{y: Latitude of the graph nodes (numeric or integer).}
 #' }
 #' @return A ggplot2 object to plot
 #' @import ggplot2
@@ -77,21 +78,24 @@ graph_plot_compar <- function(x, y,
 
   # Check whether the graphs have the same nodes' names and in the same order
   if(!all(igraph::V(x)$name == igraph::V(y)$name)){
-    stop("Both graphs must have the same nodes' names and the nodes ranked in the same order.")
+    stop("Both graphs must have the same nodes' names and the
+         nodes ranked in the same order.")
   }
 
   if(!exists("crds")){
-    stop("You must provide the spatial coordinates of the graph's nodes.")
+    stop("You must provide the spatial coordinates of the graph nodes.")
   } else if( nrow(crds) != length(igraph::V(x) ) ) {
     stop("'crds' must have as many rows as there are nodes in 'x' and 'y'.")
   } else if( !all( colnames(crds) == c("ID","x","y") ) ){
     stop("Column names of crds must be 'ID', 'x' and 'y'.")
   } else if( !any( as.character(crds$ID) %in% igraph::V(x)$name ) ){
-    stop("The IDs of 'crds' elements are not the same as the names of the nodes in 'x' and 'y'.")
-  } else if(class(crds$x) != "numeric"){
-    stop("'x' must be of class 'numeric'.")
-  } else if(class(crds$y) != "numeric"){
-    stop("'y' must be of class 'numeric'.")
+    stop("The IDs of 'crds' elements are not the same as the names of
+         the nodes in 'x' and 'y'.")
+    # Check whether spatial coordinates are numeric or integer
+  } else if(!inherits(crds$x, c("integer", "numeric"))){
+    stop("'x' must be of class 'numeric' or 'integer'")
+  } else if(!inherits(crds$y, c("integer", "numeric"))){
+    stop("'y' must be of class 'numeric' or 'integer'")
   } else {
     crds$ID <- as.character(crds$ID)
   }
@@ -153,7 +157,8 @@ graph_plot_compar <- function(x, y,
 
   # Create the plot to compare the graphs
   g <- ggplot() +
-    geom_segment(data = graph_df[which(graph_df$link != "1"), ], aes_string(x = 'x', y = 'y',
+    geom_segment(data = graph_df[which(graph_df$link != "1"), ],
+                 aes_string(x = 'x', y = 'y',
                                              xend = 'xend', yend = 'yend',
                                              color = 'link', size = 'width'))+
     scale_size_identity()+

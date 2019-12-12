@@ -9,7 +9,7 @@ software file. The resulting text file would include the following columns :
 \describe{
 \item{1st column}{Individual names}
 \item{2nd column}{Population names}
-\item{Other columns}{12 loci's columns with microsatellites' data with
+\item{Other columns}{12 loci columns with microsatellite data with
 3 digits coding, and missing data noted "-9"}
 }
 Each individual is displayed on two rows, with one allele on each row.

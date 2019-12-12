@@ -9,7 +9,8 @@ loci_to_genind(x, ploidy = 2, na.alleles = c("NA"))
 \arguments{
 \item{x}{An object of class \code{loci} to convert}
 
-\item{ploidy}{An integer indicating the ploidy level (by default, 'ploidy = 2')}
+\item{ploidy}{An integer indicating the ploidy level
+(by default, 'ploidy = 2')}
 
 \item{na.alleles}{A character vector indicating the coding of the alleles
 to be treated as missing data (by default, 'na.alleles = c("NA")')}

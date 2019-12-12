@@ -1,7 +1,7 @@
 #' Create a graph of genetic differentiation with
 #' a specific topology
 #'
-#' @description The function allows to construct a genetic graph with
+#' @description The function constructs a genetic graph with
 #' a specific topology from genetic and/or geographical distance matrices
 #'
 #' @param mat_w A symmetric (pairwise) \code{matrix} whose elements
@@ -10,9 +10,10 @@
 #' whose values will be used for the pruning method.
 #' @param topo Which topology does the created graph have?
 #' \itemize{
-#' \item{If 'topo = 'gabriel'' (default), the resulting graph will be a Gabriel graph
-#' (Gabriel et al., 1969). It means that there is a link between nodes x and y
-#' if and only if \eqn{d_{xy}^{2} \leq \min(\sqrt{d_{xz}^{2}+d_{yz}^{2}}) },
+#' \item{If 'topo = 'gabriel'' (default), the resulting graph will be a
+#' Gabriel graph (Gabriel et al., 1969). It means that there is a link
+#' between nodes x and y if and only if
+#' \eqn{d_{xy}^{2} \leq \min(\sqrt{d_{xz}^{2}+d_{yz}^{2}}) },
 #' with z any other node of the graph.}
 #' \item{If 'topo = 'mst'', the resulting graph will have the topology
 #' of a minimum spanning tree. It means that the graph will not include
@@ -49,7 +50,7 @@ gen_graph_topo <- function(mat_w, mat_topo = NULL, topo = "gabriel"){
   if(is.null(mat_topo)){
     mat_topo <- mat_w
   # Also check whether mat_w and mat_topo have same dimensions and
-  # same rows' and columns' names
+  # same row and column names
   } else if(!all(dim(mat_w) == dim(mat_topo))){
     stop("Matrices 'mat_w' and 'mat_topo' must have the same dimensions.")
   } else {

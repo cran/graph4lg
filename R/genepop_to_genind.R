@@ -9,8 +9,10 @@
 #' @param n.loci The number of loci in the GENEPOP file (integer).
 #' @param pop_names (optional) Populations' names in the same order
 #' as in the GENEPOP file.
-#' Vector object (class character) of the same length as the number of populations.
-#' Without this parameter, populations are numbered from 1 to the number of populations.
+#' Vector object (class character) of the same length as the number
+#' of populations.
+#' Without this parameter, populations are numbered from 1 to the number
+#' of populations.
 #' @return An object of type \code{genind}.
 #' @export
 #' @details This function uses functions from \pkg{pegas} package.
@@ -20,7 +22,8 @@
 #' @seealso For more details about GENEPOP file formatting :
 #' \url{http://genepop.curtin.edu.au/help_input.html#Input}
 #' For the opposite conversion, see \code{\link{genind_to_genepop}}.
-#' The output file can be used to compute pairwise FST matrix with \code{\link{mat_pw_fst}}
+#' The output file can be used to compute pairwise FST matrix
+#' with \code{\link{mat_pw_fst}}
 #' @author P. Savary
 #' @examples
 #' path_in <- system.file('extdata', 'gpop_51_sim22_01_25.txt',
@@ -40,7 +43,7 @@ genepop_to_genind <- function(path,
 
   # Check whether 'path' is a character string
   if(!is.character(path)){
-    stop("You must specify the file's path as a character string input 'path'.")
+    stop("You must specify the file path as a character string input 'path'.")
   }
 
   # Check whether 'n.loci' is an integer
@@ -99,8 +102,9 @@ genepop_to_genind <- function(path,
 
     # Fill sep_col with the codes of the msats separated by "/"
     sep_col[, 2:ncol(sep_col)] <- lapply(sep_col[, 2:ncol(sep_col)],
-                                      function(x) paste(stringr::str_sub(x, 1, 3), "/",
-                                                        stringr::str_sub(x, 4, 6), sep = ""))
+                                      function(x){
+                                        paste(stringr::str_sub(x, 1, 3), "/",
+                                        stringr::str_sub(x, 4, 6), sep = "")})
 
     # Replace missing values by NA
     sep_col[, 2:ncol(sep_col)] <- lapply(sep_col[, 2:ncol(sep_col)],
@@ -129,7 +133,8 @@ genepop_to_genind <- function(path,
     # In this case, the loci names are all in the second line
     names.loci <- sep_col[2, (1:n.loci)]
     names.loci <- gsub(names.loci, pattern = "\\.", replacement = "_")
-    names.loci[1:(n.loci-1)] <- stringr::str_sub(names.loci[1:(n.loci - 1)], 1, -2)
+    names.loci[1:(n.loci-1)] <- stringr::str_sub(names.loci[1:(n.loci - 1)],
+                                                 1, -2)
 
     # Remove the two first lines (name of the file, name of the loci)
     sep_col <- sep_col[-(1:2), ]

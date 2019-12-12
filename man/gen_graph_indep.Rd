@@ -5,8 +5,16 @@
 \title{Create an independence graph of genetic differentiation
 from genetic data of class genind}
 \usage{
-gen_graph_indep(x, dist = "basic", cov = "sq", pcor = "magwene",
-  alpha = 0.05, test = "EED", adj = "none", output = "igraph")
+gen_graph_indep(
+  x,
+  dist = "basic",
+  cov = "sq",
+  pcor = "magwene",
+  alpha = 0.05,
+  test = "EED",
+  adj = "none",
+  output = "igraph"
+)
 }
 \arguments{
 \item{x}{An object of class \code{genind} that contains the multilocus
@@ -17,7 +25,7 @@ and their geographical coordinates.}
 multilocus genetic distance between populations
 \itemize{
 \item{If 'dist = 'basic'' (default), then the multilocus genetic distance is
-computed using a formula of Euclidean genetic distance (Excoffier et al., 1992)}
+computed using a Euclidean genetic distance formula (Excoffier et al., 1992)}
 \item{If 'dist = 'weight'', then the multilocus genetic distance is computed
 as in Fortuna et al. (2009). It is a Euclidean genetic distance giving more
 weight to rare alleles}
@@ -25,18 +33,18 @@ weight to rare alleles}
 in popgraph::popgraph function, following several steps of PCA and SVD
 (Dyer et Nason, 2004).}
 \item{If 'dist = 'PCA'', then the genetic distance is computed following a
-PCA of the matrix of allelic frequencies by population. It is a Euclidean genetic
-distance between populations in the multidimensional space defined by all
-the independent principal components.}
+PCA of the matrix of allelic frequencies by population. It is a Euclidean
+genetic distance between populations in the multidimensional space defined
+by all the independent principal components.}
 }}
 
 \item{cov}{A character string indicating the formula used to compute the
 covariance matrix from the distance matrix
 \itemize{
-\item{If 'cov = 'sq'' (default), then the covariance matrix is calculated from
-the matrix of squared distances as in Everitt et Hothorn (2011)}
+\item{If 'cov = 'sq'' (default), then the covariance matrix is calculated
+from the matrix of squared distances as in Everitt et Hothorn (2011)}
 \item{If 'cov = 'dist'', then the covariance matrix is calculated from the
-matrix of distances as in Dyer et Nason (2004) and popgraph::popgraph function}
+matrix of distances as in Dyer et Nason (2004) and popgraph function}
 }}
 
 \item{pcor}{A character string indicating the way the partial correlation
@@ -81,11 +89,12 @@ the output list.
 C (covariance matrix), Rho (partial correlation matrix),
 M (graph incidence matrix) and S (strength matrix) are included}
 \item{If 'output = 'dist_graph'', then the distance matrix D is returned
-only with the values corresponding to the graph's edges}
+only with the values corresponding to the graph edges}
 \item{If 'output = 'str_graph'', then the strength values matrix S is
-returned only with the values corresponding to the graph's edges}
+returned only with the values corresponding to the graph edges}
 \item{If 'output = 'inc'', then the binary adjacency matrix M is returned}
-\item{If 'output = 'igraph'', then a graph of class \code{igraph} is returned}
+\item{If 'output = 'igraph'', then a graph of class \code{igraph}
+is returned}
 }}
 }
 \value{
@@ -95,8 +104,8 @@ class \code{matrix} or a graph object of class \code{igraph}
 \description{
 The function allows to create genetic graphs from genetic data
 by applying the conditional independence principle. Populations whose allelic
-frequencies covary significantly once the covariance with the other populations
-has been taken into account are linked on the graphs.
+frequencies covary significantly once the covariance with the other
+populations has been taken into account are linked on the graphs.
 }
 \details{
 The function allows to vary many parameters such as the genetic

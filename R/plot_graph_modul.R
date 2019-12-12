@@ -6,14 +6,16 @@
 #'
 #' @param graph A graph object of class \code{igraph} to partition into modules
 #' and to plot. The graph must be undirected. If 'crds' is not NULL, then the
-#' graph's nodes must have names corresponding to the ID's column of 'crds'.
+#' graph nodes must have names corresponding to the ID column of 'crds'.
 #' @param algo (if x and y and graph objects) A character string indicating the
 #' algorithm used to create the modules with \pkg{igraph}:
 #' \itemize{
-#' \item{If \code{algo = 'fast_greedy'} (default), function \code{cluster_fast_greedy}
-#' from \pkg{igraph} is used (Clauset et al., 2004).}
+#' \item{If \code{algo = 'fast_greedy'} (default), function
+#' \code{cluster_fast_greedy} from \pkg{igraph} is
+#' used (Clauset et al., 2004).}
 #' \item{If \code{algo = 'walktrap'}, function \code{cluster_walktrap}
-#' from \pkg{igraph} is used (Pons et Latapy, 2006) with 4 steps (default options).}
+#' from \pkg{igraph} is used (Pons et Latapy, 2006) with
+#' 4 steps (default options).}
 #' \item{If \code{algo = 'louvain'}, function \code{cluster_louvain}
 #' from \pkg{igraph} is used (Blondel et al., 2008).
 #' In that case, the number of modules created in each graph is imposed.}
@@ -23,7 +25,8 @@
 #' }
 #' @param nb_modul Numeric value indicating the number of modules to create.
 #' @param weight (optional) A character string or character vector
-#' indicating how to weight graphs' links during the calculation of the modularity.
+#' indicating how to weight graph links during the calculation
+#' of the modularity.
 #' \itemize{
 #' \item{If \code{weight = 'inv'} (default), then links are weighted with the
 #' inverse values of their initial weights.}
@@ -32,29 +35,30 @@
 #' \item{If \code{weight = 'none'}, then links are not weighted during the
 #' calculation.}
 #' }
-#' If the graphs' links are not weighted, then this argument is ignored.
-#' Links with large weights are considered as stronger connections in the modularity calculation.
+#' If the graph links are not weighted, then this argument is ignored.
+#' Links with large weights are considered as stronger connections
+#' in the modularity calculation.
 #' @param crds (if 'mode = 'spatial'') A \code{data.frame} with the spatial
-#' coordinates of the graph's nodes. It must have three columns :
+#' coordinates of the graph nodes. It must have three columns :
 #' \itemize{
-#' \item{ID: A character string indicating the name of the graph's nodes.
-#' The names must be the same as the nodes' names of the graph of
+#' \item{ID: A character string indicating the name of the graph nodes.
+#' The names must be the same as the node names of the graph of
 #' class \code{igraph} (\code{igraph::V(graph)$name})}
-#' \item{x: A character string indicating the longitude of the graphs' nodes.}
-#' \item{y: A character string indicating the latitude of the graphs' nodes.}
+#' \item{x: A numeric or integer indicating the longitude of the graph nodes.}
+#' \item{y: A numeric or integer indicating the latitude of the graph nodes.}
 #' }
 #' @param mode A character string indicating whether the graph is
 #' spatial ('mode = 'spatial'' (default)) or not ('mode = 'aspatial'')
 #' @param weight_plot Logical indicating whether the links of the graph have
 #' to be displayed on the plot
-#' @param width Logical indicating whether the width of the links on the plot should
-#' be proportional to links' weights ("w", default) or to to the inverse of
-#' links' weights ("inv", convenient with distances)
+#' @param width Logical indicating whether the width of the links
+#' on the plot should be proportional to link weights ("w", default) or
+#' to the inverse of link weights ("inv", convenient with distances)
 #' @return A ggplot2 object to plot
 #' @import ggplot2
 #' @export
-#' @details When the graph is not spatial ('mode = 'aspatial''), the nodes coordinates
-#' are calculated with Fruchterman et Reingold algorithm.
+#' @details When the graph is not spatial ('mode = 'aspatial''),
+#' the nodes coordinates are calculated with Fruchterman et Reingold algorithm.
 #' @author P. Savary
 #' @references \insertRef{hubert1985comparing}{graph4lg}
 #' \insertRef{fruchterman1991graph}{graph4lg}
@@ -87,17 +91,18 @@ plot_graph_modul <- function(graph,
   # Create a scaling function
   sc01 <- function(x){(x-min(x))/(max(x)-min(x))}
 
-  # Custom palette with 19 colors
+  # Custom palette with 26 colors
   palette <- c("#96A725","#1D72F5","#DF0101",
                "#FF9326","#A945FF","#0089B2",
                "#FDF060","#FFA6B2","#BFF217",
                "#60D5FD","#CC1577","#F2B950",
                "#7FB21D","#EC496F","#326397",
                "#B26314","#027368","#A4A4A4",
-               "#610B5E")
+               "#610B5E", "red", "green", "darkblue",
+               "orange", "blue", "grey", "black")
 
   # Check whether 'graph' is a graph
-  if(class(graph) != "igraph"){
+  if(!inherits(graph, "igraph")){
     stop("'graph' must be an object of class 'igraph'.")
   }
 
@@ -113,32 +118,36 @@ plot_graph_modul <- function(graph,
   # nodes names.
   if(mode == "spatial"){
 
-    # Check whether the graph has nodes' names
+    # Check whether the graph has node names
     if(is.null(igraph::V(graph)$name)){
-      stop("Your graph must have nodes' names.")
+      stop("Your graph must have node names.")
     }
 
-    # If 'crds' is given, check whether it has as many elements as there are nodes
+    # If 'crds' is given, check whether it has as many elements
+    # as there are nodes
     if(!exists("crds")){
-      stop("You must provide the spatial coordinates of the graph's nodes.")
+      stop("You must provide the spatial coordinates of the graph nodes.")
     } else if( nrow(crds) != length(igraph::V(graph) ) ) {
-      stop("'crds' must have the same number of rows as there are nodes in 'graph'")
-    # Check whether 'crds' has valid columns' names
+      stop("'crds' must have the same number of rows as there
+           are nodes in 'graph'")
+      # Check whether 'crds' has valid column names
     } else if( !all( colnames(crds) == c("ID","x","y") ) ){
       stop("Column names of crds must be 'ID', 'x' and 'y'.")
-    # Check whether IDs from 'crds' match with the graph's nodes names
+      # Check whether IDs from 'crds' match with the graph nodes names
     } else if( !any( as.character(crds$ID) %in% igraph::V(graph)$name ) ){
-      stop("The IDs of 'crds' elements are not the same as the names of the nodes in 'graph'")
-    # Check whether spatial coordinates are numeric
-    } else if(class(crds$x) != "numeric"){
-      stop("'x' must be of class 'numeric'")
-    } else if(class(crds$y) != "numeric"){
-      stop("'y' must be of class 'numeric'")
+      stop("The IDs of 'crds' elements are not the same as the names
+           of the nodes in 'graph'")
+      # Check whether spatial coordinates are numeric or integer
+    } else if(!inherits(crds$x, c("integer", "numeric"))){
+      stop("'x' must be of class 'numeric' or 'integer'")
+    } else if(!inherits(crds$y, c("integer", "numeric"))){
+      stop("'y' must be of class 'numeric' or 'integer'")
     } else {
       crds$ID <- as.character(crds$ID)
     }
-    # If mode = aspatial, name the nodes with a character string corresponding to
-    # their row number.
+
+    # If mode = aspatial, name the nodes with a character string
+    # corresponding to their row number.
   } else if (mode == "aspatial") {
     igraph::V(graph)$name <- as.character(1:n_nodes)
   }  else {
@@ -151,30 +160,32 @@ plot_graph_modul <- function(graph,
     # Inverse weight
     if(weight == "inv"){
       w <- 1/igraph::E(graph)$weight
-    # Initial weight
+      # Initial weight
     } else if (weight == "w"){
       w <- igraph::E(graph)$weight
-    # Links are given 1 values as weights
+      # Links are given 1 values as weights
     } else if (weight == "none"){
       w <- rep(1, length(igraph::E(graph)))
     } else {
       stop("'weight' must be either 'inv', 'w' or 'none'.")
     }
-  # If links do not have weights, then links are given 1 values as weights
+    # If links do not have weights, then links are given 1 values as weights
   } else {
     w <- rep(1, length(igraph::E(graph)))
-    message("graph is not a weighted graph and its links were given 1 values as weights in the calculations.")
+    message("graph is not a weighted graph and its links were given 1 values
+            as weights in the calculations.")
   }
 
   # Number of modules to create in both graphs
-  if (class(nb_modul) == "numeric"){
+  if (inherits(nb_modul, "numeric")){
     n_m <- nb_modul
   } else if (is.null(nb_modul)){
     n_m <- NULL
     ##########################################################
     # Number of modules will be determined later
   } else {
-    stop("'nb_modul' must be NULL, a numeric value or a numeric vector of length 2.")
+    stop("'nb_modul' must be NULL, a numeric value or a numeric
+         vector of length 2.")
   }
 
   # Creation of the modules
@@ -183,21 +194,25 @@ plot_graph_modul <- function(graph,
     # it is the number of modules
     # created by default by the algorithm.
     if(is.null(n_m)){
-      n_m <- length(unique(igraph::cluster_fast_greedy(graph, weights = w)$membership))
+      n_m <- length(unique(igraph::cluster_fast_greedy(graph,
+                                                       weights = w)$membership))
     }
     # We create the modules with the right algorithm, the right weighting
     # and we create the specified number of modules in the graph.
-    x <- igraph::cut_at(igraph::cluster_fast_greedy(graph, weights = w), no = n_m)
+    x <- igraph::cut_at(igraph::cluster_fast_greedy(graph, weights = w),
+                        no = n_m)
 
   } else if (algo == "louvain"){
     x <- igraph::cluster_louvain(graph, weights = w)$membership
-    message("With this algorithm, 'nb_modul' parameter was not used and the number of
-              modules is the default number as computed by the algorithm.")
+    message("With this algorithm, 'nb_modul' parameter was not used
+            and the number of modules is the default number
+            as computed by the algorithm.")
 
   } else if (algo == "optimal"){
     x <- igraph::cluster_optimal(graph, weights = w)$membership
-    message("With this algorithm, 'nb_modul' parameter was not used and the number of
-              modules is the default number as computed by the algorithm.")
+    message("With this algorithm, 'nb_modul' parameter was not used
+            and the number of modules is the default number as computed
+            by the algorithm.")
 
   } else if (algo == "walktrap"){
     if(is.null(n_m)){
@@ -210,11 +225,12 @@ plot_graph_modul <- function(graph,
     stop("You must specify a correct 'algo' option.")
   }
 
-  # Create a data.frame with the nodes' partition into modules and their ID
-  modul_df <- data.frame(ID = igraph::V(graph)$name, modul = as.factor(as.vector(x)))
+  # Create a data.frame with the node partition into modules and their ID
+  modul_df <- data.frame(ID = igraph::V(graph)$name,
+                         modul = as.factor(as.vector(x)))
   modul_df$ID <- as.character(modul_df$ID)
 
-  # If the graph's nodes have spatial coordinates
+  # If the graph nodes have spatial coordinates
   if (mode == "spatial") {
 
     # Create a df with the edge list
@@ -234,7 +250,8 @@ plot_graph_modul <- function(graph,
     graph_df <- merge(graph_df, crds, by.x = 'from', by.y = 'ID')
     graph_df <- merge(graph_df, crds, by.x = 'to', by.y = 'ID')
 
-    # If 'mode = spatial', plot the nodes on a plane defined by latitude and longitude axes
+    # If 'mode = spatial', plot the nodes on a plane defined by latitude
+    # and longitude axes
     # To that purpose, merge modul_df with crds.
     crds <- merge(crds, modul_df, by.x = 'ID', by.y = 'ID')
 
@@ -251,7 +268,9 @@ plot_graph_modul <- function(graph,
         # Compute the inverse weight and scale it
         graph_df$w_sc <- 1/sc01(graph_df$weight)
         # Replace 'Inf' values by the largest values
-        graph_df[which(graph_df$w_sc == "Inf" ), 'w_sc'] <- max(graph_df[which(graph_df$w_sc < Inf), "w_sc"]) + 2
+        graph_df[which(graph_df$w_sc == "Inf" ),
+                 'w_sc'] <- max(graph_df[which(graph_df$w_sc < Inf),
+                                         "w_sc"]) + 2
         # Rescale again
         graph_df$w_sc <- sc01(graph_df$w_sc)
       } else {
@@ -262,7 +281,8 @@ plot_graph_modul <- function(graph,
       g <- ggplot() +
         geom_segment(data = graph_df, aes_string(x = 'x', y = 'y',
                                                  xend = 'xend', yend = 'yend',
-                                                 size = 'w_sc'), color = "black")+
+                                                 size = 'w_sc'),
+                     color = "black")+
         scale_size_identity()+
         scale_color_manual(values = palette) +
         geom_point(data = crds, aes_string(x = 'x', y = 'y', color = 'modul'),
@@ -274,7 +294,7 @@ plot_graph_modul <- function(graph,
 
       # If the links are not weighted on the plot
     } else {
-      # Give columns' names to 'graph_df'
+      # Give column names to 'graph_df'
       names(graph_df) <- c("to", "from", "x", "y", "xend", "yend")
 
       # Create the plot
@@ -293,7 +313,7 @@ plot_graph_modul <- function(graph,
     }
 
 
-  # If the graph's nodes do not have spatial coordinates
+    # If the graph nodes do not have spatial coordinates
   } else if (mode == "aspatial"){
 
     # If 'mode = aspatial', then the nodes position is calculated with
@@ -303,20 +323,22 @@ plot_graph_modul <- function(graph,
 
     # If links are weighted
     if (weight == TRUE){
-      # Use the Fruchterman and Reingold algorithm to compute the nodes' coordinates
-      # giving a weight to the links equal to the inverse of the distance they
-      # are weighted with in the graph
-      crds <- igraph::layout_with_fr(graph, weights = 1/(igraph::E(graph)$weight))
+      # Use the Fruchterman and Reingold algorithm to compute the node
+      # coordinates giving a weight to the links equal to the inverse of
+      # the distance they are weighted with in the graph
+      crds <- igraph::layout_with_fr(graph,
+                                     weights = 1/(igraph::E(graph)$weight))
     } else {
-      # Use the Fruchterman and Reingold algorithm to compute the nodes' coordinates
-      # giving a weight of 1 to the links
-      crds <- igraph::layout_with_fr(graph, weights = rep(1, length(igraph::E(graph))))
+      # Use the Fruchterman and Reingold algorithm to compute
+      # the node coordinates giving a weight of 1 to the links
+      crds <- igraph::layout_with_fr(graph,
+                                     weights = rep(1, length(igraph::E(graph))))
     }
     # Create the data.frame 'crds'
     crds <- data.frame(crds)
     names(crds) <- c("x", "y")
 
-    # IDs of 'crds' elements are graph's nodes names
+    # IDs of 'crds' elements are graph nodes names
     crds$ID <- igraph::V(graph)$name
     crds <- crds[, c('ID', 'x', 'y')]
 
@@ -332,7 +354,8 @@ plot_graph_modul <- function(graph,
       names(graph_df) <- c("from", "to")
     }
 
-    # Merge 'graph_df' and 'crds' in order to get spatial coordinates of the nodes
+    # Merge 'graph_df' and 'crds' in order to get spatial coordinates
+    # of the nodes
     graph_df <- merge(graph_df, crds, by.x = 'from', by.y = 'ID')
     graph_df <- merge(graph_df, crds, by.x = 'to', by.y = 'ID')
 
@@ -351,7 +374,9 @@ plot_graph_modul <- function(graph,
         # Compute the inverse weight and scale it
         graph_df$w_sc <- 1/sc01(graph_df$weight)
         # Replace 'Inf' values by the largest values
-        graph_df[which(graph_df$w_sc == "Inf" ), 'w_sc'] <- max(graph_df[which(graph_df$w_sc < Inf), "w_sc"]) + 2
+        graph_df[which(graph_df$w_sc == "Inf" ),
+                 'w_sc'] <- max(graph_df[which(graph_df$w_sc < Inf),
+                                         "w_sc"]) + 2
         # Rescale again
         graph_df$w_sc <- sc01(graph_df$w_sc)
       } else {
@@ -362,7 +387,8 @@ plot_graph_modul <- function(graph,
       g <- ggplot() +
         geom_segment(data = graph_df, aes_string(x = 'x', y = 'y',
                                                  xend = 'xend', yend = 'yend',
-                                                 size = 'w_sc'), color = "black")+
+                                                 size = 'w_sc'),
+                     color = "black")+
         scale_size_identity()+
         scale_fill_manual(values = palette) +
         geom_point(data = crds, aes_string(x = 'x', y = 'y', color = 'modul'),
@@ -372,9 +398,9 @@ plot_graph_modul <- function(graph,
         theme_bw()+
         labs(x="x", y="y", color = "Module")
 
-    # If the links are not weighted
+      # If the links are not weighted
     } else {
-      # Give columns' names to 'graph_df'
+      # Give column names to 'graph_df'
       names(graph_df) <- c("to", "from", "x", "y", "xend", "yend")
 
       # Create the plot

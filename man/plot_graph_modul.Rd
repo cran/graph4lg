@@ -4,22 +4,31 @@
 \alias{plot_graph_modul}
 \title{Plot the graphs making visible their partition into modules}
 \usage{
-plot_graph_modul(graph, algo = "fast_greedy", nb_modul = NULL,
-  weight = "inv", crds, mode = "spatial", weight_plot = TRUE,
-  width = "inv")
+plot_graph_modul(
+  graph,
+  algo = "fast_greedy",
+  nb_modul = NULL,
+  weight = "inv",
+  crds,
+  mode = "spatial",
+  weight_plot = TRUE,
+  width = "inv"
+)
 }
 \arguments{
 \item{graph}{A graph object of class \code{igraph} to partition into modules
 and to plot. The graph must be undirected. If 'crds' is not NULL, then the
-graph's nodes must have names corresponding to the ID's column of 'crds'.}
+graph nodes must have names corresponding to the ID column of 'crds'.}
 
 \item{algo}{(if x and y and graph objects) A character string indicating the
 algorithm used to create the modules with \pkg{igraph}:
 \itemize{
-\item{If \code{algo = 'fast_greedy'} (default), function \code{cluster_fast_greedy}
-from \pkg{igraph} is used (Clauset et al., 2004).}
+\item{If \code{algo = 'fast_greedy'} (default), function
+\code{cluster_fast_greedy} from \pkg{igraph} is
+used (Clauset et al., 2004).}
 \item{If \code{algo = 'walktrap'}, function \code{cluster_walktrap}
-from \pkg{igraph} is used (Pons et Latapy, 2006) with 4 steps (default options).}
+from \pkg{igraph} is used (Pons et Latapy, 2006) with
+4 steps (default options).}
 \item{If \code{algo = 'louvain'}, function \code{cluster_louvain}
 from \pkg{igraph} is used (Blondel et al., 2008).
 In that case, the number of modules created in each graph is imposed.}
@@ -31,7 +40,8 @@ In that case, the number of modules created in each graph is imposed.}
 \item{nb_modul}{Numeric value indicating the number of modules to create.}
 
 \item{weight}{(optional) A character string or character vector
-indicating how to weight graphs' links during the calculation of the modularity.
+indicating how to weight graph links during the calculation
+of the modularity.
 \itemize{
 \item{If \code{weight = 'inv'} (default), then links are weighted with the
 inverse values of their initial weights.}
@@ -40,17 +50,18 @@ weights values.}
 \item{If \code{weight = 'none'}, then links are not weighted during the
 calculation.}
 }
-If the graphs' links are not weighted, then this argument is ignored.
-Links with large weights are considered as stronger connections in the modularity calculation.}
+If the graph links are not weighted, then this argument is ignored.
+Links with large weights are considered as stronger connections
+in the modularity calculation.}
 
 \item{crds}{(if 'mode = 'spatial'') A \code{data.frame} with the spatial
-coordinates of the graph's nodes. It must have three columns :
+coordinates of the graph nodes. It must have three columns :
 \itemize{
-\item{ID: A character string indicating the name of the graph's nodes.
-The names must be the same as the nodes' names of the graph of
+\item{ID: A character string indicating the name of the graph nodes.
+The names must be the same as the node names of the graph of
 class \code{igraph} (\code{igraph::V(graph)$name})}
-\item{x: A character string indicating the longitude of the graphs' nodes.}
-\item{y: A character string indicating the latitude of the graphs' nodes.}
+\item{x: A numeric or integer indicating the longitude of the graph nodes.}
+\item{y: A numeric or integer indicating the latitude of the graph nodes.}
 }}
 
 \item{mode}{A character string indicating whether the graph is
@@ -59,9 +70,9 @@ spatial ('mode = 'spatial'' (default)) or not ('mode = 'aspatial'')}
 \item{weight_plot}{Logical indicating whether the links of the graph have
 to be displayed on the plot}
 
-\item{width}{Logical indicating whether the width of the links on the plot should
-be proportional to links' weights ("w", default) or to to the inverse of
-links' weights ("inv", convenient with distances)}
+\item{width}{Logical indicating whether the width of the links
+on the plot should be proportional to link weights ("w", default) or
+to the inverse of link weights ("inv", convenient with distances)}
 }
 \value{
 A ggplot2 object to plot
@@ -72,8 +83,8 @@ and plots the graph colouring the nodes with colors corresponding to
 their respective modules.
 }
 \details{
-When the graph is not spatial ('mode = 'aspatial''), the nodes coordinates
-are calculated with Fruchterman et Reingold algorithm.
+When the graph is not spatial ('mode = 'aspatial''),
+the nodes coordinates are calculated with Fruchterman et Reingold algorithm.
 }
 \examples{
 data(data_simul_genind)

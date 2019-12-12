@@ -9,18 +9,18 @@
 #'
 #' @param mat_y A symmetric (complete) \code{matrix} with pairwise (genetic or
 #' landscape) distances between populations or sample sites. These values
-#' will be the points' coordinates on the y axis. \code{mat_y} is the matrix
+#' will be the point coordinates on the y axis. \code{mat_y} is the matrix
 #' used to weight the links of the graph \code{x}, whose nodes correspond to
-#' rows' and columns' names of \code{mat_y}.
+#' row and column names of \code{mat_y}.
 #' @param mat_x A symmetric (complete) \code{matrix} with pairwise (genetic or
 #' landscape) distances between populations or sample sites. These values
-#' will be the points' coordinates on the x axis.
-#' \code{mat_x} and \code{mat_y} must have the same rows' and columns' names,
+#' will be the point coordinates on the x axis.
+#' \code{mat_x} and \code{mat_y} must have the same row and column names,
 #' ordered in the same way.
 #' @param graph A graph object of class \code{igraph}.
-#' Its nodes must have the same names as the rows' and columns' of
+#' Its nodes must have the same names as the row and column of
 #' \code{mat_y} and \code{mat_x} matrices. \code{x} must have weighted links.
-#' Links' weights have to be values from \code{mat_y} matrix. \code{graph} must
+#' Link weights have to be values from \code{mat_y} matrix. \code{graph} must
 #' be an undirected graph.
 #' @param thr_y (optional) A numeric value used to remove values from the
 #' data before to plot. All values from \code{mat_y} above \code{thr_y}
@@ -69,9 +69,9 @@ scatter_dist_g <- function(mat_y, mat_x,
                            pts_col_2 = "black"){
 
   # Check whether 'mat_y' and 'mat_x' are symmetric matrices
-  if(class(mat_y) != "matrix"){
+  if(!inherits(mat_y, "matrix")){
     stop("'mat_y' must be an object of class 'matrix'.")
-  } else if (class(mat_x) != "matrix"){
+  } else if (!inherits(mat_x, "matrix")){
     stop("'mat_x' must be an object of class 'matrix'.")
   } else if (!Matrix::isSymmetric(mat_y)){
     stop("'mat_y' must be a symmetric pairwise matrix.")
@@ -79,26 +79,26 @@ scatter_dist_g <- function(mat_y, mat_x,
     stop("'mat_x' must be a symmetric pairwise matrix.")
   }
 
-  # Check whether 'mat_y' and 'mat_x' have the same rows' and columns' names
+  # Check whether 'mat_y' and 'mat_x' have the same row and column names
   if(!all(row.names(mat_y) == row.names(mat_x))){
-    stop("'mat_y' and 'mat_x' must have the same rows' names.")
+    stop("'mat_y' and 'mat_x' must have the same row names.")
   } else if(!all(colnames(mat_y) == colnames(mat_x))){
-    stop("'mat_y' and 'mat_x' must have the same columns' names.")
+    stop("'mat_y' and 'mat_x' must have the same column names.")
   }
 
   # Check whether 'graph' is a graph object of class 'igraph', non-weighted,
-  # non-directed, with nodes'names and whose nodes' names are the same as
-  # rows' and columns' names of 'mat_x' and 'mat_y'
-  if(class(graph) != "igraph"){
+  # non-directed, with node names and whose node names are the same as
+  # row and column names of 'mat_x' and 'mat_y'
+  if(!inherits(graph, "igraph")){
     stop("graph must be an object of class 'igraph'.")
   } else if (!(igraph::is.weighted(graph))){
     stop("graph must a weighted graph.")
   } else if (igraph::is.directed(graph)){
     stop("graph must a non-directed graph.")
   } else if (is.null(igraph::V(graph)$name)){
-    stop("graph must have nodes' names.")
+    stop("graph must have node names.")
   } else if (!all(igraph::V(graph)$name %in% row.names(mat_x))){
-    stop("Nodes' names from graph must be the same as the rows' and columns' names
+    stop("Node names from graph must be the same as the row and column names
         from 'mat_x'")
   }
 
@@ -121,7 +121,7 @@ scatter_dist_g <- function(mat_y, mat_x,
                                            attr = "weight",
                                            sparse = FALSE)
 
-  # Create vectors with the links' weights and the corresponding distances
+  # Create vectors with the link weights and the corresponding distances
   # in 'mat_x' and 'mat_y' (lower triangles of the matrices)
   if(all(row.names(graph_adj) == row.names(mat_y))){
     graph_val <- ecodist::lower(graph_adj)

@@ -1,22 +1,23 @@
-#' Compute an index comparing graphs' topologies
+#' Compute an index comparing graph topologies
 #'
 #' @description The function computes several indices in order to compare two
-#' graphs' topologies. One of the graph has the "true" topology the other is
+#' graph topologies. One of the graph has the "true" topology the other is
 #' supposed to reproduce. The indices are then a way to assess the reliability
 #' of the latter graph.
 #' Both graphs must have the same number of nodes, but not necessarily the
-#' same number of links. They must also have the same nodes' names and in
+#' same number of links. They must also have the same node names and in
 #' the same order.
 #'
-#' @details The indices are calculated from a confusion matrix counting the number
-#' of links that are in the "observed" graph ("true") and also in the "predicted"
-#' graph (true positives : TP), that are in the "observed" graph but not in the
-#' "predicted" graph (false negatives : FN), that are not in the "observed"
-#' graph but in the "predicted" graph (false positives : FP) and that are not
-#' in the "observed" graph and not in the "predicted" graph neither (true
-#' negatives: TN). K is the total number of links in the graphs.
+#' @details The indices are calculated from a confusion matrix counting
+#' the number of links that are in the "observed" graph ("true") and also
+#' in the "predicted" graph (true positives : TP), that are in the "observed"
+#' graph but not in the "predicted" graph (false negatives : FN), that are not
+#' in the "observed" graph but in the "predicted" graph (false positives : FP)
+#' and that are not in the "observed" graph and not in the "predicted" graph
+#' neither (true negatives: TN). K is the total number of links in the graphs.
 #' K is equal to \eqn{n\times(n-1)} if the graphs are directed and to
-#' \eqn{\frac{n\times(n-1)}{2}} if they are not directed, with n the number of nodes.
+#' \eqn{\frac{n\times(n-1)}{2}} if they are not directed, with n the number
+#' of nodes.
 #' OP = TP + FN, ON = TN + FP, PP = TP + FP and PN = FN + TN.
 #'
 #' The Matthews Correlation Coefficient (MCC) is computed as follows:
@@ -48,7 +49,8 @@
 #' @param mode A character string specifying which index to compute in order
 #' to compare the topologies of the graphs.
 #' \itemize{
-#' \item{If 'mode = 'mcc'' (default), the Matthews Correlation Coefficient (MCC) is computed.}
+#' \item{If 'mode = 'mcc'' (default), the Matthews Correlation
+#' Coefficient (MCC) is computed.}
 #' \item{If 'mode = 'kappa'', the Kappa index is computed.}
 #' \item{If 'mode = 'fdr'', the False Discovery Rate (FDR) is computed.}
 #' \item{If 'mode = 'acc'', the Accuracy is computed.}
@@ -84,22 +86,23 @@
 #'                   directed = FALSE)
 
 
-graph_topo_compar <- function(obs_graph, pred_graph, mode = "mcc", directed = FALSE){
+graph_topo_compar <- function(obs_graph, pred_graph,
+                              mode = "mcc", directed = FALSE){
 
   # Check whether obs_graph and pred_graph are graphs
-  if(class(obs_graph) != "igraph"){
+  if(!inherits(obs_graph, "igraph")){
     stop("'obs_graph' must be a graph object of class 'igraph'.")
-  } else if (class(pred_graph) != "igraph"){
+  } else if (!inherits(pred_graph, "igraph")){
     stop("'pred_graph' must be a graph object of class 'igraph'.")
   }
 
-  # Check whether they have the same nodes' number
+  # Check whether they have the same node number
   if(length(igraph::V(obs_graph)) != length(igraph::V(pred_graph))){
-    stop("Both graphs must have the same nodes' number.")
+    stop("Both graphs must have the same node number.")
   }
 
 
-  # Check whether the graphs' nodes have names
+  # Check whether the graph nodes have names
   if(is.null(igraph::V(obs_graph)$name)){
     stop("The nodes of 'obs_graph' must have names.")
   } else if(is.null(igraph::V(pred_graph)$name)){
@@ -108,7 +111,8 @@ graph_topo_compar <- function(obs_graph, pred_graph, mode = "mcc", directed = FA
 
   # Check whether the graphs have the same names and in the same order
   if(!all(igraph::V(obs_graph)$name == igraph::V(pred_graph)$name)){
-    stop("Both graphs must have the same nodes' names and the nodes ranked in the same order.")
+    stop("Both graphs must have the same node names and the nodes
+         ranked in the same order.")
   }
 
 
@@ -121,8 +125,10 @@ graph_topo_compar <- function(obs_graph, pred_graph, mode = "mcc", directed = FA
     K <- (nb_nodes - 1) * nb_nodes
 
     # Get the adjacency matrices of both graphs
-    adj1 <- igraph::as_adjacency_matrix(obs_graph, names = TRUE , sparse = FALSE)
-    adj2 <- igraph::as_adjacency_matrix(pred_graph, names = TRUE , sparse = FALSE)
+    adj1 <- igraph::as_adjacency_matrix(obs_graph,
+                                        names = TRUE , sparse = FALSE)
+    adj2 <- igraph::as_adjacency_matrix(pred_graph,
+                                        names = TRUE , sparse = FALSE)
 
     diag(adj1) <- diag(adj2) <- 0
 
@@ -132,7 +138,8 @@ graph_topo_compar <- function(obs_graph, pred_graph, mode = "mcc", directed = FA
 
     # 0obs 0pred (TN)
     tn <- length(which(((1 - adj1) & (1 - adj2)))) - nb_nodes
-    # 0 values become 1 in both adjacency matrices when using 1 - adj1 and 1 - adj2
+    # 0 values become 1 in both adjacency matrices when
+    # using 1 - adj1 and 1 - adj2
     # We remove the number of nodes as both diagonal values
     # of 1 - adj1 and 1 - adj2 are ones.
 
@@ -153,8 +160,10 @@ graph_topo_compar <- function(obs_graph, pred_graph, mode = "mcc", directed = FA
     # We consider half the number of links in that case
     # given the graphs are not directed.
 
-    adj1 <- igraph::as_adjacency_matrix(obs_graph, type = "both", names = TRUE , sparse = FALSE)
-    adj2 <- igraph::as_adjacency_matrix(pred_graph, type = "both", names = TRUE , sparse = FALSE)
+    adj1 <- igraph::as_adjacency_matrix(obs_graph, type = "both",
+                                        names = TRUE , sparse = FALSE)
+    adj2 <- igraph::as_adjacency_matrix(pred_graph, type = "both",
+                                        names = TRUE , sparse = FALSE)
 
     diag(adj1) <- diag(adj2) <- 0
 
@@ -164,7 +173,8 @@ graph_topo_compar <- function(obs_graph, pred_graph, mode = "mcc", directed = FA
 
     # 0obs 0pred (TN)
     tn <- length(which(((1 - adj1) & (1 - adj2))))/2 - (nb_nodes / 2)
-    # We divide by 2 and then we remove half the number of nodes as both diagonal values
+    # We divide by 2 and then we remove half the number of nodes
+    # as both diagonal values
     # of 1 - adj1 and 1 - adj2 are ones.
 
     # 0obs 1pred (FP)
@@ -193,7 +203,7 @@ graph_topo_compar <- function(obs_graph, pred_graph, mode = "mcc", directed = FA
   pn_on <- pn * on
 
   mcc <- (tp * tn - fp * fn) / ( sqrt(pp_op) * sqrt(pn_on) )
-  kappa <- ( K * (tp + tn) - (on * pn) - (op * pp)) / (K^2 - (on * pn) - (op * pp))
+  kappa <- ( K * (tp + tn) - (on * pn)-(op * pp))/(K^2 - (on * pn) - (op * pp))
   fdr <- fp / (tp + fp)
   acc <- (tp + tn) / K
   sens <- tp / (tp + fn)

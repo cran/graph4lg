@@ -4,36 +4,41 @@
 \alias{pop_gen_index}
 \title{Compute population-level genetic indices}
 \usage{
-pop_gen_index(x, pop_names = NULL, indices = c("Nb_ind", "A", "He",
-  "Ho"))
+pop_gen_index(x, pop_names = NULL, indices = c("Nb_ind", "A", "He", "Ho"))
 }
 \arguments{
 \item{x}{An object of class \code{genind}
 from package \pkg{adegenet}.}
 
-\item{pop_names}{(optional) A character vector indicating populations' names.
+\item{pop_names}{(optional) A character vector indicating population names.
 It is of the same length as the number of populations. Without this
 argument, populations are given the names they have initially in the
 'genind' object (which is sometimes only a number). The order of the
-populations' names must match with their order in the 'genind' object.
+population names must match with their order in the 'genind' object.
 The function does not reorder them. Users must be careful.}
 
 \item{indices}{(optional) A character vector indicating the population-level
 indices to compute. These indices can be:
 \itemize{
-\item{Mean allelic richness by locus by population (\code{indices = c("A", ...)})}
-\item{Mean expected heterozygosity by locus by population (\code{indices = c("He",...)})}
-\item{Mean observed heterozygosity by locus by population (\code{indices = c("Ho",...)})}
-\item{Number of individuals by population (\code{indices = c("Nb_ind", ...)})}
-\item{Total allelic richness by population (\code{indices = c("A_tot",...)})}
+\item{Mean allelic richness by locus by
+population (\code{indices = c("A", ...)})}
+\item{Mean expected heterozygosity by locus by
+population (\code{indices = c("He",...)})}
+\item{Mean observed heterozygosity by locus by
+population (\code{indices = c("Ho",...)})}
+\item{Number of individuals by
+population (\code{indices = c("Nb_ind", ...)})}
+\item{Total allelic richness by
+population (\code{indices = c("A_tot",...)})}
 }
 By default, \code{indices = c("Nb_ind", "A", "He", "Ho")}.}
 }
 \value{
-An object of class \code{data.frame} whose rows correspond to populations
-and columns to populations' attributes (ID, size, genetic indices). By default,
-the first column corresponds to the populations' names (ID). The order of the
-columns depends on the vector 'indices'.
+An object of class \code{data.frame} whose rows
+correspond to populations and columns to population attributes
+(ID, size, genetic indices). By default, the first column corresponds to
+the population names (ID). The order of the columns depends on the
+vector 'indices'.
 }
 \description{
 The function computes population-level genetic indices from an
@@ -45,7 +50,7 @@ x <- data_simul_genind
 pop_names <- levels(x@pop)
 df_pop_indices <- pop_gen_index(x = x,
                    pop_names = pop_names,
-                   indices = c("Nb_ind", "A", "He", "Ho"))
+                   indices = c("Nb_ind", "A"))
 }
 \author{
 P. Savary

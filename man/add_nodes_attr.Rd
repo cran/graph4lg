@@ -4,8 +4,15 @@
 \alias{add_nodes_attr}
 \title{Add attributes to the nodes of a graph}
 \usage{
-add_nodes_attr(graph, input = "df", data, dir_path = NULL,
-  layer = NULL, index = "Id", include = "all")
+add_nodes_attr(
+  graph,
+  input = "df",
+  data,
+  dir_path = NULL,
+  layer = NULL,
+  index = "Id",
+  include = "all"
+)
 }
 \arguments{
 \item{graph}{A graph object of class \code{igraph}.}
@@ -19,7 +26,7 @@ a shapefile layer of type point.}
 \code{data.frame}}
 }
 In both cases, input attribute table or dataframe must have a column with
-the exact same values as the nodes' IDs.}
+the exact same values as the node IDs.}
 
 \item{data}{(only if 'input = "df"') The name of the object of
 class \code{data.frame} with the attributes to add to the nodes.}
@@ -46,9 +53,9 @@ Alternatively, 'include' can be a vector with the names of the columns to add
 A graph object of class \code{igraph}
 }
 \description{
-The function adds attributes to the nodes of a graph from either an object
-of class \code{data.frame} or from a shapefile layer.
-The nodes' IDs in the input objects must be the same as in the graph object.
+The function adds attributes to the nodes of a graph from
+either an object of class \code{data.frame} or from a shapefile layer.
+The node IDs in the input objects must be the same as in the graph object.
 }
 \details{
 The graph can be created with the function

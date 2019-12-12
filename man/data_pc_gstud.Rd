@@ -10,9 +10,9 @@
 \item{Cluster}{Population name}
 \item{ID}{Individual ID}
 \item{id}{Population ID used during the sampling stage}
-\item{Latitude}{Sampling site's (population) latitude (WGS 84 - UTM 20 N)}
-\item{Longitude}{Sampling site's (population) longitude (WGS 84 - UTM 20 N)}
-\item{DkiD102 to DkiD12}{12 loci's columns with microsatellites' data with
+\item{Latitude}{Sampling site (population) latitude (WGS 84 - UTM 20 N)}
+\item{Longitude}{Sampling site (population) longitude (WGS 84 - UTM 20 N)}
+\item{DkiD102 to DkiD12}{12 loci columns with microsatellite data with
 3 digits coding, alleles separated by ":", and blank missing data
 (class 'locus' from \pkg{gstudio})}
 }}

@@ -9,11 +9,11 @@ file :
 \describe{
 \item{1st column}{Individual identifier beginning with population name and
 ending with a comma}
-\item{Other columns}{12 loci's columns with microsatellites' data with
+\item{Other columns}{12 loci columns with microsatellite data with
 3 digits coding, alleles not separated, and missing data noted "000000"}
 }
 Each group of individuals from the same population are separated by a line
-with only the character value "Pop" in firts column.
+with only the character value "Pop" in first column.
 First lines include loci names and file name}
 \source{
 \url{https://datadryad.org/resource/doi:10.5061/dryad.v8324}

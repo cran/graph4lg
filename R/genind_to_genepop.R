@@ -4,7 +4,8 @@
 #' a GENEPOP file.
 #' It then allows to use the functionalities of the GENEPOP software and
 #' its derived package \pkg{GENEPOP} on R, as well as some functions
-#' from other packages (differentiation test, F-stats calculations, HWE test,...).
+#' from other packages (differentiation test, F-stats calculations,
+#' HWE test,...).
 #' It is designed to be used with diploid microsatellite data and
 #' alleles coded with 3 digits
 #'
@@ -54,7 +55,8 @@
 #' @seealso For more details about GENEPOP file formatting :
 #' \url{http://genepop.curtin.edu.au/help_input.html#Input}.
 #' For the opposite conversion, see \code{\link{genepop_to_genind}}.
-#' The output file can be used to compute pairwise FST matrix with \code{\link{mat_pw_fst}}
+#' The output file can be used to compute pairwise FST matrix
+#' with \code{\link{mat_pw_fst}}
 #' @export
 #' @author P. Savary
 #' @examples
@@ -69,7 +71,7 @@
 genind_to_genepop <- function(x, output = "data.frame"){
 
   # Check whether 'x' is a genind object
-  if(class(x) != "genind"){
+  if(!inherits(x, "genind")){
     stop("Input 'x' must be an object of class 'genind'.")
   }
 
@@ -184,10 +186,11 @@ genind_to_genepop <- function(x, output = "data.frame"){
 
   # Add the last population
   data_gpop2 <- rbind(data_gpop2, c("Pop", rep("", n.loci)),
-                      data_gpop[(num_end_pop[length(num_end_pop)]+1):nrow(data_gpop), ])
+             data_gpop[(num_end_pop[length(num_end_pop)]+1):nrow(data_gpop), ])
 
   # The two first lines are the heading and the names of the loci
-  data_gpop2 <- rbind(c("Conversion of an object of class 'genind' into a GENEPOP file with the package 'graph4lg'",
+  data_gpop2 <- rbind(c("Conversion of an object of class 'genind' into
+                        a GENEPOP file with the package 'graph4lg'",
                         rep("", n.loci)),
                       c(paste(loci_names[1:(n.loci-1)],",", sep = ""),
                         loci_names[n.loci], ""),

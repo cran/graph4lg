@@ -4,21 +4,28 @@
 \alias{graph_to_shp}
 \title{Export a spatial graph to shapefile layers}
 \usage{
-graph_to_shp(graph, crds, mode = "both", crds_crs, layer_name, dir_path,
-  metrics = FALSE)
+graph_to_shp(
+  graph,
+  crds,
+  mode = "both",
+  crds_crs,
+  layer_name,
+  dir_path,
+  metrics = FALSE
+)
 }
 \arguments{
 \item{graph}{A graph object of class \code{igraph}}
 
 \item{crds}{(if 'mode = 'spatial'') A \code{data.frame} with the spatial
-coordinates of the graph's nodes. It must have three columns:
+coordinates of the graph nodes. It must have three columns:
 \itemize{
-\item{ID: Name of the graph's nodes (will be converted into character string).
-The names must the same as the nodes' names of the graph object of
+\item{ID: Name of the graph nodes (will be converted into character string).
+The names must the same as the node names of the graph object of
 class \code{igraph} (\code{igraph::V(graph)$name})}
-\item{x: Longitude (numeric) of the graphs' nodes in the coordinates
+\item{x: Longitude (numeric or integer) of the graph nodes in the coordinates
 reference system indicated with the argument crds_crs.}
-\item{y: Latitude (numeric) of the graphs' nodes in the coordinates
+\item{y: Latitude (numeric or integer) of the graph nodes in the coordinates
 reference system indicated with the argument crds_crs.}
 }}
 
@@ -30,8 +37,9 @@ one for the nodes and another for the links.}
 \item{If 'mode = 'link'', a shapefile layer is created for the links only.}
 }}
 
-\item{crds_crs}{A character string indicating the Coordinates Reference System
-of the spatial coordinates of the nodes and of the shapefile layers created.
+\item{crds_crs}{A character string indicating the Coordinates
+Reference System of the spatial coordinates of the nodes and of the
+shapefile layers created.
 The projection and datum are given in the PROJ.4 format.}
 
 \item{layer_name}{A character string indicating the suffix of the name of
@@ -42,7 +50,7 @@ in which the shapefile layers will be exported. If \code{dir_path = "wd"},
 then the layers are created in the current working directory.}
 
 \item{metrics}{(not possible if 'mode = 'link'') Logical. Should metrics
-be calculated and integrated in the attribute table of the nodes' shapefile
+be calculated and integrated in the attribute table of the node shapefile
 layer? (default: FALSE)
 Metrics calculated are degrees, betweenness centrality and sum of
 inverse weight (if links are weighted)}
@@ -52,7 +60,8 @@ Create shapefile layers in the directory specified with the parameter
 'dir_path'.
 }
 \description{
-The function enables to export a spatial graph to shapefile layers.
+The function enables to export a spatial graph to
+shapefile layers.
 }
 \examples{
 data(data_tuto)

@@ -1,17 +1,18 @@
 #' Export a spatial graph to shapefile layers
 #'
-#' @description The function enables to export a spatial graph to shapefile layers.
+#' @description The function enables to export a spatial graph to
+#' shapefile layers.
 #'
 #' @param graph A graph object of class \code{igraph}
 #' @param crds (if 'mode = 'spatial'') A \code{data.frame} with the spatial
-#' coordinates of the graph's nodes. It must have three columns:
+#' coordinates of the graph nodes. It must have three columns:
 #' \itemize{
-#' \item{ID: Name of the graph's nodes (will be converted into character string).
-#' The names must the same as the nodes' names of the graph object of
+#' \item{ID: Name of the graph nodes (will be converted into character string).
+#' The names must the same as the node names of the graph object of
 #' class \code{igraph} (\code{igraph::V(graph)$name})}
-#' \item{x: Longitude (numeric) of the graphs' nodes in the coordinates
+#' \item{x: Longitude (numeric or integer) of the graph nodes in the coordinates
 #' reference system indicated with the argument crds_crs.}
-#' \item{y: Latitude (numeric) of the graphs' nodes in the coordinates
+#' \item{y: Latitude (numeric or integer) of the graph nodes in the coordinates
 #' reference system indicated with the argument crds_crs.}
 #' }
 #' @param mode Indicates which shapefile layers will be created
@@ -22,12 +23,13 @@
 #' \item{If 'mode = 'link'', a shapefile layer is created for the links only.}
 #' }
 #' @param metrics (not possible if 'mode = 'link'') Logical. Should metrics
-#' be calculated and integrated in the attribute table of the nodes' shapefile
+#' be calculated and integrated in the attribute table of the node shapefile
 #' layer? (default: FALSE)
 #' Metrics calculated are degrees, betweenness centrality and sum of
 #' inverse weight (if links are weighted)
-#' @param crds_crs A character string indicating the Coordinates Reference System
-#' of the spatial coordinates of the nodes and of the shapefile layers created.
+#' @param crds_crs A character string indicating the Coordinates
+#' Reference System of the spatial coordinates of the nodes and of the
+#' shapefile layers created.
 #' The projection and datum are given in the PROJ.4 format.
 #' @param dir_path A character string corresponding to the path to the directory
 #' in which the shapefile layers will be exported. If \code{dir_path = "wd"},
@@ -59,27 +61,27 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
                          metrics = FALSE){
 
   # Check whether 'graph' is a graph object of class igraph
-  if(class(graph) != "igraph"){
+  if(!inherits(graph, "igraph")){
     stop("graph must be a graph objet of class igraph")
   }
 
   # Check whether 'crds' is an object of class data.frame
-  if(class(crds) != "data.frame"){
+  if(!inherits(crds, "data.frame")){
     stop("crds must be an objet of class data.frame")
   }
 
   # Check whether 'crds_crs' is a character string
-  if(class(crds_crs) != "character"){
+  if(!inherits(crds_crs, "character")){
     stop("crds_crs must be a character string")
   }
 
   # Check whether 'layer_name' is a character string
-  if(class(layer_name) != "character"){
+  if(!inherits(layer_name, "character")){
     stop("layer_name must be a character string")
   }
 
   # Check whether 'dir_path' is a character string
-  if(class(dir_path) != "character"){
+  if(!inherits(dir_path, "character")){
     stop("dir_path must be a character string")
   }
 
@@ -93,9 +95,9 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
     stop("dir_path must be the path to an existing directory")
   }
 
-  # Check whether 'graph' has nodes' names
+  # Check whether 'graph' has node names
   if(is.null(igraph::V(graph)$name)){
-    stop("Your graph must have nodes' names.")
+    stop("Your graph must have node names.")
   }
 
   # Check whether a correct 'mode' option was specified
@@ -105,18 +107,22 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
 
   # Check whether crds and the graph object are compatible
   if( nrow(crds) != length(igraph::V(graph) ) ) {
-    stop("'crds' must have the same number of rows as there are nodes in 'graph'")
+    stop("'crds' must have the same number of rows as there are
+         nodes in 'graph'")
   } else if( !all( colnames(crds) == c("ID","x","y") ) ){
     stop("Column names of crds must be 'ID', 'x' and 'y'.")
   } else if( !any( as.character(crds$ID) %in% igraph::V(graph)$name ) ){
-    stop("The IDs of 'crds' elements are not the same as the names of the nodes in 'graph'")
-  } else if(class(crds$x) != "numeric"){
-    stop("'x' must be of class 'numeric'")
-  } else if(class(crds$y) != "numeric"){
-    stop("'y' must be of class 'numeric'")
+    stop("The IDs of 'crds' elements are not the same as the names
+         of the nodes in 'graph'")
+    # Check whether spatial coordinates are numeric or integer
+  } else if(!inherits(crds$x, c("integer", "numeric"))){
+    stop("'x' must be of class 'numeric' or 'integer'")
+  } else if(!inherits(crds$y, c("integer", "numeric"))){
+    stop("'y' must be of class 'numeric' or 'integer'")
   } else {
     crds$ID <- as.character(crds$ID)
   }
+
 
   # If 'mode = 'link'' or 'mode = 'both'', then export the links
   if(any(c(mode, mode) == c("link", "both"))){
@@ -160,7 +166,8 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
 
     # Create a data.frame with edge attributes
     edge_att <- graph_df
-    row.names(edge_att) <- paste( "ID", as.character(1:nrow(edge_att)), sep ="" )
+    row.names(edge_att) <- paste( "ID",
+                                  as.character(1:nrow(edge_att)), sep ="" )
 
     #lines_sp@lines
     # Create a spatial lines data.frame
@@ -189,10 +196,11 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
       crds$degree <- igraph::degree(graph)
 
       if(!is.null(igraph::E(graph)$weight)){
-        crds$siw <- igraph::strength(graph, weights = 1/igraph::E(graph)$weight)
+        crds$siw <- igraph::strength(graph,
+                                     weights = 1/igraph::E(graph)$weight)
       }
     }
-    # Create a data.frame with the nodes' coordinates
+    # Create a data.frame with the node coordinates
     xy <- crds[,c('x','y')]
     # Create a spatial points data.frame
     node_lay <- sp::SpatialPointsDataFrame(coords = xy, data = crds,

@@ -2,7 +2,8 @@
 % Please edit documentation in R/mat_pw_dps.R
 \name{mat_pw_dps}
 \alias{mat_pw_dps}
-\title{Compute a pairwise genetic distance matrix between populations using Bowcock et al. (1994) formula}
+\title{Compute a pairwise genetic distance matrix between populations
+using Bowcock et al. (1994) formula}
 \usage{
 mat_pw_dps(x)
 }
@@ -30,7 +31,8 @@ has a copy of \eqn{a_{kd}}
 of \eqn{a_{kd}} (homozygotes)
 \eqn{f_{a_{kd}i}} is allele \eqn{a_{kd}} frequency in
 individual \eqn{i} (0, 0.5 or 1).
-More information in : \href{https://www.ncbi.nlm.nih.gov/pubmed/7510853}{Bowcock et al., 1994}
+More information in :
+\href{https://www.ncbi.nlm.nih.gov/pubmed/7510853}{Bowcock et al., 1994}
 and \href{http://i122server.vu-wien.ac.at/MSA/info.html/Distances.html#DPS}{MSA manual}.
 This function uses functions from \pkg{adegenet} package
 Note that in the paper of Bowcock et al. (1994), the denominator is 2D.

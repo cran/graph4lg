@@ -3,7 +3,7 @@
 \name{gen_graph_thr}
 \alias{gen_graph_thr}
 \title{Create a graph of genetic differentiation
-using a link's weight threshold}
+using a link weight threshold}
 \usage{
 gen_graph_thr(mat_w, mat_thr = NULL, thr, mode = "larger")
 }
@@ -14,7 +14,8 @@ will be the links' weights}
 \item{mat_thr}{(optional) A symmetric (pairwise) distance \code{matrix} whose
 values will be used for the pruning based on the threshold value.}
 
-\item{thr}{The threshold value (logically between min(mat_thr) and max(mat_thr))}
+\item{thr}{The threshold value (logically between min(mat_thr)
+and max(mat_thr))}
 
 \item{mode}{\itemize{
 \item{If 'mode = 'larger'' (default), all the links whose weight is larger

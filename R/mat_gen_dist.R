@@ -9,7 +9,8 @@
 #' multilocus genetic distance between populations
 #' \itemize{
 #' \item{If 'dist = 'basic'' (default), then the multilocus genetic distance is
-#' computed using a formula of Euclidean genetic distance (Excoffier et al., 1992)}
+#' computed using a formula of Euclidean genetic
+#' distance (Excoffier et al., 1992)}
 #' \item{If 'dist = 'weight'', then the multilocus genetic distance is computed
 #' as in Fortuna et al. (2009). It is a Euclidean genetic distance giving more
 #' weight to rare alleles}
@@ -23,11 +24,13 @@
 #' \item{If 'dist = 'FST_lin'', then the genetic distance used is the linearised
 #' pairwise FST (Weir et Cockerham, 1984)(FST_lin = FST/(1-FST))}
 #' \item{If 'dist = 'PCA'', then the genetic distance is computed following a
-#' PCA of the matrix of allelic frequencies by population. It is a Euclidean genetic
-#' distance between populations in the multidimensional space defined by all
-#' the independent principal components.}
-#' \item{If 'dist = 'GST'', then the genetic distance used is the G'ST (Hedrick, 2005)}
-#' \item{If 'dist = 'D'', then the genetic distance used is Jost's D (Jost, 2008)}
+#' PCA of the matrix of allelic frequencies by population. It is a
+#' Euclidean genetic distance between populations in the multidimensional
+#' space defined by all the independent principal components.}
+#' \item{If 'dist = 'GST'', then the genetic distance used is the
+#' G'ST (Hedrick, 2005)}
+#' \item{If 'dist = 'D'', then the genetic distance used is
+#' Jost's D (Jost, 2008)}
 #' }
 #' @param null_val (optional) Logical. Should negative and null FST, FST_lin,
 #' GST or D values be replaced by half the minimum positive value?
@@ -37,8 +40,9 @@
 #' @return An object of class \code{matrix}
 #' @export
 #' @details Negative values are converted into 0.
-#' Euclidean genetic distance \eqn{d_{ij}} between population i and j is computed as
-#' follows: \deqn{d_{ij}^{2} = \sum_{k=1}^{n} (x_{ki} - x_{kj})^{2} } where
+#' Euclidean genetic distance \eqn{d_{ij}} between population i and j
+#' is computed as follows:
+#' \deqn{d_{ij}^{2} = \sum_{k=1}^{n} (x_{ki} - x_{kj})^{2} } where
 #' \eqn{x_{ki}} is the allelic frequency of allele k in population i and n is
 #' the total number of alleles. Note that when 'dist = 'weight'', the formula
 #' becomes \deqn{d_{ij}^{2} = \sum_{k=1}^{n} (1/(K*p_{k}))(x_{ki} - x_{kj})^{2}}
@@ -65,7 +69,7 @@ mat_gen_dist <- function(x,
                          null_val = FALSE){
 
   # Check whether 'x' is of class 'genind'
-  if(class(x) != "genind"){
+  if(!inherits(x, "genind")){
     stop("x must be an object of type genind")
   }
 
@@ -125,7 +129,7 @@ mat_gen_dist <- function(x,
   groups <- row.names(A)
 
   # D is an empty symmetric matrix with as many rows as there are populations.
-  # Rows' names and columns' names are populations' names
+  # Row names and column names are population names
   D <- matrix(0, nrow = rows, ncol = rows)
   row.names(D) <- colnames(D) <- groups
 
@@ -154,7 +158,8 @@ mat_gen_dist <- function(x,
             # p_k is the frequency of the allele considered
             p_k <- Freq[m]
             # w is the weight given to the allele in the computation of the
-            # element of the distance between i and j corresponding to this allele
+            # element of the distance between i and j corresponding
+            # to this allele
             w <- 1/(k * p_k)
             # We add the element corresponding to this allele to suma_loci
             # This way, we compute a Euclidean distance with a particular
@@ -176,7 +181,7 @@ mat_gen_dist <- function(x,
   } else if (dist == "PCA") {
 
     # PCA of the total table of allele frequencies by individuals
-    pcfit <- stats::prcomp(x_w, retx = T)
+    pcfit <- stats::prcomp(x_w, retx = TRUE)
     # We project every individual along the principal components
     # We keep only the number of principal components equal to the total
     # number of alleles minus the total number of loci
@@ -188,14 +193,17 @@ mat_gen_dist <- function(x,
     # Mean coordinates per population and principal components
     x_w2_mean <- tapply(x_w2, list(rep(group_init, columns), col(x_w2)), mean)
 
-    # Double-centering by columns and by rows so that covariance calculation is correct
+    # Double-centering by columns and by rows so that covariance
+    # calculation is correct
     x_w2_mean <- scale(x_w2_mean, scale = FALSE, center = TRUE)
     x_w2_mean <- t(scale(t(x_w2_mean), scale=FALSE, center = TRUE))
 
     # Euclidean distance between population in the new space
-    D <- as.matrix(stats::dist(x_w2_mean, diag = TRUE, upper = TRUE, method = "euclidean"))
+    D <- as.matrix(stats::dist(x_w2_mean, diag = TRUE, upper = TRUE,
+                               method = "euclidean"))
 
-    # Basic method : no weighting, no transformation (loci with many alleles have more weight)
+    # Basic method : no weighting, no transformation (loci with many
+    # alleles have more weight)
   } else if (dist == "basic") {
 
     # No PCA
@@ -203,7 +211,8 @@ mat_gen_dist <- function(x,
     # Centering by rows does not affect distance (be careful if missing data)
     # Centering by columns never affects distance by definition
     # rowSums(A)
-    D <- as.matrix(stats::dist(A, diag = TRUE, upper = TRUE, method = "euclidean"))
+    D <- as.matrix(stats::dist(A, diag = TRUE, upper = TRUE,
+                               method = "euclidean"))
 
 
   # Popgraph method : many transformations to reduce dimensionality
@@ -211,7 +220,7 @@ mat_gen_dist <- function(x,
   } else if (dist == "PG"){
     # This part of the code is directly inspired from popgraph package
     tol <- 1e-4
-    pcfit <- stats::prcomp(x_w, retx = T)
+    pcfit <- stats::prcomp(x_w, retx = TRUE)
     mv <- pcfit$x[, pcfit$sdev > tol]
 
     P <- ncol(mv)
@@ -220,7 +229,9 @@ mat_gen_dist <- function(x,
     sigma.w <- sqrt(diag(stats::var(mv - pop.means[group_init, ])))
 
     if (any(sigma.w < tol))
-      warning(paste("Dropped rotated genetic variable '", paste((as.character(1:P)[sigma.w < tol]), collapse = ","), "' from the analysis due to constancy within groups",
+      warning(paste("Dropped rotated genetic variable '",
+                    paste((as.character(1:P)[sigma.w < tol]), collapse = ","),
+                    "' from the analysis due to constancy within groups",
                     sep = ""))
 
     scaling <- diag(1/sigma.w, , P)
@@ -228,10 +239,13 @@ mat_gen_dist <- function(x,
     X <- sqrt(fac) * (mv - pop.means[group_init, ]) %*% scaling
     X.s <- svd(X, nu = 0)
     rank <- sum(X.s$d > tol)
-    # if(rank < P) warning( paste( (P-rank), ' variables are collinear and being dropped from the discriminant rotation.', sep=''))
+    # if(rank < P) warning( paste( (P-rank), ' variables are collinear and
+    # being dropped from the discriminant rotation.', sep=''))
     scaling <- scaling %*% X.s$v[, 1:rank] %*% diag(1/X.s$d[1:rank], , rank)
     mu <- colSums(Pop.priors %*% pop.means)
-    X <- sqrt((n * Pop.priors)/(rows - 1)) * scale(pop.means, center = mu, scale = FALSE) %*% scaling
+    X <- sqrt((n * Pop.priors)/(rows - 1)) * scale(pop.means,
+                                                   center = mu,
+                                                   scale = FALSE) %*% scaling
     X.s <- svd(X, nu = 0)
     rank <- sum(X.s$d > tol * X.s$d[1L])
     scaling <- scaling %*% X.s$v[, 1L:rank]
@@ -241,7 +255,8 @@ mat_gen_dist <- function(x,
 
     allLD <- tapply(LDValues, list(rep(group_init, rank), col(LDValues)), mean)
 
-    D <- as.matrix(stats::dist(allLD, diag = TRUE, upper = TRUE, method = "euclidean"))
+    D <- as.matrix(stats::dist(allLD, diag = TRUE, upper = TRUE,
+                               method = "euclidean"))
 
   # DPS : based on the proportion of shared alleles
   } else if (dist == "DPS"){

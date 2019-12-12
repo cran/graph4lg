@@ -1,7 +1,7 @@
-#' Plot histograms of links weight
+#' Plot histograms of link weights
 #'
 #' @description The function enables to plot histogram to visualize the
-#' distribution of the links' weights
+#' distribution of the link weights
 #'
 #' @param graph A graph object of class \code{igraph} whose links are weighted
 #' @param fill A character string indicating the color used to fill
@@ -26,10 +26,10 @@ plot_w_hist <- function(graph,
     stop("Your graph must have weighted links.")
   }
 
-  # Create a data.frame from the graph's links
+  # Create a data.frame from the graph links
   graph_df <- data.frame(igraph::as_edgelist(graph))
 
-  # Add the links' weights in the data.frame
+  # Add the link weights in the data.frame
   graph_df$weight <- igraph::E(graph)$weight
   # Give columns' names to 'graph_df'
   names(graph_df) <- c("from", "to", "weight")
@@ -47,7 +47,7 @@ plot_w_hist <- function(graph,
                  aes_string(x = 'weight')) +
     geom_histogram(binwidth = b_w, fill = fill, color = "#776F62", size = .2) +
     labs(x="Link weight",
-         y="Number of nodes' pairs") +
+         y="Number of node pairs") +
     theme_bw()
 
   #print(hist)

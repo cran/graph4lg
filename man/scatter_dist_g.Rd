@@ -4,26 +4,33 @@
 \alias{scatter_dist_g}
 \title{Plot scatterplots of distances to visualize the graph pruning intensity}
 \usage{
-scatter_dist_g(mat_y, mat_x, graph, thr_y = NULL, thr_x = NULL,
-  pts_col_1 = "#999999", pts_col_2 = "black")
+scatter_dist_g(
+  mat_y,
+  mat_x,
+  graph,
+  thr_y = NULL,
+  thr_x = NULL,
+  pts_col_1 = "#999999",
+  pts_col_2 = "black"
+)
 }
 \arguments{
 \item{mat_y}{A symmetric (complete) \code{matrix} with pairwise (genetic or
 landscape) distances between populations or sample sites. These values
-will be the points' coordinates on the y axis. \code{mat_y} is the matrix
+will be the point coordinates on the y axis. \code{mat_y} is the matrix
 used to weight the links of the graph \code{x}, whose nodes correspond to
-rows' and columns' names of \code{mat_y}.}
+row and column names of \code{mat_y}.}
 
 \item{mat_x}{A symmetric (complete) \code{matrix} with pairwise (genetic or
 landscape) distances between populations or sample sites. These values
-will be the points' coordinates on the x axis.
-\code{mat_x} and \code{mat_y} must have the same rows' and columns' names,
+will be the point coordinates on the x axis.
+\code{mat_x} and \code{mat_y} must have the same row and column names,
 ordered in the same way.}
 
 \item{graph}{A graph object of class \code{igraph}.
-Its nodes must have the same names as the rows' and columns' of
+Its nodes must have the same names as the row and column of
 \code{mat_y} and \code{mat_x} matrices. \code{x} must have weighted links.
-Links' weights have to be values from \code{mat_y} matrix. \code{graph} must
+Link weights have to be values from \code{mat_y} matrix. \code{graph} must
 be an undirected graph.}
 
 \item{thr_y}{(optional) A numeric value used to remove values from the

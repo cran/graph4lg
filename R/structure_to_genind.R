@@ -7,31 +7,34 @@
 #' format .txt, or alternatively the name of the file in the working directory.
 #' The STRUCTURE file must only have :
 #' \itemize{
-#' \item A first column with the IDs of the individuals (can be a simple number)
-#' \item A second column with the IDs of the populations (can be a simple number)
+#' \item A first column with the IDs of the individuals
+#' (can be a simple number)
+#' \item A second column with the IDs of the populations
+#' (can be a simple number)
 #' \item Some loci columns : as many columns as loci in the data
 #' }
-#' The row for loci's names is optional but recommended.
+#' The row for loci names is optional but recommended.
 #' Each individual is displayed on 2 rows.
 #'
 #' @param loci_names A character vector with the names of the loci if not
-#' specified in the file's first row. This argument is mandatory if the
+#' specified in the file first row. This argument is mandatory if the
 #' STRUCTURE file does not include the names of the loci in the first row.
-#' In other cases, the names of the loci is extracted from the file's first row
-#' @param pop_names (optional) A character vector indicating the populations'
+#' In other cases, the names of the loci is extracted from the file first row
+#' @param pop_names (optional) A character vector indicating the population
 #' names in the same order as in the STRUCTURE file. It is of the same length
 #' as the number of populations. Without this argument, populations are
 #' numbered from 1 to the total number of individuals.
-#' @param ind_names (optional) A character vector indicating the individuals'
+#' @param ind_names (optional) A character vector indicating the individual
 #' names in the same order as in the STRUCTURE file. It is of the same length
 #' as the number of individuals. Without this argument, individuals are
 #' numbered from 1 to the total number of individuals.
 #' @return An object of type \code{genind}.
-#' @details The columns' order of the resulting object can be different from
+#' @details The column order of the resulting object can be different from
 #' that of objects returned by \code{\link{gstud_to_genind}}
-#' and \code{\link{genepop_to_genind}}, depending on alleles' and loci's coding
+#' and \code{\link{genepop_to_genind}}, depending on allele and loci coding
 #' This function uses functions from \pkg{pegas} package.
-#' For details about STRUCTURE file format : \href{http://www.ccg.unam.mx/~vinuesa/tlem09/docs/structure_doc.pdf}{STRUCTURE user manual}
+#' For details about STRUCTURE file format :
+#' \href{http://www.ccg.unam.mx/~vinuesa/tlem09/docs/structure_doc.pdf}{STRUCTURE user manual}
 #' @export
 #' @author P. Savary
 #' @examples
@@ -56,7 +59,7 @@ structure_to_genind <- function(path,
 
   # Check whether 'path' is a character string
   if(!is.character(path)){
-    stop("You must specify the file's path as a character string input 'path'.")
+    stop("You must specify the file path as a character string input 'path'.")
   }
 
   # Check whether individuals are regrouped in the data
@@ -71,10 +74,10 @@ structure_to_genind <- function(path,
 
   # If the first line does not correspond to the first individual
   if(stringr::str_sub(data_str[1, ], 1, 2) != "1 "){
-    # Get the loci's names from the first line
+    # Get the loci names from the first line
     loci_names <- unlist(strsplit(as.character(data_str[1, ]), split = " "))
 
-    # Replace '.' by '_' in the loci's names
+    # Replace '.' by '_' in the loci names
     loci_names <- gsub(loci_names,
                        pattern = "\\.",
                        replacement = "_")
@@ -85,7 +88,7 @@ structure_to_genind <- function(path,
   # If the first line corresponds to the first individual
   } else {
 
-    # Check whether loci's names are given
+    # Check whether loci names are given
     if (!is.vector(loci_names)){
       stop("You must specify the names of the loci in a character vector
            because input file does not include them.")
@@ -93,20 +96,20 @@ structure_to_genind <- function(path,
     # Re-open the data with another separator
     data_str <- utils::read.table(file = path, sep = "")
 
-    # Check whether there are as many loci's names in 'loci_names' than
+    # Check whether there are as many loci names in 'loci_names' than
     # in the data
     if (length(loci_names)!= (ncol(data_str)-2)){
       stop("The length of 'loci_names' is not equal to the number of loci
             in the input file.")
     }
 
-    # Replace '.' by '_' in the loci's names
+    # Replace '.' by '_' in the loci names
     loci_names <- gsub(loci_names,
                        pattern = "\\.",
                        replacement = "_")
   }
 
-  # Give columns' names to the data
+  # Give column names to the data
   col_names <- unlist(c("ind", "pop", loci_names))
   colnames(data_str) <- col_names
 
@@ -115,11 +118,11 @@ structure_to_genind <- function(path,
     ind.pop <- as.numeric(table(data_str$pop))
 
     if(length(pop_names)!=length(ind.pop)){
-      stop("The length of 'pop_names' is not equal to populations' number
+      stop("The length of 'pop_names' is not equal to population number
             in the input file.")
     }
 
-    # Give populations' names to the individuals
+    # Give population names to the individuals
     data_str$pop <- rep(pop_names, times = ind.pop)
   }
 
@@ -127,11 +130,11 @@ structure_to_genind <- function(path,
   if (is.vector(ind_names)){
 
     if(length(ind_names) != (nrow(data_str)/2)){
-      stop("The length of 'ind_names' is not equal to individuals' number
+      stop("The length of 'ind_names' is not equal to individual number
            in the input file.")
     }
 
-    # Give individuals' names to the individuals
+    # Give individual names to the individuals
     data_str$ind <- rep(ind_names, each = 2)
   }
 
@@ -159,7 +162,7 @@ structure_to_genind <- function(path,
                                              pattern = '-9/-9',
                                              replacement = 'NA/NA')
 
-  # Add rows' names
+  # Add row names
   row.names(data_union) <- data_union$ind
   # Remove the 'ind' column
   data_union <- data_union[, -which(colnames(data_union) == "ind")]

@@ -3,8 +3,8 @@
 #'
 #' @description The function allows to create genetic graphs from genetic data
 #' by applying the conditional independence principle. Populations whose allelic
-#' frequencies covary significantly once the covariance with the other populations
-#' has been taken into account are linked on the graphs.
+#' frequencies covary significantly once the covariance with the other
+#' populations has been taken into account are linked on the graphs.
 #'
 #' @details The function allows to vary many parameters such as the genetic
 #' distance used, the formula used to compute the covariance, the statistical
@@ -17,7 +17,7 @@
 #' multilocus genetic distance between populations
 #' \itemize{
 #' \item{If 'dist = 'basic'' (default), then the multilocus genetic distance is
-#' computed using a formula of Euclidean genetic distance (Excoffier et al., 1992)}
+#' computed using a Euclidean genetic distance formula (Excoffier et al., 1992)}
 #' \item{If 'dist = 'weight'', then the multilocus genetic distance is computed
 #' as in Fortuna et al. (2009). It is a Euclidean genetic distance giving more
 #' weight to rare alleles}
@@ -25,17 +25,17 @@
 #' in popgraph::popgraph function, following several steps of PCA and SVD
 #' (Dyer et Nason, 2004).}
 #' \item{If 'dist = 'PCA'', then the genetic distance is computed following a
-#' PCA of the matrix of allelic frequencies by population. It is a Euclidean genetic
-#' distance between populations in the multidimensional space defined by all
-#' the independent principal components.}
+#' PCA of the matrix of allelic frequencies by population. It is a Euclidean
+#' genetic distance between populations in the multidimensional space defined
+#' by all the independent principal components.}
 #' }
 #' @param cov A character string indicating the formula used to compute the
 #' covariance matrix from the distance matrix
 #' \itemize{
-#' \item{If 'cov = 'sq'' (default), then the covariance matrix is calculated from
-#' the matrix of squared distances as in Everitt et Hothorn (2011)}
+#' \item{If 'cov = 'sq'' (default), then the covariance matrix is calculated
+#' from the matrix of squared distances as in Everitt et Hothorn (2011)}
 #' \item{If 'cov = 'dist'', then the covariance matrix is calculated from the
-#' matrix of distances as in Dyer et Nason (2004) and popgraph::popgraph function}
+#' matrix of distances as in Dyer et Nason (2004) and popgraph function}
 #' }
 #' @param pcor A character string indicating the way the partial correlation
 #' matrix is computed from the covariance matrix.
@@ -75,11 +75,12 @@
 #' C (covariance matrix), Rho (partial correlation matrix),
 #' M (graph incidence matrix) and S (strength matrix) are included}
 #' \item{If 'output = 'dist_graph'', then the distance matrix D is returned
-#' only with the values corresponding to the graph's edges}
+#' only with the values corresponding to the graph edges}
 #' \item{If 'output = 'str_graph'', then the strength values matrix S is
-#' returned only with the values corresponding to the graph's edges}
+#' returned only with the values corresponding to the graph edges}
 #' \item{If 'output = 'inc'', then the binary adjacency matrix M is returned}
-#' \item{If 'output = 'igraph'', then a graph of class \code{igraph} is returned}
+#' \item{If 'output = 'igraph'', then a graph of class \code{igraph}
+#' is returned}
 #' }
 #' @return A \code{list} of objects of class \code{matrix}, an object of
 #' class \code{matrix} or a graph object of class \code{igraph}
@@ -199,8 +200,9 @@ gen_graph_indep <- function(x, dist = "basic", cov = "sq",
             k <- vec.n.all[m]
             # p_k is the frequency of the allele considered
             p_k <- Freq[m]
-            # w is the weight given to the allele in the computation of the
-            # element of the distance between i and j corresponding to this allele
+            # w is the weight given to the allele in the computation of
+            # the element of the distance between i and j corresponding
+            # to this allele
             w <- 1/(k * p_k)
             # We add the element corresponding to this allele to suma_loci
             # This way, we compute a Euclidean distance with a particular
@@ -222,7 +224,7 @@ gen_graph_indep <- function(x, dist = "basic", cov = "sq",
   } else if (dist == "PCA") {
 
     # PCA of the total table of allele frequencies by individuals
-    pcfit <- stats::prcomp(x_w, retx = T)
+    pcfit <- stats::prcomp(x_w, retx = TRUE)
     # We project every individual along the principal components
     # We keep only the number of principal components equal to the total
     # number of alleles minus the total number of loci
@@ -234,14 +236,17 @@ gen_graph_indep <- function(x, dist = "basic", cov = "sq",
     # Mean coordinates per population and principal components
     x_w2_mean <- tapply(x_w2, list(rep(group_init, columns), col(x_w2)), mean)
 
-    # Double-centering by columns and by rows so that covariance calculation is correct
+    # Double-centering by columns and by rows so that covariance calculation
+    # is correct
     x_w2_mean <- scale(x_w2_mean, scale = FALSE, center = TRUE)
     x_w2_mean <- t(scale(t(x_w2_mean), scale=FALSE, center = TRUE))
 
     # Euclidean distance between population in the new space
-    D <- as.matrix(stats::dist(x_w2_mean, diag = TRUE, upper = TRUE, method = "euclidean"))
+    D <- as.matrix(stats::dist(x_w2_mean, diag = TRUE, upper = TRUE,
+                               method = "euclidean"))
 
-    # Basic method : no weighting, no transformation (loci with many alleles have more weight)
+    # Basic method : no weighting, no transformation (loci with many alleles
+    # have more weight)
   } else if (dist == "basic") {
 
     # No PCA
@@ -249,25 +254,28 @@ gen_graph_indep <- function(x, dist = "basic", cov = "sq",
     # Centering by rows does not affect distance (be careful if missing data)
     # Centering by columns never affects distance by definition
     # rowSums(A)
-    D <- as.matrix(stats::dist(A, diag = TRUE, upper = TRUE, method = "euclidean"))
+    D <- as.matrix(stats::dist(A, diag = TRUE, upper = TRUE,
+                               method = "euclidean"))
 
-    # Popgraph method : many transformations to reduce dimensionality and colinearity before distance calculation
+    # Popgraph method : many transformations to reduce dimensionality
+    # and colinearity before distance calculation
   } else if (dist == "PG") {
     # This part of the code is directly inspired from popgraph package
-    tol = 1e-04
+    tol <- 1e-04
     critVal <- stats::qchisq(1 - alpha, 1)
 
     # throw warning of some groups are small
     t <- table(group_init)
     if (any(t < 4)) {
       popnames <- paste(names(which(t < 4)), collapse = ", ")
-      message(paste("You have strata (", popnames, ") that have fewer than 4 individuals.
-                    This analysis needs to have a good estimate of within stratum variance."))
+      message(paste("You have strata (", popnames, ") that have fewer
+                    than 4 individuals. This analysis needs to have a good
+                    estimate of within stratum variance."))
     }
 
     # PCA of all the data rotate all data and keep stuff that is not invariant.
 
-    pcfit <- stats::prcomp(x_w, retx = T)
+    pcfit <- stats::prcomp(x_w, retx = TRUE)
     mv <- pcfit$x[, pcfit$sdev > tol]
 
     P <- ncol(mv)
@@ -276,7 +284,9 @@ gen_graph_indep <- function(x, dist = "basic", cov = "sq",
     sigma.w <- sqrt(diag(stats::var(mv - pop.means[group_init, ])))
 
     if (any(sigma.w < tol))
-      message(paste("Dropped rotated genetic variable '", paste((as.character(1:P)[sigma.w < tol]), collapse = ","), "' from the analysis due to constancy within groups",
+      message(paste("Dropped rotated genetic variable '",
+                    paste((as.character(1:P)[sigma.w < tol]), collapse = ","),
+                    "' from the analysis due to constancy within groups",
                     sep = ""))
 
     scaling <- diag(1/sigma.w, , P)
@@ -284,10 +294,13 @@ gen_graph_indep <- function(x, dist = "basic", cov = "sq",
     X <- sqrt(fac) * (mv - pop.means[group_init, ]) %*% scaling
     X.s <- svd(X, nu = 0)
     rank <- sum(X.s$d > tol)
-    # if(rank < P) warning( paste( (P-rank), ' variables are collinear and being dropped from the discriminant rotation.', sep=''))
+    # if(rank < P) warning( paste( (P-rank), ' variables are collinear and
+    # being dropped from the discriminant rotation.', sep=''))
     scaling <- scaling %*% X.s$v[, 1:rank] %*% diag(1/X.s$d[1:rank], , rank)
     mu <- colSums(Pop.priors %*% pop.means)
-    X <- sqrt((n * Pop.priors)/(rows - 1)) * scale(pop.means, center = mu, scale = FALSE) %*% scaling
+    X <- sqrt((n * Pop.priors)/(rows - 1)) * scale(pop.means,
+                                                   center = mu,
+                                                   scale = FALSE) %*% scaling
     X.s <- svd(X, nu = 0)
     rank <- sum(X.s$d > tol * X.s$d[1L])
     scaling <- scaling %*% X.s$v[, 1L:rank]
@@ -308,7 +321,8 @@ gen_graph_indep <- function(x, dist = "basic", cov = "sq",
 
     #allSD <- centroid_variance(LDValues, group_init)
 
-    D <- as.matrix(stats::dist(allLD, diag = TRUE, upper = TRUE, method = "euclidean"))
+    D <- as.matrix(stats::dist(allLD, diag = TRUE, upper = TRUE,
+                               method = "euclidean"))
 
     # There are differences between two ways of computing euclidean distances
     # only at the 14th digits when rounding.
@@ -322,7 +336,8 @@ gen_graph_indep <- function(x, dist = "basic", cov = "sq",
     #}
 
     ## Be careful to the names order in the resulting matrix.
-    ## It should different from the order in the matrices obtained with other methods
+    ## It should different from the order in the matrices obtained
+    ## with other methods
 
 
   #} else if (dist == "DPS") {
@@ -546,7 +561,9 @@ gen_graph_indep <- function(x, dist = "basic", cov = "sq",
           pop1 <- row.names(M)[i]
           pop2 <- colnames(M)[j]
           if(pop1 != pop2){
-            M[i, j] <- M[j, i] <- ifelse(pval1_df[which(pval1_df$pop1 == pop1 & pval1_df$pop2 == pop2), "p_cor"] < alpha, 1, 0)
+            M[i, j] <- M[j, i] <- ifelse(pval1_df[which(pval1_df$pop1 == pop1 &
+                                                        pval1_df$pop2 == pop2),
+                                                  "p_cor"] < alpha, 1, 0)
           } else {
             M[i, j] <- M[j, i] <- 0
           }

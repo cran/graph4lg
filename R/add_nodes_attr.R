@@ -1,8 +1,8 @@
 #' Add attributes to the nodes of a graph
 #'
-#' @description The function adds attributes to the nodes of a graph from either an object
-#' of class \code{data.frame} or from a shapefile layer.
-#' The nodes' IDs in the input objects must be the same as in the graph object.
+#' @description The function adds attributes to the nodes of a graph from
+#' either an object of class \code{data.frame} or from a shapefile layer.
+#' The node IDs in the input objects must be the same as in the graph object.
 #'
 #' @param graph A graph object of class \code{igraph}.
 #' @param input A character string indicating the nature of the
@@ -14,7 +14,7 @@
 #' \code{data.frame}}
 #' }
 #' In both cases, input attribute table or dataframe must have a column with
-#' the exact same values as the nodes' IDs.
+#' the exact same values as the node IDs.
 #' @param data (only if 'input = "df"') The name of the object of
 #' class \code{data.frame} with the attributes to add to the nodes.
 #' @param dir_path (only if 'input = "shp"') The path (character string) to the
@@ -61,19 +61,19 @@ add_nodes_attr <- function(graph,
                            include = "all"){
 
   # Check whether graph is a graph of class igraph
-  if(class(graph) != "igraph"){
+  if(!inherits(graph, "igraph")){
     stop("'graph' must be an object of class 'igraph'.")
   # and check if nodes have names
   } else if (is.null(igraph::V(graph)$name)){
     stop("'graph' must have nodes' names.")
   }
 
-  # Create a vector with nodes' names
+  # Create a vector with node names
   nds.names <- as.character(igraph::V(graph)$name)
 
   # Check whether input, data and index are compatible
   if(input == "df"){
-    if(class(data) != "data.frame"){
+    if(!inherits(data, "data.frame")){
       stop("'data' must be a data.frame when 'input = 'df''.")
     } else if (!(index %in% names(data))){
       stop("'index' must be the name of a column of 'data'.")
@@ -83,10 +83,12 @@ add_nodes_attr <- function(graph,
 
     if(any(c(is.null(dir_path),
              is.null(layer)))){
-      stop("'dir_path' and 'layer' must be character strings when 'input = 'shp''.")
-    } else if(!all(c(class(dir_path) == "character",
-                     class(layer) == "character"))){
-      stop("'dir_path' and 'layer' must be character strings when 'input = 'shp''.")
+      stop("'dir_path' and 'layer' must be character strings when
+           'input = 'shp''.")
+    } else if(!all(c(inherits(dir_path, "character"),
+                     inherits(layer, "character")))){
+      stop("'dir_path' and 'layer' must be character strings when
+           'input = 'shp''.")
     } else {
       # If 'dir_path' and 'layer' are well defined, open the GIS layer
       sink("aux")
@@ -107,7 +109,7 @@ add_nodes_attr <- function(graph,
 
   data.names <- as.character(data[, index])
 
-  # Check whether nodes' names are in data.names
+  # Check whether node names are in data.names
   if(!all(nds.names %in% data.names)){
     stop("Column 'index' from input data must contain the nodes names
          of 'data'.")
@@ -115,12 +117,12 @@ add_nodes_attr <- function(graph,
 
   # Get only the data relative to the nodes
   data <- data[which(data.names %in% nds.names), ]
-  # Reorder data in the same order as the graph's nodes
+  # Reorder data in the same order as the graph nodes
   data <- data[match(nds.names, data[, index]), ]
   # attrib are all the columns of data different from index
   attrib <- setdiff( names(data), index )
 
-  if(class(include) == "character"){
+  if(inherits(include, "character")){
     # If include indicates more than one column
     # get the set of corresponding variables
     if(length(include) > 1){
@@ -135,7 +137,8 @@ add_nodes_attr <- function(graph,
     }
 
   } else {
-    stop("'include' must be a character string or a vector of character strings.")
+    stop("'include' must be a character string or a vector
+         of character strings.")
   }
 
   # If attrib does not contain anything, it stops.
@@ -152,4 +155,3 @@ add_nodes_attr <- function(graph,
   return(graph)
 
 }
-

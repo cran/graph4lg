@@ -2,8 +2,8 @@
 #'
 #' @description The function imports a landscape graph created with GRAPHAB
 #' software and converts it into a graph object of class \code{igraph}.
-#' The graph has weighted links and is undirected. Nodes have spatial coordinates.
-#' Other nodes attributes can be included.
+#' The graph has weighted links and is undirected.
+#' Nodes have spatial coordinates. Other nodes attributes can be included.
 #' It takes shapefiles layers created with GRAPHAB as input.
 #'
 #' @param dir_path A character string indicating the path of the GRAPHAB project
@@ -12,23 +12,26 @@
 #' \itemize{
 #' \item{the spatial layer of the habitat patches corresponding to the
 #' nodes of the graph (usually named 'patches.shp').}
-#' \item{(alternatively) an exported spatial layer of the nodes (faster option).}
-#' \item{the links' spatial layer file used to import the graph.}
+#' \item{(alternatively) an exported spatial layer of
+#' the nodes (faster option).}
+#' \item{the link spatial layer file used to import the graph.}
 #' }
-#' @param nodes A character string indicating the names of the nodes' spatial
-#' layer in format .shp (without extension, ex.: "nodes" refers to "nodes.shp" layer).
+#' @param nodes A character string indicating the names of the node spatial
+#' layer in format .shp (without extension, ex.: "nodes"
+#' refers to "nodes.shp" layer).
 #' This layer has been created with GRAPHAB and has therefore coordinates
 #' in a projected coordinates reference system.
 #' Default: nodes = "patches", referring to the spatial polygon layer of the
 #' habitat patches.
-#' @param links A character string indicating the name of the links' spatial layer
+#' @param links A character string indicating the name of the link spatial layer
 #' in format .shp (without extension, ex.: "link_graph" refers to
 #' "link_graph.shp" layer).
 #' This layer has been created with GRAPHAB and has therefore coordinates
 #' in a projected coordinates reference system. It includes in the attribute
-#' tables between patches' Euclidean as well as cost-distance. These
+#' tables between patches Euclidean as well as cost-distance. These
 #' distances are used to weight the link.
-#' @param weight A character string ("euc" or "cost") indicating whether to weight
+#' @param weight A character string ("euc" or "cost") indicating
+#' whether to weight
 #' the links with Euclidean distance or cost-distance (default) values.
 #' @param fig Logical (default = FALSE) indicating whether to plot a figure of
 #' the resulting spatial graph. The figure is plotted using function
@@ -60,10 +63,10 @@ graphab_to_igraph <- function(dir_path,
                   crds = FALSE){
 
   # Check whether the input are character strings
-  if(!all(c(class(dir_path) == "character",
-            class(nodes) == "character",
-            class(links) == "character",
-            class(weight) == "character"))){
+  if(!all(c(inherits(dir_path, "character"),
+            inherits(nodes, "character"),
+            inherits(links, "character"),
+            inherits(weight, "character")))){
     stop("Inputs 'dir_path', 'nodes', 'links' and 'weight' must
          be character strings.")
   }
@@ -79,7 +82,7 @@ graphab_to_igraph <- function(dir_path,
   #sink(NULL)
 
 
-  # If as many nodes' ID in nds_df and in links1, then there is not any
+  # If as many node ID in nds_df and in links1, then there is not any
   # isolated node and the graph can be created directly from the edge list
   # derived from links1
   if(length(unique(nds_df$Id)) == length(unique(c(links1_df$ID1,
@@ -126,7 +129,8 @@ graphab_to_igraph <- function(dir_path,
       df <- df[-which(df$Id %in% links1_df$Id), ]
       df <- rbind(df, links1_df)
     } else {
-      stop("Error probably due to unusual structure of the links spatial layer.")
+      stop("Error probably due to unusual structure
+           of the links spatial layer.")
     }
 
     # We extract the edgelist and create a complete unweighted graph

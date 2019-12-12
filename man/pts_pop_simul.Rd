@@ -7,8 +7,8 @@
 \format{An object of class 'data.frame' with the following columns :
 \describe{
 \item{ID}{Population ID of the 50 populations}
-\item{x}{Site's longitude (RGF93)}
-\item{y}{Site's latitude (RGF93)}
+\item{x}{Site longitude (RGF93)}
+\item{y}{Site latitude (RGF93)}
 }}
 \usage{
 pts_pop_simul

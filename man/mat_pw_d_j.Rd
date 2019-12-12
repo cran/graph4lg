@@ -11,7 +11,7 @@ mat_pw_d_j(x, pop_names = NULL)
 the path of the GENEPOP file.}
 
 \item{pop_names}{(optional) A vector of class \code{character} of the same
-length as the number of populations (rows' and columns' number in the returned
+length as the number of populations (row and column number in the returned
 matrix). It contains the name of the populations.}
 }
 \value{
@@ -20,11 +20,13 @@ there are populations in the input data.
 }
 \description{
 The function computes the pairwise Jost's D matrix between
-populations from an object of class \code{genind} or directly from a GENEPOP file.
+populations from an object of class \code{genind} or directly
+from a GENEPOP file.
 }
 \details{
 The formula used is that of Jost (2008)
-This functions uses directly the function \code{diffCalc} from \pkg{diveRsity}.
+This functions uses directly the function \code{diffCalc}
+from \pkg{diveRsity}.
 See \url{http://genepop.curtin.edu.au/help_input.html} for details on the
 GENEPOP file format and see Raymond (1995) for detail about GENEPOP software.
 }
@@ -34,7 +36,7 @@ The order of populations matters :
 \itemize{
 \item If \code{x} is an object of class \code{genind}, individuals are
 re-ordered by populations and populations are ordered in alphabetic order.
-\item If \code{x} is the path to a GENEPOP file, populations' order
+\item If \code{x} is the path to a GENEPOP file, population order
 in \code{pop_names} must be the same as in the GENEPOP file.
 }
 Negative values are converted into 0

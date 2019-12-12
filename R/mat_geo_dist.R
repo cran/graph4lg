@@ -5,15 +5,15 @@
 #' Reference System.
 #'
 #' @param data An object of class :\itemize{
-#' \item \code{data.frame} with 3 columns: 2 columns with the points' spatial
-#' coordinates and another column with points' IDs
+#' \item \code{data.frame} with 3 columns: 2 columns with the point spatial
+#' coordinates and another column with point IDs
 #' \item \code{SpatialPointsDataFrame} }
 #' @param ID (if \code{data} is of class \code{data.frame}) A character string
-#' indicating the name of the column of \code{data} with the points' IDs
+#' indicating the name of the column of \code{data} with the point IDs
 #' @param x (if \code{data} is of class \code{data.frame}) A character string
-#' indicating the name of the column of \code{data} with the points' longitude
+#' indicating the name of the column of \code{data} with the point longitude
 #' @param y (if \code{data} is of class \code{data.frame}) A character string
-#' indicating the name of the column of \code{data} with the points' latitude
+#' indicating the name of the column of \code{data} with the point latitude
 #' @return A pairwise matrix of geographic distances between points
 #' @export
 #' @author P. Savary
@@ -26,28 +26,31 @@
 #'              x = "x",
 #'              y = "y")
 
-###################################################################################
+###############################################################################
 
 ###### mat_geo_dist function ###########################
 
 mat_geo_dist <- function(data, ID = NULL, x = NULL, y = NULL){
 
   # If 'data' is a Spatial Points data.frame
-  if(class(data) == "SpatialPointsDataFrame"){
+  if(inherits(data, "SpatialPointsDataFrame")){
 
     # Check whether locations are not duplicated (and display a warning message
     # in such a case)
     if(any(duplicated(data@coords))){
-      warning("At least 1 point's location appears twice in the 'SpatialPointsDataFrame'.")
+      warning("At least 1 point location appears twice in
+              the 'SpatialPointsDataFrame'.")
     }
 
     # Check whether the data have projected coordinates
     if(stringr::str_sub(raster::crs(data), 7, 13) == "longlat"){
-      stop("Your SpatialPointsDataFrame must have projected (metric) coordinates")
+      stop("Your SpatialPointsDataFrame must have
+           projected (metric) coordinates")
     }
 
     # Check whether the data have projected coordinates in a common CRS
-    if(!(stringr::str_sub(raster::crs(data), 7, 9) %in% c("lcc", "utm", "mer"))){
+    if(!(stringr::str_sub(raster::crs(data), 7, 9) %in% c("lcc",
+                                                          "utm", "mer"))){
       message("The CRS of your SpatialPointsDataFrame is not common,
               ensure it has projected coordinates.")
     }
@@ -82,7 +85,7 @@ mat_geo_dist <- function(data, ID = NULL, x = NULL, y = NULL){
     name <- data@data[, ID]
     row.names(mat) <- colnames(mat) <- name
 
-  } else if (class(data)=="data.frame"){
+  } else if (inherits(data, "data.frame")){
 
     # Check whether 'x' is specified
     if(is.null(x) ) {
@@ -118,7 +121,8 @@ mat_geo_dist <- function(data, ID = NULL, x = NULL, y = NULL){
     row.names(mat) <- colnames(mat) <- name
 
   } else {
-    stop("Input 'data' must be of class 'data.frame' or 'SpatialPointsDataFrame'.")
+    stop("Input 'data' must be of class 'data.frame' or
+         'SpatialPointsDataFrame'.")
   }
 
   return(mat)

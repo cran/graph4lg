@@ -17,9 +17,10 @@ Genetic dataset from genetic simulation on CDPOP
 \details{
 The simulation was made with CDPOP during 50 generations.
 Dispersal was possible between the 50 populations. Its probability depended
-on the cost distance between populations, calculated on a simulated resistance
-surface (raster). Mutations were not possible. There were initially 600
-alleles in total (many disappeared because of drift). Population stayed constant
+on the cost distance between populations, calculated on a simulated
+resistance surface (raster). Mutations were not possible. There
+were initially 600 alleles in total (many disappeared because of drift).
+Population stayed constant
 with a sex-ratio of 1. Generations did not overlap.
 This simulation includes a part of stochasticity and these data result
 from only 1 simulation run.

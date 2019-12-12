@@ -4,8 +4,14 @@
 \alias{graph_node_compar}
 \title{Compare the local properties of the nodes from two graphs}
 \usage{
-graph_node_compar(x, y, metrics = c("siw", "siw"), method = "spearman",
-  weight = TRUE, test = TRUE)
+graph_node_compar(
+  x,
+  y,
+  metrics = c("siw", "siw"),
+  method = "spearman",
+  weight = TRUE,
+  test = TRUE
+)
 }
 \arguments{
 \item{x}{An object of class \code{igraph}.
@@ -53,11 +59,11 @@ A \code{list} summarizing the correlation analysis.
 }
 \description{
 The function computes a correlation coefficient between the
-graph-theoretic metric's values computed at the node-level in two graphs
+graph-theoretic metric values computed at the node-level in two graphs
 sharing the same nodes. It allows to assess whether the connectivity
 properties of the nodes in one graph are similar to that of the same nodes
 in the other graph. Alternatively, the correlation is computed between
-a graph-theoretic metric's values and the values of an attribute associated
+a graph-theoretic metric values and the values of an attribute associated
 to the nodes of a graph.
 }
 \details{

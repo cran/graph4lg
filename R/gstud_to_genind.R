@@ -3,7 +3,7 @@
 #' @description The function converts a file formatted to use \pkg{gstudio} or
 #' \pkg{popgraph} package into a genind object (\pkg{adegenet} package)
 #'
-#' @param x An object of class \code{data.frame} with loci's columns in
+#' @param x An object of class \code{data.frame} with loci columns in
 #' format \code{locus} (defined in package \pkg{gstudio}) with as many rows as
 #' individuals and as many columns in format \code{locus} as there are loci and
 #' additional columns
@@ -16,7 +16,8 @@
 #' @details This function uses functions from \pkg{pegas} package.
 #' It can handle genetic data where alleles codings do not have same length,
 #' (99:101, for example).
-#' If the names of the loci include '.' characters, they will be replaced by '_'.
+#' If the names of the loci include '.' characters, they will
+#' be replaced by '_'.
 #' @author P. Savary
 #' @examples
 #' data("data_pc_gstud")
@@ -29,14 +30,14 @@
 gstud_to_genind <- function(x, pop_col, ind_col=NULL){
 
   # Check whether 'x' is a 'data.frame'
-  if(class(x) != "data.frame"){
-    stop("'x' must be an object of class 'data.frame' with columns corresponding
-         to loci of class 'locus'.")
+  if(!inherits(x, "data.frame")){
+    stop("'x' must be an object of class 'data.frame' with columns
+          corresponding to loci of class 'locus'.")
   }
 
   # Check whether 'pop_col' is a character string
   if(!is.character(pop_col)){
-    stop("You must specify the column's name with the populations' names
+    stop("You must specify the column name with the population names
          as a character string input 'pop_col'.")
   }
 
@@ -54,10 +55,11 @@ gstud_to_genind <- function(x, pop_col, ind_col=NULL){
     x <- x[order(x[, pop_col]), ]
   }
 
-  # Get the number of the useful columns for this operation (pop names and locus)
+  # Get the number of the useful columns for this operation
+  # (pop names and locus)
   col <- c()
   for (i in 1:ncol(x)){
-    if(class(x[,i]) == "locus"){
+    if(inherits(x[, i], "locus")){
       col[i] <- i
     } else {
       col[i] <- 0

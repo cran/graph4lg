@@ -7,7 +7,7 @@
 \format{An object of class 'loci' and 'data.frame' with the columns :
 \describe{
 \item{population}{Population name}
-\item{Other columns}{12 loci's columns with microsatellites' data with
+\item{Other columns}{12 loci columns with microsatellite data with
 3 digits coding, alleles separated by "/", and missing data noted "NA/NA"}
 }
 Row names correspond to individuals' ID}

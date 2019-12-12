@@ -8,8 +8,8 @@
 #' @param mat_gd A symmetric \code{matrix} with pairwise genetic distances
 #' between populations or sample sites.
 #' @param mat_ld A symmetric \code{matrix} with pairwise landscape distances
-#' between populations or sample sites. These distances can be Euclidean distances,
-#' cost-distances or resistance distances, among others.
+#' between populations or sample sites. These distances can be
+#' Euclidean distances, cost-distances or resistance distances, among others.
 #' @param method A character string indicating the smoothing method
 #' used to fit a line on the scatterplot. Possible values are the same as
 #' with function 'geom_smooth()' from \pkg{ggplot2} : 'lm', 'glm', 'gam',
@@ -61,9 +61,9 @@ scatter_dist <- function(mat_gd,
                          pts_col = "#999999"){
 
   # Check whether 'mat_gd' and 'mat_ld' are symmetric matrices
-  if(class(mat_gd) != "matrix"){
+  if(!inherits(mat_gd, "matrix")){
     stop("'mat_gd' must be an object of class 'matrix'.")
-  } else if (class(mat_ld) != "matrix"){
+  } else if (!inherits(mat_ld, "matrix")){
     stop("'mat_ld' must be an object of class 'matrix'.")
   } else if (!Matrix::isSymmetric(mat_gd)){
     stop("'mat_gd' must be a symmetric pairwise matrix.")
@@ -79,7 +79,7 @@ scatter_dist <- function(mat_gd,
   }
 
   # Check whether 'method' is a character string
-  if (class(method) != "character"){
+  if (!inherits(method, "character")){
     stop("'method' must be a character string.")
   }
 
@@ -134,7 +134,8 @@ scatter_dist <- function(mat_gd,
   nb_conserv <- nrow(dat)
 
   # Display the number of observations conserved
-  message(paste(nb_conserv, " out of ", nb_pairs, " values were used.", sep = ""))
+  message(paste(nb_conserv, " out of ", nb_pairs, " values were used.",
+                sep = ""))
 
   # Create the plot
   scat <- ggplot(data = dat, aes(x = land, y = gen)) +

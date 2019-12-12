@@ -4,7 +4,8 @@
 #' from \pkg{pegas} package
 #'
 #' @param x An object of class \code{loci} to convert
-#' @param ploidy An integer indicating the ploidy level (by default, 'ploidy = 2')
+#' @param ploidy An integer indicating the ploidy level
+#' (by default, 'ploidy = 2')
 #' @param na.alleles  A character vector indicating the coding of the alleles
 #' to be treated as missing data (by default, 'na.alleles = c("NA")')
 #' @return An object of class \code{genind}
@@ -19,7 +20,7 @@ loci_to_genind <- function(x,
                            na.alleles = c("NA")){
 
   # Check whether 'x' is a 'loci' object
-  if(!all(class(x) == c("loci","data.frame"))){
+  if(!inherits(x, "loci")){
     stop("Input 'x' must be a 'loci' object.")
   }
 

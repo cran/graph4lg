@@ -37,7 +37,8 @@ The function converts an object of class \code{genind} into
 a GENEPOP file.
 It then allows to use the functionalities of the GENEPOP software and
 its derived package \pkg{GENEPOP} on R, as well as some functions
-from other packages (differentiation test, F-stats calculations, HWE test,...).
+from other packages (differentiation test, F-stats calculations,
+HWE test,...).
 It is designed to be used with diploid microsatellite data and
 alleles coded with 3 digits
 }
@@ -79,7 +80,8 @@ df_genepop <- suppressWarnings(genind_to_genepop(x,
 For more details about GENEPOP file formatting :
 \url{http://genepop.curtin.edu.au/help_input.html#Input}.
 For the opposite conversion, see \code{\link{genepop_to_genind}}.
-The output file can be used to compute pairwise FST matrix with \code{\link{mat_pw_fst}}
+The output file can be used to compute pairwise FST matrix
+with \code{\link{mat_pw_fst}}
 }
 \author{
 P. Savary

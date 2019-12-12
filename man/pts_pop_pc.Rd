@@ -8,10 +8,10 @@
 \describe{
 \item{id}{Population ID of the 20 populations, as used during the sampling
 stage}
-\item{Longitude}{Sampling site's (population) longitude (WGS 84)}
-\item{Latitude}{Sampling site's (population) latitude (WGS 84)}
+\item{Longitude}{Sampling site (population) longitude (WGS 84)}
+\item{Latitude}{Sampling site (population) latitude (WGS 84)}
 \item{loc}{Character string indicating whether the population is located
-on "Basse-Terre" (BT) or on "Grande-Terre" (GT) (2 main Guadeloupe's islands)}
+on "Basse-Terre" (BT) or on "Grande-Terre" (GT) (2 main Guadeloupe islands)}
 \item{id_publi}{Population ID of the 20 populations, as used in the
 paper of Khimoun et al. (2017).}
 }}

@@ -5,17 +5,25 @@
 \title{Compute the distance at which the correlation between genetic distance
 and landscape distance is maximal}
 \usage{
-dist_max_corr(mat_gd, mat_ld, interv, from = NULL, to = NULL,
-  fig = TRUE, thr_gd = NULL, line_col = "black",
-  pts_col = "#999999")
+dist_max_corr(
+  mat_gd,
+  mat_ld,
+  interv,
+  from = NULL,
+  to = NULL,
+  fig = TRUE,
+  thr_gd = NULL,
+  line_col = "black",
+  pts_col = "#999999"
+)
 }
 \arguments{
 \item{mat_gd}{A symmetric \code{matrix} with pairwise genetic distances
 between populations or sample sites.}
 
 \item{mat_ld}{A symmetric \code{matrix} with pairwise landscape distances
-between populations or sample sites. These distances can be Euclidean distances,
-cost-distances or resistance distances, among others.}
+between populations or sample sites. These distances can be
+Euclidean distances, cost-distances or resistance distances, among others.}
 
 \item{interv}{A numeric value indicating the interval between the different
 distance thresholds for which the correlation coefficients are computed.}
@@ -52,9 +60,9 @@ distance thresholds}
 }
 }
 \description{
-The function enables to compute the distance at which the correlation
-between genetic distance and landscape distance is maximal, using a method
-similar to that employed by van Strien et al. (2015).
+The function enables to compute the distance at which the
+correlation between genetic distance and landscape distance is maximal,
+using a method similar to that employed by van Strien et al. (2015).
 Iteratively, distance threshold values are tested. For each value, all the
 population pairs separated by a landscape distance larger than the threshold
 are removed before the Mantel correlation coefficient between genetic

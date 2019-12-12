@@ -1,5 +1,5 @@
 #' Create a graph of genetic differentiation
-#' using a link's weight threshold
+#' using a link weight threshold
 #'
 #' @description The function allows to construct a genetic graph whose
 #' links' weights are larger or lower than a specific threshold
@@ -8,7 +8,8 @@
 #' will be the links' weights
 #' @param mat_thr (optional) A symmetric (pairwise) distance \code{matrix} whose
 #' values will be used for the pruning based on the threshold value.
-#' @param thr The threshold value (logically between min(mat_thr) and max(mat_thr))
+#' @param thr The threshold value (logically between min(mat_thr)
+#' and max(mat_thr))
 #' @param mode
 #' \itemize{
 #' \item{If 'mode = 'larger'' (default), all the links whose weight is larger

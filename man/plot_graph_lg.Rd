@@ -4,31 +4,37 @@
 \alias{plot_graph_lg}
 \title{Plot graphs}
 \usage{
-plot_graph_lg(graph, crds, mode = "spatial", weight = TRUE,
-  width = "w", pts_col = "#F2B950")
+plot_graph_lg(
+  graph,
+  crds,
+  mode = "spatial",
+  weight = TRUE,
+  width = "w",
+  pts_col = "#F2B950"
+)
 }
 \arguments{
 \item{graph}{A graph object of class \code{igraph}}
 
 \item{crds}{(if 'mode = 'spatial'') A \code{data.frame} with the spatial
-coordinates of the graph's nodes. It must have three columns :
+coordinates of the graph nodes. It must have three columns :
 \itemize{
-\item{ID: A character string indicating the name of the graph's nodes.
-The names must be the same as the nodes' names of the graph of
+\item{ID: A character string indicating the name of the graph nodes.
+The names must be the same as the node names of the graph of
 class \code{igraph} (\code{igraph::V(graph)$name})}
-\item{x: A character string indicating the longitude of the graphs' nodes.}
-\item{y: A character string indicating the latitude of the graphs' nodes.}
+\item{x: A numeric or integer indicating the longitude of the graph nodes.}
+\item{y: A numeric or integer indicating the latitude of the graph nodes.}
 }}
 
 \item{mode}{A character string indicating whether the graph is
 spatial ('mode = 'spatial'' (default)) or not ('mode = 'aspatial'')}
 
-\item{weight}{A character string indicating whether the links of the graph have
-weights (T)(default) or not (F)}
+\item{weight}{A character string indicating whether the links of
+the graph have weights (T)(default) or not (F)}
 
 \item{width}{A character string indicating whether the width of the link
-should be proportional to links' weights ("w", default) or to the inverse
-of links' weights ("inv", convenient with distances)}
+should be proportional to link weights ("w", default) or to the inverse
+of link weights ("inv", convenient with distances)}
 
 \item{pts_col}{(optional) A character string indicating the color
 used to plot the nodes (default: "#F2B950"). It must be a hexadecimal color
@@ -41,9 +47,9 @@ A ggplot2 object to plot
 The function enables to plot graphs, whether spatial or not.
 }
 \details{
-When the graph is not spatial ('mode = 'aspatial''), the nodes coordinates
-are calculated with Fruchterman et Reingold algorithm.
-The graph object \code{x} of class \code{igraph} must have nodes' names
+When the graph is not spatial ('mode = 'aspatial''),
+the nodes coordinates are calculated with Fruchterman et Reingold algorithm.
+The graph object \code{x} of class \code{igraph} must have node names
 (not necessarily in the same order as IDs in crds, given a merging is done).
 }
 \examples{

@@ -1,11 +1,11 @@
 #' Compare the local properties of the nodes from two graphs
 #'
 #' @description The function computes a correlation coefficient between the
-#' graph-theoretic metric's values computed at the node-level in two graphs
+#' graph-theoretic metric values computed at the node-level in two graphs
 #' sharing the same nodes. It allows to assess whether the connectivity
 #' properties of the nodes in one graph are similar to that of the same nodes
 #' in the other graph. Alternatively, the correlation is computed between
-#' a graph-theoretic metric's values and the values of an attribute associated
+#' a graph-theoretic metric values and the values of an attribute associated
 #' to the nodes of a graph.
 #'
 #' @details The correlation coefficients between the metrics can be computed
@@ -78,9 +78,9 @@ graph_node_compar <- function(x,
                               test = TRUE){
 
   # Check whether x and y are graphs
-  if(class(x) != "igraph"){
+  if(!inherits(x, "igraph")){
     stop("'x' must be a graph object of class 'igraph'.")
-  } else if (class(y) != "igraph"){
+  } else if (!inherits(y, "igraph")){
     stop("'y' must be a graph object of class 'igraph'.")
   }
 
@@ -107,7 +107,7 @@ graph_node_compar <- function(x,
   # Check whether the vector 'metrics' is a two-element character vector.
   if(length(metrics)!= 2){
     stop("'metrics' vector must be of a length 2")
-  } else if(class(metrics)!= "character") {
+  } else if(!inherits(metrics, "character")) {
     stop("'metrics' vector must be a character vector")
   }
 
@@ -128,13 +128,15 @@ graph_node_compar <- function(x,
   # Check whether the graphs' links are weighted to compute some metrics
   if(metrics[1] %in% c("close", "btw", "siw", "miw", "str")){
     if(is.null(igraph::E(x)$weight)){
-      stop("x must have weighted links in order to compute the specified metric.")
+      stop("x must have weighted links in order to compute the
+           specified metric.")
     }
   }
 
   if(metrics[2] %in% c("close", "btw", "siw", "miw", "str")){
     if(is.null(igraph::E(y)$weight)){
-      stop("y must have weighted links in order to compute the specified metric.")
+      stop("y must have weighted links in order to compute the
+           specified metric.")
     }
   }
 
@@ -162,7 +164,8 @@ graph_node_compar <- function(x,
 
   # Check whether 'method' option is a valid one
   if(!(method %in% c("pearson", "spearman", "kendall"))){
-    stop("You must specify a valid method to compute the correlation coefficient")
+    stop("You must specify a valid method to compute the
+         correlation coefficient")
   }
 
   ############## Get the values to correlate ################################
@@ -172,9 +175,9 @@ graph_node_compar <- function(x,
   if(met_from_x == "attrib"){
     # Get the nodes' attribute from the attributes of the igraph object
     met_val_x <- igraph::vertex.attributes(x)[[num_met_x]]
-  # Check whether met_val_x is of class numeric
-    if(class(met_val_x) != "numeric"){
-      stop("Nodes' attributes must be of class 'numeric'")
+  # Check whether met_val_x is of class numeric or integer
+    if(!inherits(met_val_x, c("numeric", "integer"))){
+      stop("Nodes' attributes must be of class 'numeric' or 'integer'")
     }
 
   # Compute the nodes' attributes
@@ -187,7 +190,8 @@ graph_node_compar <- function(x,
       if(weight){
         met_val_x <- igraph::closeness(x)
       } else if (weight == FALSE) {
-        met_val_x <- igraph::closeness(x, weights = rep(1, length(igraph::E(x))))
+        met_val_x <- igraph::closeness(x, weights = rep(1,
+                                                        length(igraph::E(x))))
       } else {
         stop("'weight' must be TRUE or FALSE.")
       }
@@ -196,14 +200,17 @@ graph_node_compar <- function(x,
       if(weight){
         met_val_x <- igraph::betweenness(x)
       } else if (weight == FALSE) {
-        met_val_x <- igraph::betweenness(x, weights = rep(1, length(igraph::E(x))))
+        met_val_x <- igraph::betweenness(x, weights = rep(1,
+                                                          length(igraph::E(x))))
       } else {
         stop("'weight' must be TRUE or FALSE.")
       }
     } else if (metrics[1] == "siw"){
-      met_val_x <- igraph::strength(x, weights = 1/igraph::E(x)$weight)
+      met_val_x <- igraph::strength(x,
+                                    weights = 1/igraph::E(x)$weight)
     } else if (metrics[1] == "miw"){
-      met_val_x <- igraph::strength(x, weights = 1/igraph::E(x)$weight)/igraph::degree(x)
+      met_val_x <- igraph::strength(x,
+                            weights = 1/igraph::E(x)$weight)/igraph::degree(x)
     } else if (metrics[1] == "str"){
       met_val_x <- igraph::strength(x)
     }
@@ -217,8 +224,8 @@ graph_node_compar <- function(x,
   if(met_from_y == "attrib"){
     met_val_y <- igraph::vertex.attributes(y)[[num_met_y]]
 
-    if(class(met_val_y) != "numeric"){
-      stop("Nodes' attributes must be of class 'numeric'")
+    if(!inherits(met_val_y, c("numeric", "integer"))){
+      stop("Nodes' attributes must be of class 'numeric' or 'integer'")
     }
 
   } else if (met_from_y == "comput"){
@@ -228,7 +235,8 @@ graph_node_compar <- function(x,
       if(weight){
         met_val_y <- igraph::closeness(y)
       } else if (weight == FALSE) {
-        met_val_y <- igraph::closeness(y, weights = rep(1, length(igraph::E(y))))
+        met_val_y <- igraph::closeness(y, weights = rep(1,
+                                                        length(igraph::E(y))))
       } else {
         stop("'weight' must be TRUE or FALSE.")
       }
@@ -236,14 +244,17 @@ graph_node_compar <- function(x,
       if(weight){
         met_val_y <- igraph::betweenness(y)
       } else if (weight == FALSE) {
-        met_val_y <- igraph::betweenness(y, weights = rep(1, length(igraph::E(y))))
+        met_val_y <- igraph::betweenness(y, weights = rep(1,
+                                                          length(igraph::E(y))))
       } else {
         stop("'weight' must be TRUE or FALSE.")
       }
     } else if (metrics[2] == "siw"){
-      met_val_y <- igraph::strength(y, weights = 1/igraph::E(y)$weight)
+      met_val_y <- igraph::strength(y,
+                                    weights = 1/igraph::E(y)$weight)
     } else if (metrics[2] == "miw"){
-      met_val_y <- igraph::strength(y, weights = 1/igraph::E(y)$weight)/igraph::degree(y)
+      met_val_y <- igraph::strength(y,
+                            weights = 1/igraph::E(y)$weight)/igraph::degree(y)
     } else if (metrics[2] == "str"){
       met_val_y <- igraph::strength(y)
     }
@@ -266,7 +277,8 @@ graph_node_compar <- function(x,
 
     res_list <- list(paste0("Metric from graph x: ", metrics[1]),
                      paste0("Metric from graph y: ", metrics[2]),
-                     paste0("Method used: ", method, "'s correlation coefficient"),
+                     paste0("Method used: ", method,
+                            "'s correlation coefficient"),
                      paste0("Sample size: ", n_nodes),
                      paste0("Correlation coefficient: ", r),
                      paste0("p-value of the significance test: ", pval))
@@ -276,7 +288,8 @@ graph_node_compar <- function(x,
     res_r <- stats::cor(df_values$met_x, df_values$met_y, method = method)
     res_list <- list(paste0("Metric from graph x: ", metrics[1]),
                      paste0("Metric from graph y: ", metrics[2]),
-                     paste0("Method used: ", method, "'s correlation coefficient"),
+                     paste0("Method used: ", method,
+                            "'s correlation coefficient"),
                      paste0("Sample size: ", n_nodes),
                      paste0("Correlation coefficient: ", res_r))
 

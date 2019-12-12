@@ -4,8 +4,15 @@
 \alias{convert_cd}
 \title{Fit a model to convert cost-distances into Euclidean distances}
 \usage{
-convert_cd(mat_euc, mat_ld, to_convert, method = "log-log", fig = TRUE,
-  line_col = "black", pts_col = "#999999")
+convert_cd(
+  mat_euc,
+  mat_ld,
+  to_convert,
+  method = "log-log",
+  fig = TRUE,
+  line_col = "black",
+  pts_col = "#999999"
+)
 }
 \arguments{
 \item{mat_euc}{A symmetric \code{matrix} with pairwise geographical Euclidean
@@ -21,11 +28,10 @@ lower triangle will be used.}
 \item{to_convert}{A numeric value or numeric vector with Euclidean distances
 to convert into cost-distances.}
 
-\item{method}{A character string indicating the method
-used to fit the model.
+\item{method}{A character string indicating the method used to fit the model.
 \itemize{
-\item{If 'method = "log-log"' (default), then the model takes the following form :
-log(ld) ~ A + B * log(euc)}
+\item{If 'method = "log-log"' (default), then the model takes the
+following form : log(ld) ~ A + B * log(euc)}
 \item{If 'method = "lm"', then the model takes the following form :
 ld ~ A + B * euc}
 }}
@@ -45,8 +51,8 @@ A list of output (converted values, estimated parameters, R2)
 and optionally a ggplot2 object to plot
 }
 \description{
-The function fits a model to convert cost-distances into Euclidean distances
-as implemented in GRAPHAB software.
+The function fits a model to convert cost-distances into
+Euclidean distances as implemented in GRAPHAB software.
 }
 \details{
 IDs in 'mat_euc' and 'mat_ld' must be the same and refer to the same

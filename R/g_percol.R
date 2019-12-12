@@ -23,7 +23,7 @@
 g_percol <- function(x, val_step = 20){
 
   # Check whether x is a symmetric matrix
-  if(class(x) != "matrix"){
+  if(!inherits(x, "matrix")){
     stop("'x' must be a matrix")
   } else if(!isSymmetric(x)){
     stop("The matrix 'x' must be symmetric")
@@ -56,15 +56,16 @@ g_percol <- function(x, val_step = 20){
   # We calculate the weight of the link at the class limits (threshold)
   threshold <- g1_df[id_sup, 'w']
 
-  # We will find in which class, weights become so small that the graph breaks into
-  # two components
+  # We will find in which class, weights become so small that the graph
+  # breaks into two components
 
-  # If we remove the links with a big weight, the graph stays connected logically
-  # Once it breaks into two components, it means that the threshold is
+  # If we remove the links with a big weight, the graph stays connected
+  # logically.
+  #Once it breaks into two components, it means that the threshold is
   # in the last class before the value
 
   comp <- 1
-  i = 1
+  i <- 1
   while(comp < 2){
     mat_g2 <- x
     mat_g2[mat_g2 > threshold[i]] <- 0
@@ -94,15 +95,16 @@ g_percol <- function(x, val_step = 20){
   # We calculate the weight of the link at the class limits (threshold)
   threshold2 <- g1_df[id_sup2, 'w']
 
-  # We will find in which class, weights become so small that the graph breaks into
-  # two components
+  # We will find in which class, weights become so small that the graph
+  # breaks into two components
 
-  # If we remove the links with a big weight, the graph stays connected logically
+  # If we remove the links with a big weight, the graph stays connected
+  # logically.
   # Once it breaks into two components, it means that the threshold is
   # in the last class before the value
 
   comp <- 1
-  i = 1
+  i <- 1
   while(comp < 2){
     mat_g2 <- x
     mat_g2[mat_g2 > threshold2[i]] <- 0
@@ -123,7 +125,7 @@ g_percol <- function(x, val_step = 20){
   threshold3 <- g1_df[id_sup3, 'w']
 
   comp <- 1
-  i = 1
+  i <- 1
   while(comp < 2){
     mat_g2 <- x
     mat_g2[mat_g2 > threshold3[i]] <- 0

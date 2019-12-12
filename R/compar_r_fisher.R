@@ -36,7 +36,8 @@
 compar_r_fisher <- function(data){
   data$z1 <- (1/2)*log( (1+data$r1) / (1-data$r1) )
   data$z2 <- (1/2)*log( (1+data$r2) / (1-data$r2) )
-  data$Z <- (data$z1 - data$z2) / sqrt( ( 1/(data$n1 - 3) ) + ( 1/(data$n2 - 3) ))
+  data$Z <- (data$z1 - data$z2) / sqrt( ( 1/(data$n1 - 3) ) +
+                                          ( 1/(data$n2 - 3) ))
   data$p <- (2*(1-stats::pnorm(abs(data$Z))))
 
   return(data)

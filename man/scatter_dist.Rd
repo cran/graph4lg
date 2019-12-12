@@ -4,17 +4,24 @@
 \alias{scatter_dist}
 \title{Plot scatterplots of genetic distance vs landscape distance}
 \usage{
-scatter_dist(mat_gd, mat_ld, method = "loess", thr_gd = NULL,
-  thr_ld = NULL, se = TRUE, smooth_col = "black",
-  pts_col = "#999999")
+scatter_dist(
+  mat_gd,
+  mat_ld,
+  method = "loess",
+  thr_gd = NULL,
+  thr_ld = NULL,
+  se = TRUE,
+  smooth_col = "black",
+  pts_col = "#999999"
+)
 }
 \arguments{
 \item{mat_gd}{A symmetric \code{matrix} with pairwise genetic distances
 between populations or sample sites.}
 
 \item{mat_ld}{A symmetric \code{matrix} with pairwise landscape distances
-between populations or sample sites. These distances can be Euclidean distances,
-cost-distances or resistance distances, among others.}
+between populations or sample sites. These distances can be
+Euclidean distances, cost-distances or resistance distances, among others.}
 
 \item{method}{A character string indicating the smoothing method
 used to fit a line on the scatterplot. Possible values are the same as

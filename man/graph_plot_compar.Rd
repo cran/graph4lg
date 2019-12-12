@@ -14,23 +14,24 @@ Its nodes must have the same names as in graph \code{y}.}
 Its nodes must have the same names as in graph \code{x}.}
 
 \item{crds}{A \code{data.frame} with the spatial
-coordinates of the graph's nodes (both \code{x} and \code{y}).
+coordinates of the graph nodes (both \code{x} and \code{y}).
 It must have three columns:
 \itemize{
-\item{ID: Name of the graph's nodes (character string).
-The names must be the same as the nodes' names of the graphs of
+\item{ID: Name of the graph nodes (character string).
+The names must be the same as the node names of the graphs of
 class \code{igraph} (\code{igraph::V(graph)$name})}
-\item{x: Longitude of the graphs' nodes.}
-\item{y: Latitude of the graphs' nodes.}
+\item{x: Longitude of the graph nodes (numeric or integer).}
+\item{y: Latitude of the graph nodes (numeric or integer).}
 }}
 }
 \value{
 A ggplot2 object to plot
 }
 \description{
-The function enables to compare two spatial graphs by plotting them highlighting
-the topological similarities and differences between them. Both graphs should
-share the same nodes and cannot be directed graphs.
+The function enables to compare two spatial graphs by
+plotting them highlighting the topological similarities and differences
+between them. Both graphs should share the same nodes and cannot
+be directed graphs.
 }
 \details{
 The graphs \code{x} and \code{y} of class \code{igraph} must have

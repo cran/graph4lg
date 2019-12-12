@@ -7,7 +7,7 @@
 gstud_to_genind(x, pop_col, ind_col = NULL)
 }
 \arguments{
-\item{x}{An object of class \code{data.frame} with loci's columns in
+\item{x}{An object of class \code{data.frame} with loci columns in
 format \code{locus} (defined in package \pkg{gstudio}) with as many rows as
 individuals and as many columns in format \code{locus} as there are loci and
 additional columns}
@@ -29,7 +29,8 @@ The function converts a file formatted to use \pkg{gstudio} or
 This function uses functions from \pkg{pegas} package.
 It can handle genetic data where alleles codings do not have same length,
 (99:101, for example).
-If the names of the loci include '.' characters, they will be replaced by '_'.
+If the names of the loci include '.' characters, they will
+be replaced by '_'.
 }
 \examples{
 data("data_pc_gstud")

@@ -26,25 +26,26 @@ reorder_mat <- function(mat, order){
   n <- length(order)
 
   # Check whether 'mat' is a 'matrix'
-  if(class(mat) != "matrix"){
+  if(!inherits(mat, "matrix")){
     stop("'mat' must be a matrix")
   # Check whether 'order' is of class 'character'
-  } else if (class(order) != "character"){
+  } else if (!inherits(order, "character")){
     stop("'order' must be a character vector")
   # Check whether 'mat' is a symmetric matrix
   } else if(!(isSymmetric(mat))){
     stop("The matrix 'mat' must be symmetric")
-  # Check whether 'order' has as many elements as there are rows and columns in 'mat'
+  # Check whether 'order' has as many elements as there are rows
+  # and columns in 'mat'
   } else if (n != length(colnames(mat))){
     stop("'order' must have as many elements as there are rows and
          columns in 'mat'")
-  # Check whether the columns' names are in the 'order' vector
+  # Check whether the column names are in the 'order' vector
   } else if(length(which(colnames(mat) %in% order)) != n){
-    stop("The columns' names of the matrix you want to reorder must
+    stop("The column names of the matrix you want to reorder must
          be present in the vector 'order'")
-  # Check whether the rows' names are in the 'order' vector
+  # Check whether the row names are in the 'order' vector
   } else if (length(which(row.names(mat) %in% order)) != n){
-    print("The rows' names of the matrix you want to reorder must
+    print("The row names of the matrix you want to reorder must
           be present in the vector 'order'")
   } else {
 

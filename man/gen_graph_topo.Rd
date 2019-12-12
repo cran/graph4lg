@@ -16,9 +16,10 @@ whose values will be used for the pruning method.}
 
 \item{topo}{Which topology does the created graph have?
 \itemize{
-\item{If 'topo = 'gabriel'' (default), the resulting graph will be a Gabriel graph
-(Gabriel et al., 1969). It means that there is a link between nodes x and y
-if and only if \eqn{d_{xy}^{2} \leq \min(\sqrt{d_{xz}^{2}+d_{yz}^{2}}) },
+\item{If 'topo = 'gabriel'' (default), the resulting graph will be a
+Gabriel graph (Gabriel et al., 1969). It means that there is a link
+between nodes x and y if and only if
+\eqn{d_{xy}^{2} \leq \min(\sqrt{d_{xz}^{2}+d_{yz}^{2}}) },
 with z any other node of the graph.}
 \item{If 'topo = 'mst'', the resulting graph will have the topology
 of a minimum spanning tree. It means that the graph will not include
@@ -34,7 +35,7 @@ values from 'mat_w' is created.}
 A graph object of class \code{igraph}
 }
 \description{
-The function allows to construct a genetic graph with
+The function constructs a genetic graph with
 a specific topology from genetic and/or geographical distance matrices
 }
 \details{

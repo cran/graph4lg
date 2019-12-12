@@ -14,7 +14,8 @@ genotypes (format 'locus') of the individuals as well as their populations.}
 multilocus genetic distance between populations
 \itemize{
 \item{If 'dist = 'basic'' (default), then the multilocus genetic distance is
-computed using a formula of Euclidean genetic distance (Excoffier et al., 1992)}
+computed using a formula of Euclidean genetic
+distance (Excoffier et al., 1992)}
 \item{If 'dist = 'weight'', then the multilocus genetic distance is computed
 as in Fortuna et al. (2009). It is a Euclidean genetic distance giving more
 weight to rare alleles}
@@ -28,11 +29,13 @@ FST (Weir et Cockerham, 1984)}
 \item{If 'dist = 'FST_lin'', then the genetic distance used is the linearised
 pairwise FST (Weir et Cockerham, 1984)(FST_lin = FST/(1-FST))}
 \item{If 'dist = 'PCA'', then the genetic distance is computed following a
-PCA of the matrix of allelic frequencies by population. It is a Euclidean genetic
-distance between populations in the multidimensional space defined by all
-the independent principal components.}
-\item{If 'dist = 'GST'', then the genetic distance used is the G'ST (Hedrick, 2005)}
-\item{If 'dist = 'D'', then the genetic distance used is Jost's D (Jost, 2008)}
+PCA of the matrix of allelic frequencies by population. It is a
+Euclidean genetic distance between populations in the multidimensional
+space defined by all the independent principal components.}
+\item{If 'dist = 'GST'', then the genetic distance used is the
+G'ST (Hedrick, 2005)}
+\item{If 'dist = 'D'', then the genetic distance used is
+Jost's D (Jost, 2008)}
 }}
 
 \item{null_val}{(optional) Logical. Should negative and null FST, FST_lin,
@@ -50,8 +53,9 @@ between populations and allows to implement several formula.
 }
 \details{
 Negative values are converted into 0.
-Euclidean genetic distance \eqn{d_{ij}} between population i and j is computed as
-follows: \deqn{d_{ij}^{2} = \sum_{k=1}^{n} (x_{ki} - x_{kj})^{2} } where
+Euclidean genetic distance \eqn{d_{ij}} between population i and j
+is computed as follows:
+\deqn{d_{ij}^{2} = \sum_{k=1}^{n} (x_{ki} - x_{kj})^{2} } where
 \eqn{x_{ki}} is the allelic frequency of allele k in population i and n is
 the total number of alleles. Note that when 'dist = 'weight'', the formula
 becomes \deqn{d_{ij}^{2} = \sum_{k=1}^{n} (1/(K*p_{k}))(x_{ki} - x_{kj})^{2}}

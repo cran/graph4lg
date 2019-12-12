@@ -1,7 +1,7 @@
 #' Fit a model to convert cost-distances into Euclidean distances
 #'
-#' @description The function fits a model to convert cost-distances into Euclidean distances
-#' as implemented in GRAPHAB software.
+#' @description The function fits a model to convert cost-distances into
+#' Euclidean distances as implemented in GRAPHAB software.
 #'
 #' @param mat_euc A symmetric \code{matrix} with pairwise geographical Euclidean
 #' distances between populations or sample sites. It will be the explanatory
@@ -11,11 +11,10 @@
 #' cost-distances or resistance distances, among others.
 #' It will be the explained variable, and only values from the off diagonal
 #' lower triangle will be used.
-#' @param method A character string indicating the method
-#' used to fit the model.
+#' @param method A character string indicating the method used to fit the model.
 #' \itemize{
-#' \item{If 'method = "log-log"' (default), then the model takes the following form :
-#' log(ld) ~ A + B * log(euc)}
+#' \item{If 'method = "log-log"' (default), then the model takes the
+#' following form : log(ld) ~ A + B * log(euc)}
 #' \item{If 'method = "lm"', then the model takes the following form :
 #' ld ~ A + B * euc}
 #' }
@@ -75,9 +74,9 @@ convert_cd <- function(mat_euc, mat_ld,
                        pts_col = "#999999"){
 
   # Check whether mat_euc and mat_ld are symmetric matrices
-  if(class(mat_euc) != "matrix"){
+  if(!inherits(mat_euc, "matrix")){
     stop("'mat_euc' must be an object of class 'matrix'.")
-  } else if (class(mat_ld) != "matrix"){
+  } else if (!inherits(mat_ld, "matrix")){
     stop("'mat_ld' must be an object of class 'matrix'.")
   } else if (!Matrix::isSymmetric(mat_euc)){
     stop("'mat_euc' must be a symmetric pairwise matrix.")
@@ -117,7 +116,7 @@ convert_cd <- function(mat_euc, mat_ld,
     model <- stats::lm(data = df, formula = log_ld ~ log_euc)
 
     converted <- exp(stats::predict(model,
-                                    newdata = data.frame(log_euc = log(to_convert))))
+                            newdata = data.frame(log_euc = log(to_convert))))
 
 
   } else if (method == "lm"){
@@ -140,7 +139,9 @@ convert_cd <- function(mat_euc, mat_ld,
 
   if(fig == FALSE){
     list_res <- list(converted, param, r_sq)
-    names(list_res) <- c("Converted values", "Model parameters", "Model multiple R-squared")
+    names(list_res) <- c("Converted values",
+                         "Model parameters",
+                         "Model multiple R-squared")
   } else if(fig == TRUE){
 
     df$predict <- stats::predict(model)
@@ -154,9 +155,13 @@ convert_cd <- function(mat_euc, mat_ld,
                         log_conv = log(converted))
 
       plot <- ggplot() +
-        geom_point(data = df, aes_string(x = 'log_euc', y = 'log_ld'), color = pts_col)+
-        geom_line(data = df, aes_string(x = 'log_euc', y = 'predict'), color = line_col)+
-        geom_point(data = df2, aes_string(x = 'log_euc', y = 'log_conv'), color = "black", size = 3)+
+        geom_point(data = df,
+                   aes_string(x = 'log_euc', y = 'log_ld'), color = pts_col)+
+        geom_line(data = df, aes_string(x = 'log_euc', y = 'predict'),
+                  color = line_col)+
+        geom_point(data = df2,
+                   aes_string(x = 'log_euc', y = 'log_conv'),
+                   color = "black", size = 3)+
         labs(x = "log ( Euclidean distance )",
              y = "log ( Landscape distance )") +
         theme_bw()
@@ -167,9 +172,15 @@ convert_cd <- function(mat_euc, mat_ld,
                         conv = converted)
 
       plot <- ggplot() +
-        geom_point(data = df, aes_string(x = 'euc', y = 'ld'), color = pts_col)+
-        geom_line(data = df, aes_string(x = 'euc', y = 'predict'), color = line_col)+
-        geom_point(data = df2, aes_string(x = 'euc', y = 'conv'), color = "black", size = 3)+
+        geom_point(data = df,
+                   aes_string(x = 'euc', y = 'ld'),
+                   color = pts_col)+
+        geom_line(data = df,
+                  aes_string(x = 'euc', y = 'predict'),
+                  color = line_col)+
+        geom_point(data = df2,
+                   aes_string(x = 'euc', y = 'conv'),
+                   color = "black", size = 3)+
         labs(x = "Euclidean distance",
              y = "Landscape distance") +
         theme_bw()

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_w_hist.R
 \name{plot_w_hist}
 \alias{plot_w_hist}
-\title{Plot histograms of links weight}
+\title{Plot histograms of link weights}
 \usage{
 plot_w_hist(graph, fill = "#396D35")
 }
@@ -18,7 +18,7 @@ A ggplot2 object to plot
 }
 \description{
 The function enables to plot histogram to visualize the
-distribution of the links' weights
+distribution of the link weights
 }
 \examples{
 data(data_simul_genind)

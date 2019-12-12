@@ -1,17 +1,19 @@
 #' Compute a pairwise FST matrix between populations
 #'
 #' @description The function computes the pairwise FST matrix between
-#' populations from an object of class \code{genind} or directly from a GENEPOP file.
+#' populations from an object of class \code{genind} or
+#' directly from a GENEPOP file.
 #'
-#' @param x An object of class \code{genind}, or the character string indicating
-#' the path of the GENEPOP file.
+#' @param x An object of class \code{genind}, or the
+#' character string indicating the path of the GENEPOP file.
 #' @param pop_names (optional) A vector of class \code{character} of the same
-#' length as the number of populations (rows' and columns' number in the returned
+#' length as the number of populations (row and column number in the returned
 #' matrix). It contains the name of the populations.
 #' @return A pairwise \code{matrix} of FST with as many rows and columns as
 #' there are populations in the input data.
 #' @details The formula used is that of Weir et Cockerham (1984).
-#' This functions uses directly the function \code{diffCalc} from \pkg{diveRsity}.
+#' This functions uses directly the function \code{diffCalc}
+#' from \pkg{diveRsity}.
 #' See \url{http://genepop.curtin.edu.au/help_input.html} for details on the
 #' GENEPOP file format and see Raymond (1995) for detail about GENEPOP software.
 #' @section Warnings:
@@ -19,7 +21,7 @@
 #' \itemize{
 #' \item If \code{x} is an object of class \code{genind}, individuals are
 #' re-ordered by populations and populations are ordered in alphabetic order.
-#' \item If \code{x} is the path to a GENEPOP file, populations' order
+#' \item If \code{x} is the path to a GENEPOP file, population order
 #' in \code{pop_names} must be the same as in the GENEPOP file.
 #' }
 #' Negative values are converted into 0
@@ -42,7 +44,7 @@
 mat_pw_fst <- function(x, pop_names = NULL){
 
   # If 'x' is a 'genind' object
-  if (class(x) == "genind"){
+  if (inherits(x, "genind")){
     # Create a temporary text file name
     tmp <- tempfile(fileext = ".txt")
     # Convert the 'genind' object into a GENEPOP formatted text file

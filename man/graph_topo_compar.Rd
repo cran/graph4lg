@@ -2,10 +2,9 @@
 % Please edit documentation in R/graph_topo_compar.R
 \name{graph_topo_compar}
 \alias{graph_topo_compar}
-\title{Compute an index comparing graphs' topologies}
+\title{Compute an index comparing graph topologies}
 \usage{
-graph_topo_compar(obs_graph, pred_graph, mode = "mcc",
-  directed = FALSE)
+graph_topo_compar(obs_graph, pred_graph, mode = "mcc", directed = FALSE)
 }
 \arguments{
 \item{obs_graph}{A graph object of class \code{igraph} with n nodes.
@@ -17,7 +16,8 @@ It is the predicted graph that is supposed to be akin to \code{obs_graph}.}
 \item{mode}{A character string specifying which index to compute in order
 to compare the topologies of the graphs.
 \itemize{
-\item{If 'mode = 'mcc'' (default), the Matthews Correlation Coefficient (MCC) is computed.}
+\item{If 'mode = 'mcc'' (default), the Matthews Correlation
+Coefficient (MCC) is computed.}
 \item{If 'mode = 'kappa'', the Kappa index is computed.}
 \item{If 'mode = 'fdr'', the False Discovery Rate (FDR) is computed.}
 \item{If 'mode = 'acc'', the Accuracy is computed.}
@@ -34,23 +34,24 @@ The value of the index computed
 }
 \description{
 The function computes several indices in order to compare two
-graphs' topologies. One of the graph has the "true" topology the other is
+graph topologies. One of the graph has the "true" topology the other is
 supposed to reproduce. The indices are then a way to assess the reliability
 of the latter graph.
 Both graphs must have the same number of nodes, but not necessarily the
-same number of links. They must also have the same nodes' names and in
+same number of links. They must also have the same node names and in
 the same order.
 }
 \details{
-The indices are calculated from a confusion matrix counting the number
-of links that are in the "observed" graph ("true") and also in the "predicted"
-graph (true positives : TP), that are in the "observed" graph but not in the
-"predicted" graph (false negatives : FN), that are not in the "observed"
-graph but in the "predicted" graph (false positives : FP) and that are not
-in the "observed" graph and not in the "predicted" graph neither (true
-negatives: TN). K is the total number of links in the graphs.
+The indices are calculated from a confusion matrix counting
+the number of links that are in the "observed" graph ("true") and also
+in the "predicted" graph (true positives : TP), that are in the "observed"
+graph but not in the "predicted" graph (false negatives : FN), that are not
+in the "observed" graph but in the "predicted" graph (false positives : FP)
+and that are not in the "observed" graph and not in the "predicted" graph
+neither (true negatives: TN). K is the total number of links in the graphs.
 K is equal to \eqn{n\times(n-1)} if the graphs are directed and to
-\eqn{\frac{n\times(n-1)}{2}} if they are not directed, with n the number of nodes.
+\eqn{\frac{n\times(n-1)}{2}} if they are not directed, with n the number
+of nodes.
 OP = TP + FN, ON = TN + FP, PP = TP + FP and PN = FN + TN.
 
 The Matthews Correlation Coefficient (MCC) is computed as follows:

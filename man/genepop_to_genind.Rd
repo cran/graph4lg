@@ -15,8 +15,10 @@ directory.}
 
 \item{pop_names}{(optional) Populations' names in the same order
 as in the GENEPOP file.
-Vector object (class character) of the same length as the number of populations.
-Without this parameter, populations are numbered from 1 to the number of populations.}
+Vector object (class character) of the same length as the number
+of populations.
+Without this parameter, populations are numbered from 1 to the number
+of populations.}
 }
 \value{
 An object of type \code{genind}.
@@ -47,7 +49,8 @@ file.remove(file_n)
 For more details about GENEPOP file formatting :
 \url{http://genepop.curtin.edu.au/help_input.html#Input}
 For the opposite conversion, see \code{\link{genind_to_genepop}}.
-The output file can be used to compute pairwise FST matrix with \code{\link{mat_pw_fst}}
+The output file can be used to compute pairwise FST matrix
+with \code{\link{mat_pw_fst}}
 }
 \author{
 P. Savary

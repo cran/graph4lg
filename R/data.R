@@ -38,9 +38,9 @@
 #' \item{Cluster}{Population name}
 #' \item{ID}{Individual ID}
 #' \item{id}{Population ID used during the sampling stage}
-#' \item{Latitude}{Sampling site's (population) latitude (WGS 84 - UTM 20 N)}
-#' \item{Longitude}{Sampling site's (population) longitude (WGS 84 - UTM 20 N)}
-#' \item{DkiD102 to DkiD12}{12 loci's columns with microsatellites' data with
+#' \item{Latitude}{Sampling site (population) latitude (WGS 84 - UTM 20 N)}
+#' \item{Longitude}{Sampling site (population) longitude (WGS 84 - UTM 20 N)}
+#' \item{DkiD102 to DkiD12}{12 loci columns with microsatellite data with
 #' 3 digits coding, alleles separated by ":", and blank missing data
 #' (class 'locus' from \pkg{gstudio})}
 #' }
@@ -68,11 +68,11 @@
 #' \describe{
 #' \item{1st column}{Individual identifier beginning with population name and
 #' ending with a comma}
-#' \item{Other columns}{12 loci's columns with microsatellites' data with
+#' \item{Other columns}{12 loci columns with microsatellite data with
 #' 3 digits coding, alleles not separated, and missing data noted "000000"}
 #' }
 #' Each group of individuals from the same population are separated by a line
-#' with only the character value "Pop" in firts column.
+#' with only the character value "Pop" in first column.
 #' First lines include loci names and file name
 #' @references \insertRef{khimoun2017landscape}{graph4lg}
 #' @source \url{https://datadryad.org/resource/doi:10.5061/dryad.v8324}
@@ -94,7 +94,7 @@
 #' @format An object of class 'loci' and 'data.frame' with the columns :
 #' \describe{
 #' \item{population}{Population name}
-#' \item{Other columns}{12 loci's columns with microsatellites' data with
+#' \item{Other columns}{12 loci columns with microsatellite data with
 #' 3 digits coding, alleles separated by "/", and missing data noted "NA/NA"}
 #' }
 #' Row names correspond to individuals' ID
@@ -120,7 +120,7 @@
 #' \describe{
 #' \item{1st column}{Individual names}
 #' \item{2nd column}{Population names}
-#' \item{Other columns}{12 loci's columns with microsatellites' data with
+#' \item{Other columns}{12 loci columns with microsatellite data with
 #' 3 digits coding, and missing data noted "-9"}
 #' }
 #' Each individual is displayed on two rows, with one allele on each row.
@@ -144,10 +144,10 @@
 #' \describe{
 #' \item{id}{Population ID of the 20 populations, as used during the sampling
 #' stage}
-#' \item{Longitude}{Sampling site's (population) longitude (WGS 84)}
-#' \item{Latitude}{Sampling site's (population) latitude (WGS 84)}
+#' \item{Longitude}{Sampling site (population) longitude (WGS 84)}
+#' \item{Latitude}{Sampling site (population) latitude (WGS 84)}
 #' \item{loc}{Character string indicating whether the population is located
-#' on "Basse-Terre" (BT) or on "Grande-Terre" (GT) (2 main Guadeloupe's islands)}
+#' on "Basse-Terre" (BT) or on "Grande-Terre" (GT) (2 main Guadeloupe islands)}
 #' \item{id_publi}{Population ID of the 20 populations, as used in the
 #' paper of Khimoun et al. (2017).}
 #' }
@@ -179,9 +179,10 @@
 #' @references \insertRef{landguth2010cdpop}{graph4lg}
 #' @details The simulation was made with CDPOP during 50 generations.
 #' Dispersal was possible between the 50 populations. Its probability depended
-#' on the cost distance between populations, calculated on a simulated resistance
-#' surface (raster). Mutations were not possible. There were initially 600
-#' alleles in total (many disappeared because of drift). Population stayed constant
+#' on the cost distance between populations, calculated on a simulated
+#' resistance surface (raster). Mutations were not possible. There
+#' were initially 600 alleles in total (many disappeared because of drift).
+#' Population stayed constant
 #' with a sex-ratio of 1. Generations did not overlap.
 #' This simulation includes a part of stochasticity and these data result
 #' from only 1 simulation run.
@@ -200,8 +201,8 @@
 #' @format An object of class 'data.frame' with the following columns :
 #' \describe{
 #' \item{ID}{Population ID of the 50 populations}
-#' \item{x}{Site's longitude (RGF93)}
-#' \item{y}{Site's latitude (RGF93)}
+#' \item{x}{Site longitude (RGF93)}
+#' \item{y}{Site latitude (RGF93)}
 #' }
 #' @references \insertRef{landguth2010cdpop}{graph4lg}
 #' There are as many rows as there are sampled populations.
