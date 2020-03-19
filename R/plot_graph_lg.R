@@ -15,7 +15,7 @@
 #' @param mode A character string indicating whether the graph is
 #' spatial ('mode = 'spatial'' (default)) or not ('mode = 'aspatial'')
 #' @param weight A character string indicating whether the links of
-#' the graph have weights (T)(default) or not (F)
+#' the graph have weights (TRUE)(default) or not (FALSE)
 #' @param width A character string indicating whether the width of the link
 #' should be proportional to link weights ("w", default) or to the inverse
 #' of link weights ("inv", convenient with distances)

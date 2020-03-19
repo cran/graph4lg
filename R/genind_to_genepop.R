@@ -83,12 +83,17 @@ genind_to_genepop <- function(x, output = "data.frame"){
   # If the individuals are not ordered by populations, they are reordered
   # with their populations in alphabetic order.
   if(!all(pop_names == rep(pop_names[-which(duplicated(pop_names))],
-                           times = table(pop_names)))){
+                           times = table(pop_names)[unique(pop_names)]))){
     message("Individuals in the input data were not ordered, they have
           been ordered by populations and populations in alphabetic order
           for the conversion.")
     pop_names <- as.character(x@pop)[order(as.character(x@pop))]
     data <- x@tab[order(as.character(x@pop)),]
+  } else {
+
+    pop_names <- as.character(x@pop)[order(as.character(x@pop))]
+    data <- x@tab[order(as.character(x@pop)),]
+
   }
 
   # Get loci names
@@ -189,8 +194,7 @@ genind_to_genepop <- function(x, output = "data.frame"){
              data_gpop[(num_end_pop[length(num_end_pop)]+1):nrow(data_gpop), ])
 
   # The two first lines are the heading and the names of the loci
-  data_gpop2 <- rbind(c("Conversion of an object of class 'genind' into
-                        a GENEPOP file with the package 'graph4lg'",
+  data_gpop2 <- rbind(c("Conversion of an object of class 'genind' into a GENEPOP file with the package 'graph4lg'",
                         rep("", n.loci)),
                       c(paste(loci_names[1:(n.loci-1)],",", sep = ""),
                         loci_names[n.loci], ""),

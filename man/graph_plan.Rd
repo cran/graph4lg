@@ -4,7 +4,7 @@
 \alias{graph_plan}
 \title{Create a graph with a minimum planar graph topology}
 \usage{
-graph_plan(crds, ID = NULL, x = NULL, y = NULL)
+graph_plan(crds, ID = NULL, x = NULL, y = NULL, weight = TRUE)
 }
 \arguments{
 \item{crds}{A \code{data.frame} with the spatial
@@ -23,6 +23,9 @@ of \code{crds} with the point longitude}
 
 \item{y}{A character string indicating the name of the column
 of \code{crds} with the point latitude}
+
+\item{weight}{A character string indicating whether the links of
+the graph have weights (TRUE)(default) or not (FALSE)}
 }
 \value{
 A planar graph of class \code{igraph}

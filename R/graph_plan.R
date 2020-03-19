@@ -16,6 +16,8 @@
 #' of \code{crds} with the point longitude
 #' @param y A character string indicating the name of the column
 #' of \code{crds} with the point latitude
+#' @param weight A character string indicating whether the links of
+#' the graph have weights (TRUE)(default) or not (FALSE)
 #' @return A planar graph of class \code{igraph}
 #' @export
 #' @author P. Savary
@@ -30,7 +32,7 @@
 
 
 
-graph_plan <- function(crds, ID = NULL, x = NULL, y = NULL){
+graph_plan <- function(crds, ID = NULL, x = NULL, y = NULL, weight = TRUE){
 
   # Check whether 'crds' is a 'data.frame'
   if (inherits(crds, "data.frame")){
@@ -83,10 +85,21 @@ graph_plan <- function(crds, ID = NULL, x = NULL, y = NULL){
   mat_plan <- ifelse(mat_plan, 1, 0)
   row.names(mat_plan) <- colnames(mat_plan) <- crds$ID
 
+  # Compute the geographical distance matrix
+  mat_geo <- mat_geo_dist(data = crds,
+                             ID = "ID", x = "x", y = "y")
+
   # Compute the planar graph
-  g <- gen_graph_topo(mat_w = mat_plan,
-                      mat_topo = mat_plan,
-                      topo = "comp")
+  if(weight == TRUE){
+    g <- gen_graph_topo(mat_w = mat_geo,
+                        mat_topo = mat_plan,
+                        topo = "comp")
+  } else {
+    g <- gen_graph_topo(mat_w = mat_plan,
+                        mat_topo = mat_plan,
+                        topo = "comp")
+  }
+
 
   return(g)
 }

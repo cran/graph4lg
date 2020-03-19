@@ -267,8 +267,8 @@ mat_gen_dist <- function(x,
   # FST
   } else if (dist == "FST"){
 
-    x@tab <- x@tab[order(as.character(x@pop)), ]
-    x@pop <- x@pop[order(as.character(x@pop))]
+    #x@tab <- x@tab[order(as.character(x@pop)), ]
+    #x@pop <- x@pop[order(as.character(x@pop))]
 
     # Use of the function 'mat_pw_fst()'
     D <- mat_pw_fst(x = x)
@@ -277,8 +277,8 @@ mat_gen_dist <- function(x,
 
   } else if (dist == "GST"){
 
-    x@tab <- x@tab[order(as.character(x@pop)), ]
-    x@pop <- x@pop[order(as.character(x@pop))]
+    #x@tab <- x@tab[order(as.character(x@pop)), ]
+    #x@pop <- x@pop[order(as.character(x@pop))]
 
     # Use of the function 'mat_pw_gst()'
     D <- mat_pw_gst(x = x)
@@ -287,8 +287,8 @@ mat_gen_dist <- function(x,
 
   } else if (dist == "D"){
 
-    x@tab <- x@tab[order(as.character(x@pop)), ]
-    x@pop <- x@pop[order(as.character(x@pop))]
+    #x@tab <- x@tab[order(as.character(x@pop)), ]
+    #x@pop <- x@pop[order(as.character(x@pop))]
 
     # Use of the function 'mat_pw_d_j()'
     D <- mat_pw_d_j(x = x)
@@ -297,8 +297,8 @@ mat_gen_dist <- function(x,
 
   } else if (dist == "FST_lin"){
 
-    x@tab <- x@tab[order(as.character(x@pop)), ]
-    x@pop <- x@pop[order(as.character(x@pop))]
+    #x@tab <- x@tab[order(as.character(x@pop)), ]
+    #x@pop <- x@pop[order(as.character(x@pop))]
 
     # Use of the function 'mat_pw_fst()'
     mat <- mat_pw_fst(x = x)

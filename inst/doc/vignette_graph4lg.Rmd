@@ -1,19 +1,21 @@
 ---
-title: "`graph4lg` - Tutorial"
+title: '`graph4lg` - Tutorial'
 author: "Paul SAVARY"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    df_print: paged
 bibliography: biblio_vignette.bib
-vignette: >
-  %\VignetteIndexEntry{`graph4lg` - Tutorial}
-  %\VignetteEngine{knitr::rmarkdown}
+vignette: |
+  %\VignetteIndexEntry{`graph4lg` - Tutorial} 
+  %\VignetteEngine{knitr::rmarkdown} 
   %\VignetteEncoding{UTF-8}
 ---
-
+  
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+collapse = TRUE,
+comment = "#>"
 )
 
 library(graph4lg)
@@ -70,7 +72,7 @@ The function `genepop_to_genind` loads a GENEPOP file (.txt extension) and conve
 
 ```{r}
 data_genind <- genepop_to_genind(path = paste0(system.file('extdata', 
-                                                          package = 'graph4lg'), "/gpop_51_sim22_01_25.txt"),
+                                                           package = 'graph4lg'), "/gpop_51_sim22_01_25.txt"),
                                  n.loci = 20, pop_names = as.character(1:50))
 data_genind
 ```
@@ -106,11 +108,11 @@ pop_names <- c("BT-1", "BT-10", "BT-11", "BT-12", "BT-13", "BT-2",
                "BT-9",  "GT-1",  "GT-2", "GT-3",  "GT-4",  "GT-5",
                "GT-6", "GT-7")
 data_paru <- structure_to_genind(path = paste0(system.file('extdata', 
-                                                          package = 'graph4lg'), 
+                                                           package = 'graph4lg'), 
                                                "/data_PC_str.txt"),
-                    loci_names = loci_names,
-                    pop_names = pop_names,
-                    ind_names = ind_names)
+                                 loci_names = loci_names,
+                                 pop_names = pop_names,
+                                 ind_names = ind_names)
 data_paru
 ```
 
@@ -126,7 +128,7 @@ head(data_pc_gstud)
 To convert it with the function `gstud_to_genind`, we indicate the name of the `data.frame` and of the columns with populations' names and individuals' names:
 ```{r}
 gstud_to_genind(x = data_pc_gstud, pop_col = "Cluster",
-                                  ind_col = "ID")
+                ind_col = "ID")
 ```
 
 ### Genetic and geographical distances calculation
@@ -135,22 +137,22 @@ gstud_to_genind(x = data_pc_gstud, pop_col = "Cluster",
 
 From a `genind` object, the function `mat_gen_dist` calculates several types of between populations genetic distances:
 
-  + F~ST~ [@weir1984estimating] or linearised F~ST~ [@rousset1997genetic] (options '`dist=FST`' and '`dist=FST_lin`').
-  
-  + G'~ST~ [@hedrick2005standardized] (option '`dist=GST`').
-  
-  + D~Jost~ [@jost2008gst] (option '`dist=D`').
-  
-  + D~PS~ (1 - proportion of shared alleles) [@bowcock1994high, @murphy_graph_2015] (option '`dist=DPS`').
-  
-  + Euclidean genetic distance [@excoffier1992analysis] (option '`dist=basic`').
-  
-  + Euclidean genetic distance with a weighting depending on allelic frequencies giving more weight to rare alleles [@fortuna2009networks] (option '`dist=weight`').
-  
-  + Euclidean genetic distance computed after a PCA of the matrix of allelic frequencies by population. The axes considered to compute the Euclidean distance are the non-collinear principal components (total number of alleles - number of loci) [@paschou2014maritime, @shirk2017comparison] (option '`dist=PCA`').
-  
-  + Euclidean genetic distance computed in the same way as with the function `popgraph` from `popgraph` package, i.e. after a PCA and two SVD, among other computation steps (option '`dist=PG`'). This distance is different from the conditional genetic distance (cGD) computed from a population graph by summing genetic distances along shortest paths.
-  
++ F~ST~ [@weir1984estimating] or linearised F~ST~ [@rousset1997genetic] (options '`dist=FST`' and '`dist=FST_lin`').
+
++ G'~ST~ [@hedrick2005standardized] (option '`dist=GST`').
+
++ D~Jost~ [@jost2008gst] (option '`dist=D`').
+
++ D~PS~ (1 - proportion of shared alleles) [@bowcock1994high, @murphy_graph_2015] (option '`dist=DPS`').
+
++ Euclidean genetic distance [@excoffier1992analysis] (option '`dist=basic`').
+
++ Euclidean genetic distance with a weighting depending on allelic frequencies giving more weight to rare alleles [@fortuna2009networks] (option '`dist=weight`').
+
++ Euclidean genetic distance computed after a PCA of the matrix of allelic frequencies by population. The axes considered to compute the Euclidean distance are the non-collinear principal components (total number of alleles - number of loci) [@paschou2014maritime, @shirk2017comparison] (option '`dist=PCA`').
+
++ Euclidean genetic distance computed in the same way as with the function `popgraph` from `popgraph` package, i.e. after a PCA and two SVD, among other computation steps (option '`dist=PG`'). This distance is different from the conditional genetic distance (cGD) computed from a population graph by summing genetic distances along shortest paths.
+
 To do these calculations with the function `mat_gen_dist`, you just have to indicate the name of the `genind` object which includes the genetic data of the individuals as well as the populations to which each of them belongs. The other argument of the function is the type of genetic distance to compute. Here are two examples:
 
 ```{r,eval=FALSE, echo =TRUE, message = FALSE, warning = FALSE}
@@ -174,7 +176,7 @@ As an example, the following command allows to import the project created to par
 
 ```{r}
 land_graph <- graphab_to_igraph(dir_path = system.file('extdata', 
-                                                          package = 'graph4lg'), 
+                                                       package = 'graph4lg'), 
                                 nodes = "patches", 
                                 links = "liens_rast2_1_11_01_19-links",
                                 weight = "cost", fig = FALSE, crds = TRUE)
@@ -200,12 +202,12 @@ mat_ld <- reorder_mat(mat = mat_ld, order = order)
 
 You can also calculate Euclidean geographical distances between populations with the function `mat_geo_dist`. It takes as an argument a `data.frame` with 3 columns:
 
-  + ID : populations' ID (or simple points' ID when using this function in another context)
-  
-  + x : populations' or points' longitude
-  
-  + y : populations' or points' latitude
-  
++ ID : populations' ID (or simple points' ID when using this function in another context)
+
++ x : populations' or points' longitude
+
++ y : populations' or points' latitude
+
 Geographical coordinates must be expressed in a projected coordinates system (metric) because Pythagoras's theorem is used to compute the distances (a warning message is displayed in every case).
 
 Example :
@@ -230,8 +232,8 @@ Below, we estimate the relationship between geographical distance and cost-dista
 
 ```{r, out.width = '40%'}
 convert_res <- convert_cd(mat_euc = mat_geo, mat_ld = mat_ld, 
-           to_convert = 10000, fig = TRUE, 
-           method = "log-log", pts_col = "grey")
+                          to_convert = 10000, fig = TRUE, 
+                          method = "log-log", pts_col = "grey")
 convert_res
 ```
 
@@ -248,7 +250,7 @@ The function `dist_max_corr` calculates the DMC from two distance matrices. You 
 Here are the command lines to execute to use these two functions:
 ```{r, eval = FALSE, echo = TRUE}
 dmc <- dist_max_corr(mat_gd = mat_dps, mat_ld = mat_ld, 
-              interv = 500, pts_col = "black")
+                     interv = 500, pts_col = "black")
 ```
 
 The `dmc` object is a list with 1) the DMC value, 2) a vector containing all the computed correlation coefficients, 3) a vector with all the distance thresholds tested and 4) a graphic object created with the `ggplot2` package.
@@ -263,8 +265,32 @@ dmc[[3]]
 ```
 
 The figure below represents the evolution of the correlation coefficient values when distance thresholds increase.
-```{r, out.width='40%'}
-dmc[[4]]
+
+
+```{r, out.width='40%', eval = TRUE, echo = FALSE}
+
+vec_t <- c(500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000,
+           6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 10230.05)
+
+cc_val <- c(NA, 0.2986565, 0.3154498, 0.5188747, 0.7059633, 0.7559539, 
+            0.7850267, 0.7947691, 0.8038470, 0.7853646, 0.7760106, 
+            0.7641339, 0.7530264, 0.7462445, 0.7386713, 0.7333936, 
+            0.7305631, 0.7226695, 0.7137972, 0.7110962, 0.7041702)
+
+
+dat <- data.frame(vec_t = vec_t, cc_val = cc_val)
+if(any(is.na(dat$cc_val))){
+  dat <- dat[-which(is.na(dat$cc_val)), ]
+}
+
+plot_dmc <- ggplot2::ggplot(data = dat, ggplot2::aes(x = vec_t, y = cc_val)) +
+  ggplot2::geom_point(color = "#999999", size = 1, shape = 16) +
+  ggplot2::geom_line(color = "black") +
+  ggplot2::labs(x = "Distance threshold",
+                y = "Correlation coefficient") +
+  ggplot2::theme_bw()
+plot_dmc
+
 ```
 
 The scatter plot is displayed with the function `scatter_dist`.
@@ -286,7 +312,7 @@ The function `gen_graph_thr` takes as arguments a distance matrix used to weight
 
 ```{r}
 graph_thr <- gen_graph_thr(mat_w = mat_dps, mat_thr = mat_geo,
-                          thr = 12000, mode = "larger")
+                           thr = 12000, mode = "larger")
 graph_thr
 ```
 
@@ -297,7 +323,7 @@ The function returns a graph in the form of an `igraph` object, which is consequ
 A graph can be pruned according to a topological criterion. The function `gen_graph_topo` can use 4 different criteria. As with the previous function, topological criteria are applied by considering the distance values of the `mat_topo` matrix, but the links are weighted with the values of the `mat_w` matrix (except when `mat_topo` is not specified, cf. previous section).
 
 **Gabriel graph**: in the created graph, two nodes are connected by a link if, when we draw a circle whose center is set at the middle of the segment linking them and whose radius is equal to half the length of this segment, there is no other node inside the circle. In mathematical terms, it means that there is a segment between $x$ and $y$ if and only if for every other point $z$, we have: $d_{xy}\leq \sqrt{d_{xz}^{2}+d_{yz}^{2}}$. We can compute such a graph from geographical distances [@gabriel1969new] (`graph_gab_geo` below) but also, less commonly, from genetic distances [@naujokaitis2013implications] (`graph_gab_gen` below). In the latter case, it is to some extent as if Pythagoras's theorem was applied to genetic distances, which can seem a bit strange even if this method has already been used by @naujokaitis2013implications.
-  
+
 ```{r}
 graph_gab_geo <- gen_graph_topo(mat_w = mat_dps, mat_topo = mat_geo,
                                 topo = "gabriel")
@@ -335,9 +361,9 @@ The last pruning method implemented by the `graph4lg` package is based upon the 
 
 ```{r, eval = FALSE, echo = TRUE}
 graph_ci <- gen_graph_indep(x = data_genind,
-                       dist = "PCA",
-                       cov = "sq",
-                       adj = "holm")
+                            dist = "PCA",
+                            cov = "sq",
+                            adj = "holm")
 ```
 ```{r}
 graph_ci
@@ -356,7 +382,7 @@ The function `plot_graph_lg` integrates functions from `igraph` and `ggplot2` to
 For example, with the graph `graph_mst` :
 ```{r, out.width = '60%'}
 p <- plot_graph_lg(graph = graph_mst, crds = crds_patches,
-              mode = "spatial", weight = TRUE, width = "inv")
+                   mode = "spatial", weight = TRUE, width = "inv")
 p
 ```
 
@@ -364,7 +390,7 @@ If the populations' spatial coordinates are not available, you can still display
 
 ```{r, out.width = '60%'}
 p <- plot_graph_lg(graph = graph_mst, crds = crds_patches,
-              mode = "aspatial", weight = TRUE, width = "inv")
+                   mode = "aspatial", weight = TRUE, width = "inv")
 p
 ```
 
@@ -437,7 +463,7 @@ Metrics' values can be associated to the nodes to which they correspond. To that
 df_met <- data.frame(ID = V(graph_percol)$name)
 df_met$deg <- igraph::degree(graph_percol)
 df_met$modul <- igraph::cluster_fast_greedy(graph_thr, 
-                        weights = 1/igraph::E(graph_thr)$weight)$membership
+                                            weights = 1/igraph::E(graph_thr)$weight)$membership
 ```
 
 Then, you add the metrics' values to the `igraph` object as nodes' attributes.

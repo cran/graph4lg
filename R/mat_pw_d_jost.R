@@ -61,7 +61,7 @@ mat_pw_d_j <- function(x, pop_names = NULL){
     # Get the D matrix
     mat_d_j <- mat_d_j$pairwise$D
     # Add rows and columns names
-    pop_names <- x@pop[order(x@pop)]
+    pop_names <- x@pop[order(as.character(x@pop))]
     pop_names <- as.character(pop_names[-which(duplicated(pop_names))])
     row.names(mat_d_j) <- colnames(mat_d_j) <- pop_names
 

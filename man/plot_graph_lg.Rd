@@ -30,7 +30,7 @@ class \code{igraph} (\code{igraph::V(graph)$name})}
 spatial ('mode = 'spatial'' (default)) or not ('mode = 'aspatial'')}
 
 \item{weight}{A character string indicating whether the links of
-the graph have weights (T)(default) or not (F)}
+the graph have weights (TRUE)(default) or not (FALSE)}
 
 \item{width}{A character string indicating whether the width of the link
 should be proportional to link weights ("w", default) or to the inverse

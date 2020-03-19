@@ -1,3 +1,8 @@
+# graph4lg 0.3.0
+
+- Minor change: weight option in graph_plan
+- Bug fixes: vignette modification to solve a Debian error
+
 # graph4lg 0.2.0
 
 - Addition of several functions (pw_mat_to_df, df_to_pw_mat, graph_to_df, graph_plan, set_AB_prob)

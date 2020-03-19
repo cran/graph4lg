@@ -60,7 +60,7 @@ mat_pw_fst <- function(x, pop_names = NULL){
     # Get the FST matrix
     mat_fst <- mat_fst$pairwise$Fst
     # Add rows and columns names
-    pop_names <- x@pop[order(x@pop)]
+    pop_names <- x@pop[order(as.character(x@pop))]
     pop_names <- as.character(pop_names[-which(duplicated(pop_names))])
     row.names(mat_fst) <- colnames(mat_fst) <- pop_names
 

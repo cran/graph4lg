@@ -60,7 +60,7 @@ mat_pw_gst <- function(x, pop_names = NULL){
     # Get the GST matrix
     mat_gst <- mat_gst$pairwise$Gst
     # Add rows and columns names
-    pop_names <- x@pop[order(x@pop)]
+    pop_names <- x@pop[order(as.character(x@pop))]
     pop_names <- as.character(pop_names[-which(duplicated(pop_names))])
     row.names(mat_gst) <- colnames(mat_gst) <- pop_names
 

@@ -1,7 +1,7 @@
 ## ----setup, include = FALSE---------------------------------------------------
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+collapse = TRUE,
+comment = "#>"
 )
 
 library(graph4lg)
@@ -19,7 +19,7 @@ dmc <- data_tuto[[4]]
 
 ## -----------------------------------------------------------------------------
 data_genind <- genepop_to_genind(path = paste0(system.file('extdata', 
-                                                          package = 'graph4lg'), "/gpop_51_sim22_01_25.txt"),
+                                                           package = 'graph4lg'), "/gpop_51_sim22_01_25.txt"),
                                  n.loci = 20, pop_names = as.character(1:50))
 data_genind
 
@@ -37,11 +37,11 @@ pop_names <- c("BT-1", "BT-10", "BT-11", "BT-12", "BT-13", "BT-2",
                "BT-9",  "GT-1",  "GT-2", "GT-3",  "GT-4",  "GT-5",
                "GT-6", "GT-7")
 data_paru <- structure_to_genind(path = paste0(system.file('extdata', 
-                                                          package = 'graph4lg'), 
+                                                           package = 'graph4lg'), 
                                                "/data_PC_str.txt"),
-                    loci_names = loci_names,
-                    pop_names = pop_names,
-                    ind_names = ind_names)
+                                 loci_names = loci_names,
+                                 pop_names = pop_names,
+                                 ind_names = ind_names)
 data_paru
 
 ## -----------------------------------------------------------------------------
@@ -49,7 +49,7 @@ head(data_pc_gstud)
 
 ## -----------------------------------------------------------------------------
 gstud_to_genind(x = data_pc_gstud, pop_col = "Cluster",
-                                  ind_col = "ID")
+                ind_col = "ID")
 
 ## ----eval=FALSE, echo =TRUE, message = FALSE, warning = FALSE-----------------
 #  mat_dps <- mat_gen_dist(x = data_genind, dist = "DPS")
@@ -65,7 +65,7 @@ mat_pg[1:5, 1:5]
 
 ## -----------------------------------------------------------------------------
 land_graph <- graphab_to_igraph(dir_path = system.file('extdata', 
-                                                          package = 'graph4lg'), 
+                                                       package = 'graph4lg'), 
                                 nodes = "patches", 
                                 links = "liens_rast2_1_11_01_19-links",
                                 weight = "cost", fig = FALSE, crds = TRUE)
@@ -92,13 +92,13 @@ mat_geo[1:5, 1:5]
 
 ## ---- out.width = '40%'-------------------------------------------------------
 convert_res <- convert_cd(mat_euc = mat_geo, mat_ld = mat_ld, 
-           to_convert = 10000, fig = TRUE, 
-           method = "log-log", pts_col = "grey")
+                          to_convert = 10000, fig = TRUE, 
+                          method = "log-log", pts_col = "grey")
 convert_res
 
 ## ---- eval = FALSE, echo = TRUE-----------------------------------------------
 #  dmc <- dist_max_corr(mat_gd = mat_dps, mat_ld = mat_ld,
-#                interv = 500, pts_col = "black")
+#                       interv = 500, pts_col = "black")
 
 ## -----------------------------------------------------------------------------
 # DMC value
@@ -108,8 +108,30 @@ dmc[[2]]
 # Threshold distances tested
 dmc[[3]]
 
-## ---- out.width='40%'---------------------------------------------------------
-dmc[[4]]
+## ---- out.width='40%', eval = TRUE, echo = FALSE------------------------------
+
+vec_t <- c(500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000,
+           6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 10230.05)
+
+cc_val <- c(NA, 0.2986565, 0.3154498, 0.5188747, 0.7059633, 0.7559539, 
+            0.7850267, 0.7947691, 0.8038470, 0.7853646, 0.7760106, 
+            0.7641339, 0.7530264, 0.7462445, 0.7386713, 0.7333936, 
+            0.7305631, 0.7226695, 0.7137972, 0.7110962, 0.7041702)
+
+
+dat <- data.frame(vec_t = vec_t, cc_val = cc_val)
+if(any(is.na(dat$cc_val))){
+  dat <- dat[-which(is.na(dat$cc_val)), ]
+}
+
+plot_dmc <- ggplot2::ggplot(data = dat, ggplot2::aes(x = vec_t, y = cc_val)) +
+  ggplot2::geom_point(color = "#999999", size = 1, shape = 16) +
+  ggplot2::geom_line(color = "black") +
+  ggplot2::labs(x = "Distance threshold",
+                y = "Correlation coefficient") +
+  ggplot2::theme_bw()
+plot_dmc
+
 
 ## ---- out.width='40%'---------------------------------------------------------
 scatter_dist(mat_gd = mat_dps, mat_ld = mat_ld, 
@@ -117,7 +139,7 @@ scatter_dist(mat_gd = mat_dps, mat_ld = mat_ld,
 
 ## -----------------------------------------------------------------------------
 graph_thr <- gen_graph_thr(mat_w = mat_dps, mat_thr = mat_geo,
-                          thr = 12000, mode = "larger")
+                           thr = 12000, mode = "larger")
 graph_thr
 
 ## -----------------------------------------------------------------------------
@@ -142,21 +164,21 @@ graph_comp <- gen_graph_topo(mat_w = mat_dps, mat_topo = mat_dps,
 
 ## ---- eval = FALSE, echo = TRUE-----------------------------------------------
 #  graph_ci <- gen_graph_indep(x = data_genind,
-#                         dist = "PCA",
-#                         cov = "sq",
-#                         adj = "holm")
+#                              dist = "PCA",
+#                              cov = "sq",
+#                              adj = "holm")
 
 ## -----------------------------------------------------------------------------
 graph_ci
 
 ## ---- out.width = '60%'-------------------------------------------------------
 p <- plot_graph_lg(graph = graph_mst, crds = crds_patches,
-              mode = "spatial", weight = TRUE, width = "inv")
+                   mode = "spatial", weight = TRUE, width = "inv")
 p
 
 ## ---- out.width = '60%'-------------------------------------------------------
 p <- plot_graph_lg(graph = graph_mst, crds = crds_patches,
-              mode = "aspatial", weight = TRUE, width = "inv")
+                   mode = "aspatial", weight = TRUE, width = "inv")
 p
 
 ## ---- out.width = '80%'-------------------------------------------------------
@@ -188,7 +210,7 @@ igraph::cluster_fast_greedy(graph_thr,
 df_met <- data.frame(ID = V(graph_percol)$name)
 df_met$deg <- igraph::degree(graph_percol)
 df_met$modul <- igraph::cluster_fast_greedy(graph_thr, 
-                        weights = 1/igraph::E(graph_thr)$weight)$membership
+                                            weights = 1/igraph::E(graph_thr)$weight)$membership
 
 ## -----------------------------------------------------------------------------
 graph_percol <- add_nodes_attr(graph_percol,
