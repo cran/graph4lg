@@ -23,7 +23,22 @@
 #' minimum weight is removed, then the graph breaks into two components.}
 #' \item{If 'topo = 'comp'', a complete graph whose links are weighted with
 #' values from 'mat_w' is created.}
+#' \item{If 'topo = 'knn'', a k-nearest neighbor graph  whose links are
+#' weighted with values from 'mat_w' is created. If the distance between node i
+#' and node j is among the k-th smallest distances between node i and the other
+#' nodes according to distances in matrix 'mat_topo', then there is a link
+#' between i and j in the resulting graph. Therefore, a node can be connected
+#' to more than two nodes because the nearest node to node j is not necessarily
+#' among the k nearest neighbors to node i. Let d1 be the smallest distance
+#' from node i to other nodes, if there are k nodes or more at this distance
+#' from node i, they are all connected to i. If there are less than k nodes
+#' connected to i at a distance d1, then we consider nodes at a distance d2
+#' from i. In the latter case, all the nodes at a distance d2 from i are
+#' connected to i.}
 #' }
+#' @param k (if 'topo = 'knn'') An integer which indicates the number of
+#' nearest neighbors considered to create the K-nearest neighbor graph. k must
+#' be lower than the total number of nodes minus 1.
 #' @return A graph object of class \code{igraph}
 #' @export
 #' @author P. Savary
@@ -34,9 +49,13 @@
 #' Values in 'mat_topo' matrix must be positive. Negative values from
 #' 'mat_w' are transformed into zeros.
 #' The function works only for undirected graphs.
+#' Note that the topology 'knn' works best when 'mat_topo' contains distance
+#' values from a continuous value range, thereby avoiding equal distances
+#' between a node and the others.  are more than k nodes located
+#' at distances in the k-th smallest distances
 #' @examples
-#' mat_w <- mat_gen_dist(x = data_simul_genind, dist = 'DPS')
-#' suppressWarnings(mat_topo <- mat_geo_dist(pts_pop_simul,
+#' mat_w <- mat_gen_dist(x = data_ex_genind, dist = 'DPS')
+#' suppressWarnings(mat_topo <- mat_geo_dist(pts_pop_ex,
 #'                  ID = "ID",
 #'                  x = "x",
 #'                 y = "y"))
@@ -44,13 +63,14 @@
 #' graph <- gen_graph_topo(mat_w, mat_topo, topo = "mst")
 
 
-gen_graph_topo <- function(mat_w, mat_topo = NULL, topo = "gabriel"){
+
+gen_graph_topo <- function(mat_w, mat_topo = NULL, topo = "gabriel", k = NULL){
 
   # Check whether mat_topo is specified, else mat_w is used as mat_topo
   if(is.null(mat_topo)){
     mat_topo <- mat_w
-  # Also check whether mat_w and mat_topo have same dimensions and
-  # same row and column names
+    # Also check whether mat_w and mat_topo have same dimensions and
+    # same row and column names
   } else if(!all(dim(mat_w) == dim(mat_topo))){
     stop("Matrices 'mat_w' and 'mat_topo' must have the same dimensions.")
   } else {
@@ -82,12 +102,12 @@ gen_graph_topo <- function(mat_w, mat_topo = NULL, topo = "gabriel"){
     # Create a minimum spanning tree from mat_topo
     graph1 <- igraph::mst(igraph::graph.adjacency(as.matrix(mat_topo),
                                                   mode = "undirected",
-                             weighted = TRUE, diag = FALSE))
+                                                  weighted = TRUE, diag = FALSE))
     # Get the adjacency mtrix of graph1
     M_adj <- igraph::as_adj(graph1, sparse = FALSE)
 
 
-  ### Gabriel graph ####
+    ### Gabriel graph ####
 
   } else if (topo == "gabriel"){
 
@@ -124,7 +144,7 @@ gen_graph_topo <- function(mat_w, mat_topo = NULL, topo = "gabriel"){
       }
     }
 
-  ### Percolation threshold #####
+    ### Percolation threshold #####
 
   } else if (topo == "percol"){
 
@@ -134,7 +154,7 @@ gen_graph_topo <- function(mat_w, mat_topo = NULL, topo = "gabriel"){
     # Get the adjacency matrix of graph1
     M_adj <- igraph::as_adj(graph1, sparse = FALSE)
 
-  ### Complete graph #####
+    ### Complete graph #####
 
   } else if (topo == "comp"){
 
@@ -143,6 +163,45 @@ gen_graph_topo <- function(mat_w, mat_topo = NULL, topo = "gabriel"){
     M_adj <- matrix(rep(1, n_pop * n_pop),
                     nrow = n_pop,
                     ncol = n_pop)
+
+    ### k-nearest neighbor graph #####
+
+  } else if (topo == "knn"){
+
+
+    # If k is null or not an integer and topo == "knn", returns an error
+    if(is.null(mat_topo)){
+      stop("If 'topo == 'knn', then k must be an integer")
+    } else if(!inherits(k, c("integer", "numeric"))){
+      stop("If 'topo == 'knn', then k must be an integer")
+    }
+
+    # Take an inteher value for k
+    k <- as.integer(k)
+
+    # Number of nodes
+    n_pop <- nrow(mat_topo)
+
+    if(k > (n_pop - 1)){
+      stop("k is too high given the number of nodes. It must be lower than
+           the number of nodes minus 1. Use 'topo == 'comp'' instead.")
+    }
+
+    M_adj <- mat_topo
+
+    for(i in 1:nrow(M_adj)){
+
+      rowi <- M_adj[i, ]
+
+      dist_k <- rowi[order(rowi)][1:(k + 1)]
+
+      rowi[-which(rowi %in% dist_k)] <- 0
+
+      #rowi[order(rowi)][(k + 2):length(rowi)] <- 0
+
+      M_adj[i, ] <- rowi
+    }
+
 
   } else {
     stop("You must specify a correct 'topo' option.")
@@ -154,7 +213,7 @@ gen_graph_topo <- function(mat_w, mat_topo = NULL, topo = "gabriel"){
 
   # Create the final graph from the modified mat_w matrix
   graph <- igraph::graph.adjacency(as.matrix(mat_w), mode = "undirected",
-                           weighted = TRUE, diag = FALSE)
+                                   weighted = TRUE, diag = FALSE)
 
   return(graph)
 }

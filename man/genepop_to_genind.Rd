@@ -34,12 +34,12 @@ of length 3.
 The loci line(s) must not start with a spacing.
 }
 \examples{
-path_in <- system.file('extdata', 'gpop_51_sim22_01_25.txt',
+path_in <- system.file('extdata', 'gpop_simul_10_g100_04_20.txt',
                        package = 'graph4lg')
-file_n <- file.path(tempdir(), "gpop_51_sim22_01_25.txt")
+file_n <- file.path(tempdir(), "gpop_simul_10_g100_04_20.txt")
 file.copy(path_in, file_n, overwrite = TRUE)
 genepop_to_genind(path = file_n, n.loci = 20,
-                  pop_names = as.character(order(as.character(1:50))))
+                  pop_names = as.character(order(as.character(1:10))))
 file.remove(file_n)
 }
 \references{

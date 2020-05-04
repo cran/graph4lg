@@ -39,8 +39,8 @@ A delaunay triangulation is performed in order to get the
 planar graph.
 }
 \examples{
-data(pts_pop_simul)
-g_plan <- graph_plan(crds = pts_pop_simul,
+data(pts_pop_ex)
+g_plan <- graph_plan(crds = pts_pop_ex,
              ID = "ID",
              x = "x",
              y = "y")

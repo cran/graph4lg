@@ -60,8 +60,8 @@
 #' @export
 #' @author P. Savary
 #' @examples
-#' data(data_pc_genind)
-#' x <- data_pc_genind
+#' data(data_ex_genind)
+#' x <- data_ex_genind
 #' df_genepop <- suppressWarnings(genind_to_genepop(x,
 #'                                                  output = "data.frame"))
 #' @references \insertRef{raymond1995genepop}{graph4lg}

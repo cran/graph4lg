@@ -60,8 +60,8 @@
 #' \insertRef{hedrick2005standardized}{graph4lg}
 #' \insertRef{jost2008gst}{graph4lg}
 #' @examples
-#' data(data_simul_genind)
-#' x <- data_simul_genind
+#' data(data_ex_genind)
+#' x <- data_ex_genind
 #' D <- mat_gen_dist(x = x, dist = "basic")
 
 mat_gen_dist <- function(x,

@@ -68,8 +68,8 @@ and populations ordered in alphabetic order.
 }
 
 \examples{
-data(data_pc_genind)
-x <- data_pc_genind
+data(data_ex_genind)
+x <- data_ex_genind
 df_genepop <- suppressWarnings(genind_to_genepop(x,
                                                  output = "data.frame"))
 }

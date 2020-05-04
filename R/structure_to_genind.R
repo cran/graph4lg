@@ -38,13 +38,13 @@
 #' @export
 #' @author P. Savary
 #' @examples
-#' data("data_pc_genind")
-#' loci_names <- levels(data_pc_genind@loc.fac)
-#' pop_names <- levels(data_pc_genind@pop)
-#' ind_names <- row.names(data_pc_genind@tab)
-#' path_in <- system.file('extdata', 'tab_gstud_structure.txt',
+#' data("data_ex_genind")
+#' loci_names <- levels(data_ex_genind@loc.fac)
+#' pop_names <- levels(data_ex_genind@pop)
+#' ind_names <- row.names(data_ex_genind@tab)
+#' path_in <- system.file('extdata', 'data_ex_str.txt',
 #'                        package = 'graph4lg')
-#' file_n <- file.path(tempdir(), "tab_gstud_structure.txt")
+#' file_n <- file.path(tempdir(), "data_ex_str.txt")
 #' file.copy(path_in, file_n, overwrite = TRUE)
 #' str <- structure_to_genind(path = file_n, loci_names = loci_names,
 #'                            pop_names = pop_names, ind_names = ind_names)

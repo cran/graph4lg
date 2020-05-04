@@ -174,9 +174,12 @@ scatter_dist_g <- function(mat_y, mat_x,
     geom_point(data = dat,
                aes_string(x = 'x_val', y = 'y_val'),
                color = pts_col_1, size = 1, shape = 16) +
+    geom_smooth(data = dat,
+                aes_string(x = 'x_val', y = 'y_val'),
+                method = "loess", color = "black") +
     geom_point(data = dat[which(!is.na(dat$graph_val)),],
                aes_string(x = 'x_val', y = 'graph_val'),
-               color = pts_col_2, size = 1, shape = 16) +
+               color = pts_col_2, size = 1.5, shape = 16) +
     labs(x = "x",
          y = "y") +
     theme_bw()

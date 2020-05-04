@@ -50,8 +50,9 @@
 #' @references \insertRef{foltete2012software}{graph4lg}
 #' @examples
 #' path <- system.file('extdata',package='graph4lg')
-#' links <- "liens_rast2_1_11_01_19-links"
+#' links <- "liens_simul_10"
 #' graph <- graphab_to_igraph(dir_path = path,
+#'                            nodes = "patches_10",
 #'                            links = links,
 #'                            fig = FALSE)
 
@@ -77,10 +78,10 @@ graphab_to_igraph <- function(dir_path,
   nds_df <- data.frame(patches@data)
 
   # Open the links layer and get the attribute table as a data.frame
-  links1 <- rgdal::readOGR(dsn = dir_path, layer = links)
-  links1_df <- data.frame(links1@data)
+  #links1 <- rgdal::readOGR(dsn = dir_path, layer = links)
+  #links1_df <- data.frame(links1@data)
+  links1_df <- foreign::read.dbf(file = paste0(dir_path, "/", links, ".dbf"))
   #sink(NULL)
-
 
   # If as many node ID in nds_df and in links1, then there is not any
   # isolated node and the graph can be created directly from the edge list
@@ -125,7 +126,7 @@ graphab_to_igraph <- function(dir_path,
     df <- df[, c(3,1:2,4:5)]
 
     # df should have the same column names as links1
-    if(all(names(links1@data) == names(df))){
+    if(all(colnames(links1_df) == names(df))){
       df <- df[-which(df$Id %in% links1_df$Id), ]
       df <- rbind(df, links1_df)
     } else {

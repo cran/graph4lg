@@ -23,8 +23,8 @@ two components. The returned graph is the last graph with only one
 component.
 }
 \examples{
-data(data_simul_genind)
-suppressWarnings(mat_w <- graph4lg::mat_geo_dist(data=pts_pop_simul,
+data(data_ex_genind)
+suppressWarnings(mat_w <- graph4lg::mat_geo_dist(data = pts_pop_ex,
                             ID = "ID",
                             x = "x",
                             y = "y"))

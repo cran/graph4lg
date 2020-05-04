@@ -75,9 +75,9 @@ When \code{x} is similar to \code{y}, then the correlation is computed
 between two metrics characterizing the nodes of the same graph.
 }
 \examples{
-data(data_simul_genind)
-data(pts_pop_simul)
-mat_dist <- suppressWarnings(graph4lg::mat_geo_dist(data = pts_pop_simul,
+data(data_ex_genind)
+data(pts_pop_ex)
+mat_dist <- suppressWarnings(graph4lg::mat_geo_dist(data = pts_pop_ex,
       ID = "ID",
       x = "x",
       y = "y"))
@@ -85,7 +85,7 @@ mat_dist <- mat_dist[order(as.character(row.names(mat_dist))),
                       order(as.character(colnames(mat_dist)))]
 graph_obs <- gen_graph_thr(mat_w = mat_dist, mat_thr = mat_dist,
                            thr = 9500, mode = "larger")
-mat_gen <- mat_gen_dist(x = data_simul_genind, dist = "DPS")
+mat_gen <- mat_gen_dist(x = data_ex_genind, dist = "DPS")
 graph_pred <- gen_graph_topo(mat_w = mat_gen, mat_topo = mat_dist,
                             topo = "gabriel")
 res_cor <- graph_node_compar(x = graph_obs, y = graph_pred,

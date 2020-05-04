@@ -39,10 +39,10 @@ node names (not necessarily in the same order as IDs in crds,
 given a merging is done).
 }
 \examples{
-data(pts_pop_simul)
-data(data_simul_genind)
-mat_w <- mat_gen_dist(data_simul_genind, dist = "DPS")
-mat_dist <- mat_geo_dist(data = pts_pop_simul,
+data(pts_pop_ex)
+data(data_ex_genind)
+mat_w <- mat_gen_dist(data_ex_genind, dist = "DPS")
+mat_dist <- mat_geo_dist(data = pts_pop_ex,
                          ID = "ID",
                          x = "x",
                          y = "y")
@@ -51,7 +51,7 @@ mat_dist <- mat_dist[order(as.character(row.names(mat_dist))),
 g1 <- gen_graph_topo(mat_w = mat_w, topo = "mst")
 g2 <- gen_graph_topo(mat_w = mat_w, mat_topo = mat_dist, topo = "gabriel")
 g <- graph_plot_compar(x = g1, y = g2,
-                       crds = pts_pop_simul)
+                       crds = pts_pop_ex)
 }
 \author{
 P. Savary

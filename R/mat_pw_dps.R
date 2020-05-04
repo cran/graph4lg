@@ -29,8 +29,8 @@
 #' @export
 #' @author P. Savary
 #' @examples
-#' data("data_simul_genind")
-#' dist_bowcock <- mat_pw_dps(data_simul_genind)
+#' data("data_ex_genind")
+#' dist_bowcock <- mat_pw_dps(data_ex_genind)
 #' @references \insertRef{bowcock1994high}{graph4lg}
 
 ################################################################################

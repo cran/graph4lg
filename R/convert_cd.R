@@ -43,27 +43,13 @@
 #' @author P. Savary
 #' @references \insertRef{foltete2012software}{graph4lg}
 #' @examples
-#' path <- system.file('extdata', package = 'graph4lg')
-#' links <- "liens_rast2_1_11_01_19-links"
-#' graph <- graphab_to_igraph(dir_path = path,
-#'                            links = links,
-#'                            fig = FALSE)
-#' mat_ld <- igraph::get.adjacency(graph, attr = "weight",
-#'                                 type = "both", sparse = FALSE )
-#' pts <- rgdal::readOGR(dsn = path, layer = "patches")
-#' pts <- data.frame(sp::coordinates(pts))
-#' pts$ID <- as.character(1:50)
-#' names(pts) <- c("x", "y", "ID")
-#' pts <- pts[, c("ID", "x", "y")]
-#'
-#' mat_euc <- suppressWarnings(mat_geo_dist(data= pts,
-#'       ID = "ID",
-#'       x = "x",
-#'       y = "y"))
-#'  to_convert <- c(15000, 20000, 25000)
-#'  res <- convert_cd(mat_euc = mat_euc,
-#'  mat_ld = mat_ld, to_convert = to_convert)
-
+#' data("data_tuto")
+#' mat_ld <- data_tuto[[2]][1:10, 1:10] * 1000
+#' mat_euc <- data_tuto[[1]][1:10, 1:10] * 50000
+#' to_convert <- c(30000, 40000)
+#' res <- convert_cd(mat_euc = mat_euc,
+#'                   mat_ld = mat_ld,
+#'                   to_convert = to_convert, fig = FALSE)
 
 
 convert_cd <- function(mat_euc, mat_ld,

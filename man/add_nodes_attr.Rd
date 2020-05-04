@@ -64,11 +64,8 @@ Values of the metrics computed at the node level with GRAPHAB can then be
 added to such a graph with this function.
 }
 \examples{
-path <- system.file('extdata', package = 'graph4lg')
-links <- "liens_rast2_1_11_01_19-links"
-graph <- graphab_to_igraph(dir_path = path,
-                           links = links,
-                           fig = FALSE)
+data("data_tuto")
+graph <- data_tuto[[3]]
 df_nodes <- data.frame(Id = igraph::V(graph)$name,
                        Area = runif(50, min = 10, max = 60))
 graph <- add_nodes_attr(graph,

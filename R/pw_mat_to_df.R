@@ -44,9 +44,21 @@ pw_mat_to_df <- function(pw_mat){
 
   # Remove the diagonal elements which corresponds to 0 values
   df_pw <- df_pw[-which(df_pw$Var1 == df_pw$Var2), ]
+
   # Remove values where Var1 is higher than Var2
   # (avoid duplicates)
-  df_pw <- df_pw[-which(as.numeric(df_pw$Var1) > as.numeric(df_pw$Var2)), ]
+  # If numeric conversion returns NA, then compare character
+  if(suppressWarnings(any(is.na(as.numeric(df_pw$Var1))))){
+
+    df_pw <- df_pw[-which(as.character(df_pw$Var1) > as.character(df_pw$Var2)), ]
+
+    # If numeric conversion does not return NA, then compare numeric orders
+  } else {
+
+    df_pw <- df_pw[-which(as.numeric(df_pw$Var1) > as.numeric(df_pw$Var2)), ]
+
+  }
+
 
   # Create a unique ID
   df_pw$id_lien <- paste0(df_pw$Var1, "_", df_pw$Var2)

@@ -14,8 +14,8 @@
 #' @export
 #' @author P. Savary
 #' @examples
-#' data(pts_pop_simul)
-#' suppressWarnings(mat_geo <- mat_geo_dist(pts_pop_simul,
+#' data(pts_pop_ex)
+#' suppressWarnings(mat_geo <- mat_geo_dist(pts_pop_ex,
 #'                  ID = "ID",
 #'                  x = "x",
 #'                 y = "y"))

@@ -33,9 +33,9 @@ If the names of the loci include '.' characters, they will
 be replaced by '_'.
 }
 \examples{
-data("data_pc_gstud")
-x <- data_pc_gstud
-pop_col <- "Cluster"
+data("data_ex_gstud")
+x <- data_ex_gstud
+pop_col <- "POP"
 ind_col <- "ID"
 data_genind <- gstud_to_genind(x, pop_col, ind_col)
 }

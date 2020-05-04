@@ -13,11 +13,18 @@
 }}
 \usage{
 data_tuto
+
+data_tuto
 }
 \description{
 Data used to generate the vignette
+
+Data used to generate the vignette
 }
 \examples{
+data("data_tuto")
+mat_dps <- data_tuto[[1]]
+str(mat_dps)
 data("data_tuto")
 mat_dps <- data_tuto[[1]]
 str(mat_dps)

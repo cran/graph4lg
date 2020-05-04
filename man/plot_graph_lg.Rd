@@ -53,12 +53,12 @@ The graph object \code{x} of class \code{igraph} must have node names
 (not necessarily in the same order as IDs in crds, given a merging is done).
 }
 \examples{
-data(pts_pop_simul)
-data(data_simul_genind)
-mat_w <- mat_gen_dist(data_simul_genind, dist = "DPS")
+data(pts_pop_ex)
+data(data_ex_genind)
+mat_w <- mat_gen_dist(data_ex_genind, dist = "DPS")
 gp <- gen_graph_topo(mat_w = mat_w, topo = "mst")
 g <- plot_graph_lg(graph = gp,
-                             crds = pts_pop_simul,
+                             crds = pts_pop_ex,
                              mode = "spatial",
                              weight = TRUE)
 }

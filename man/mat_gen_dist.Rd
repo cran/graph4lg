@@ -66,8 +66,8 @@ principal components and \eqn{x_{ki}} is the value taken by the principal
 component k in population i.
 }
 \examples{
-data(data_simul_genind)
-x <- data_simul_genind
+data(data_ex_genind)
+x <- data_ex_genind
 D <- mat_gen_dist(x = x, dist = "basic")
 }
 \references{

@@ -6,9 +6,9 @@ output:
   html_document:
     df_print: paged
 bibliography: biblio_vignette.bib
-vignette: |
-  %\VignetteIndexEntry{`graph4lg` - Tutorial} 
-  %\VignetteEngine{knitr::rmarkdown} 
+vignette: >
+  %\VignetteIndexEntry{`graph4lg` - Tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
   
@@ -32,9 +32,11 @@ In the following sections, we describe the functions of the package following th
 
 ## Loading of the data used to create the tutorial
 
-The package includes genetic and spatial data allowing users to discover its different functionalities. We included two datasets. The first is from French Guadeloupe and consists of 432 Plumbeous Warblers (*Setophaga plumbea*) genotyped at 12 microsatellite loci (169 different alleles in total) from 20 populations whose spatial coordinates are available. These data were collected and analysed by @khimoun2017landscape. They are also freely available on the website [datadryad.org](http://datadryad.org/). They were included in the package in different formats: `data.frame` format with columns of `locus` class from the package `gstud`, `genind` class from `adegenet`, `loci` class for `pegas`, text files (.txt) for GENEPOP or STRUCTURE.
+The package includes genetic and spatial data allowing users to discover its different functionalities. We included two simulated datasets. They were included in the package in different formats: `data.frame` format with columns of `locus` class from the package `gstud`, `genind` class from `adegenet`, `loci` class for `pegas`, text files (.txt) for GENEPOP or STRUCTURE.
 
-The second data set was created during simulations done with CDPOP [@landguth2010cdpop] on a simulated landscape. It consists of 1500 individuals from 50 populations genotyped at 20 microsatellite loci. Individuals dispersed less when the cost-distance between populations was large. These data were included in format `genind` and as a text file compatible with GENEPOP software. A landscape graph was created with GRAPHAB [@foltete2012software] whose nodes were the 50 simulated populations and the links were weighted by cost-distance values between populations. The project created with GRAPHAB was included into the package such that the landscape graphs and the cost-distance matrix can be easily imported into the R environment.
+The first data set (`data_simul`) was created during simulations done with CDPOP [@landguth2010cdpop] on a simulated landscape. It consists of 1500 individuals from 50 populations genotyped at 20 microsatellite loci. Individuals dispersed less when the cost-distance between populations was large. A landscape graph was created with GRAPHAB [@foltete2012software] whose nodes were the 50 simulated populations and the links were weighted by cost-distance values between populations. The project created with GRAPHAB was included into the package such that the landscape graphs and the cost-distance matrix can be easily imported into the R environment.
+
+The second data set (`data_ex`) was simulated as the first one but included only 10 populations. It is to generate quick examples.
 
 
 ```{r, echo = FALSE, eval = TRUE}
@@ -72,8 +74,8 @@ The function `genepop_to_genind` loads a GENEPOP file (.txt extension) and conve
 
 ```{r}
 data_genind <- genepop_to_genind(path = paste0(system.file('extdata', 
-                                                           package = 'graph4lg'), "/gpop_51_sim22_01_25.txt"),
-                                 n.loci = 20, pop_names = as.character(1:50))
+                                                           package = 'graph4lg'), "/gpop_simul_10_g100_04_20.txt"),
+                                 n.loci = 20, pop_names = as.character(1:10))
 data_genind
 ```
 
@@ -98,18 +100,13 @@ STRUCTURE software [@pritchard2000inference] is frequently used in population ge
 To use the function, we need to indicate the path to the file, the names of the loci, the individuals' ID and the populations' names in the same order as in the original file.
 
 ```{r}
-loci_names <- c("DkiD104", "DkiD124", "DkiD102", "CAM19",
-                "DkiC118", "DkiD128", "DkiB12",  "Lswmu7",
-                "DkiD109", "Lswmu5",  "TG12_15", "DkiD12" )
-data(data_pc_genind)
-ind_names <- row.names(data_pc_genind@tab)
-pop_names <- c("BT-1", "BT-10", "BT-11", "BT-12", "BT-13", "BT-2",
-               "BT-3",  "BT-4",  "BT-5",  "BT-6",  "BT-7",  "BT-8",
-               "BT-9",  "GT-1",  "GT-2", "GT-3",  "GT-4",  "GT-5",
-               "GT-6", "GT-7")
+loci_names <- paste0("LOCI-", as.character(1:20))
+
+ind_names <- as.character(1:200)
+pop_names <- as.character(1:10)
 data_paru <- structure_to_genind(path = paste0(system.file('extdata', 
                                                            package = 'graph4lg'), 
-                                               "/data_PC_str.txt"),
+                                               "/data_ex_str.txt"),
                                  loci_names = loci_names,
                                  pop_names = pop_names,
                                  ind_names = ind_names)
@@ -120,14 +117,14 @@ data_paru
 
 Packages `gstudio` and `popgraph` developed by R. Dyer [@dyer2009geneticstudio] use as input data R `data.frames` with columns of class `locus`. These `data.frame` objects constitute `gstud` objects. Given these packages are often used to create genetic graphs, we created a function to convert them into the `genind` format. 
 
-A `gstud` object generally has the following structure (Plumbeous Warbler data from Guadeloupe as an example):
+A `gstud` object generally has the following structure (simulations with 10 populations as an example):
 ```{r}
-head(data_pc_gstud)
+head(data_ex_gstud)
 ```
 
 To convert it with the function `gstud_to_genind`, we indicate the name of the `data.frame` and of the columns with populations' names and individuals' names:
 ```{r}
-gstud_to_genind(x = data_pc_gstud, pop_col = "Cluster",
+gstud_to_genind(x = data_ex_gstud, pop_col = "POP",
                 ind_col = "ID")
 ```
 

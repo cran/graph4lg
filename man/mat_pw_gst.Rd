@@ -43,13 +43,13 @@ Negative values are converted into 0
 }
 
 \examples{
-data("data_pc_genind")
-mat_gst <- mat_pw_gst(data_pc_genind)
-path_in <- system.file('extdata', 'gpop_51_sim22_01_25.txt',
+data("data_ex_genind")
+mat_gst <- mat_pw_gst(data_ex_genind)
+path_in <- system.file('extdata', 'gpop_simul_10_g100_04_20.txt',
                        package = 'graph4lg')
-file_n <- file.path(tempdir(), "gpop_51_sim22_01_25.txt")
+file_n <- file.path(tempdir(), "gpop_simul_10_g100_04_20.txt")
 file.copy(path_in, file_n, overwrite = TRUE)
-mat_pw_gst(x = file_n, pop_names = as.character(order(as.character(1:50))))
+mat_pw_gst(x = file_n, pop_names = as.character(order(as.character(1:10))))
 file.remove(file_n)
 }
 \references{

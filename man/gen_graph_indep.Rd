@@ -113,8 +113,8 @@ distance used, the formula used to compute the covariance, the statistical
 tolerance threshold, the p-values adjustment, among others.
 }
 \examples{
-data(data_pc_genind)
-dist_graph_test <- gen_graph_indep(x = data_pc_genind, dist = "basic",
+data(data_ex_genind)
+dist_graph_test <- gen_graph_indep(x = data_ex_genind, dist = "basic",
                              cov = "sq", pcor = "magwene",
                              alpha = 0.05, test = "EED",
                              adj = "none", output = "igraph")

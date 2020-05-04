@@ -63,17 +63,14 @@
 #' @author P. Savary
 #' @references \insertRef{van2015isolation}{graph4lg}
 #' @examples
-#' data(data_simul_genind)
-#' mat_gen <- mat_gen_dist(data_simul_genind, dist = "basic")
-#' mat_dist <- suppressWarnings(mat_geo_dist(data = pts_pop_simul,
-#'       ID = "ID",
-#'       x = "x",
-#'       y = "y"))
-#' mat_dist <- mat_dist[order(as.character(row.names(mat_dist))),
-#'                      order(as.character(colnames(mat_dist)))]
+#' data("data_tuto")
+#' mat_gen <- data_tuto[[1]]
+#' mat_dist <- data_tuto[[2]]*1000
 #' res_dmc <- dist_max_corr(mat_gd = mat_gen,
 #'                          mat_ld = mat_dist,
-#'                          interv = 10000)
+#'                          from = 32000, to = 42000,
+#'                          interv = 5000,
+#'                          fig = FALSE)
 
 
 dist_max_corr <- function(mat_gd, mat_ld,

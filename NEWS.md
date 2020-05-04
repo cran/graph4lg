@@ -1,3 +1,14 @@
+# graph4lg 0.5.0
+
+- Minor change: change in package dependencies to stick with CRAN requirements
+
+# graph4lg 0.4.0
+
+- Addition of new parameters to gen_graph_topo to allow the construction of k-nearest neighbor graphs
+- Removal of a dataset and addition of a new simulated small dataset
+- Minor change: modification of function examples to reduce their duration, vignette update, minor changes in functions 'plot_w_hist' and 'scatter_dist_g'
+- Bug fixes: modification of pw_mat_to_df function
+
 # graph4lg 0.3.0
 
 - Minor change: weight option in graph_plan

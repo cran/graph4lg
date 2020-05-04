@@ -40,8 +40,8 @@ Values in 'mat_thr' matrix must be positive. Negative values from
 The function works only for undirected graphs.
 }
 \examples{
-mat_w <- mat_gen_dist(x = data_simul_genind, dist = 'DPS')
-suppressWarnings(mat_thr <- mat_geo_dist(pts_pop_simul,
+mat_w <- mat_gen_dist(x = data_ex_genind, dist = 'DPS')
+suppressWarnings(mat_thr <- mat_geo_dist(pts_pop_ex,
                  ID = "ID",
                  x = "x",
                 y = "y"))

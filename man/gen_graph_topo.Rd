@@ -5,7 +5,7 @@
 \title{Create a graph of genetic differentiation with
 a specific topology}
 \usage{
-gen_graph_topo(mat_w, mat_topo = NULL, topo = "gabriel")
+gen_graph_topo(mat_w, mat_topo = NULL, topo = "gabriel", k = NULL)
 }
 \arguments{
 \item{mat_w}{A symmetric (pairwise) \code{matrix} whose elements
@@ -29,7 +29,23 @@ the minimum total links' weight (based on 'mat_topo' values).}
 minimum weight is removed, then the graph breaks into two components.}
 \item{If 'topo = 'comp'', a complete graph whose links are weighted with
 values from 'mat_w' is created.}
+\item{If 'topo = 'knn'', a k-nearest neighbor graph  whose links are
+weighted with values from 'mat_w' is created. If the distance between node i
+and node j is among the k-th smallest distances between node i and the other
+nodes according to distances in matrix 'mat_topo', then there is a link
+between i and j in the resulting graph. Therefore, a node can be connected
+to more than two nodes because the nearest node to node j is not necessarily
+among the k nearest neighbors to node i. Let d1 be the smallest distance
+from node i to other nodes, if there are k nodes or more at this distance
+from node i, they are all connected to i. If there are less than k nodes
+connected to i at a distance d1, then we consider nodes at a distance d2
+from i. In the latter case, all the nodes at a distance d2 from i are
+connected to i.}
 }}
+
+\item{k}{(if 'topo = 'knn'') An integer which indicates the number of
+nearest neighbors considered to create the K-nearest neighbor graph. k must
+be lower than the total number of nodes minus 1.}
 }
 \value{
 A graph object of class \code{igraph}
@@ -45,10 +61,14 @@ same rows' and columns' names.
 Values in 'mat_topo' matrix must be positive. Negative values from
 'mat_w' are transformed into zeros.
 The function works only for undirected graphs.
+Note that the topology 'knn' works best when 'mat_topo' contains distance
+values from a continuous value range, thereby avoiding equal distances
+between a node and the others.  are more than k nodes located
+at distances in the k-th smallest distances
 }
 \examples{
-mat_w <- mat_gen_dist(x = data_simul_genind, dist = 'DPS')
-suppressWarnings(mat_topo <- mat_geo_dist(pts_pop_simul,
+mat_w <- mat_gen_dist(x = data_ex_genind, dist = 'DPS')
+suppressWarnings(mat_topo <- mat_geo_dist(pts_pop_ex,
                  ID = "ID",
                  x = "x",
                 y = "y"))

@@ -27,10 +27,10 @@
 #' given a merging is done).
 #' @author P. Savary
 #' @examples
-#' data(pts_pop_simul)
-#' data(data_simul_genind)
-#' mat_w <- mat_gen_dist(data_simul_genind, dist = "DPS")
-#' mat_dist <- mat_geo_dist(data = pts_pop_simul,
+#' data(pts_pop_ex)
+#' data(data_ex_genind)
+#' mat_w <- mat_gen_dist(data_ex_genind, dist = "DPS")
+#' mat_dist <- mat_geo_dist(data = pts_pop_ex,
 #'                          ID = "ID",
 #'                          x = "x",
 #'                          y = "y")
@@ -39,13 +39,8 @@
 #' g1 <- gen_graph_topo(mat_w = mat_w, topo = "mst")
 #' g2 <- gen_graph_topo(mat_w = mat_w, mat_topo = mat_dist, topo = "gabriel")
 #' g <- graph_plot_compar(x = g1, y = g2,
-#'                        crds = pts_pop_simul)
+#'                        crds = pts_pop_ex)
 
-# x <- g1
-# y <- g2
-# crds <- pts_pop_simul
-# weight <- TRUE
-# width <- "inv"
 
 
 graph_plot_compar <- function(x, y,

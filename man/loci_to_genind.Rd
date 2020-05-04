@@ -23,8 +23,8 @@ This function is exactly the same as \code{loci2genind}
 from \pkg{pegas} package
 }
 \examples{
-data("data_pc_loci")
-genind <- loci_to_genind(data_pc_loci, ploidy = 2, na.alleles = "NA")
+data("data_ex_loci")
+genind <- loci_to_genind(data_ex_loci, ploidy = 2, na.alleles = "NA")
 }
 \author{
 P. Savary

@@ -72,8 +72,9 @@ function \code{add_nodes_attr}.
 }
 \examples{
 path <- system.file('extdata',package='graph4lg')
-links <- "liens_rast2_1_11_01_19-links"
+links <- "liens_simul_10"
 graph <- graphab_to_igraph(dir_path = path,
+                           nodes = "patches_10",
                            links = links,
                            fig = FALSE)
 }

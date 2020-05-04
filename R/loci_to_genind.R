@@ -12,8 +12,8 @@
 #' @export
 #' @author P. Savary
 #' @examples
-#' data("data_pc_loci")
-#' genind <- loci_to_genind(data_pc_loci, ploidy = 2, na.alleles = "NA")
+#' data("data_ex_loci")
+#' genind <- loci_to_genind(data_ex_loci, ploidy = 2, na.alleles = "NA")
 
 loci_to_genind <- function(x,
                            ploidy = 2,

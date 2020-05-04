@@ -26,8 +26,8 @@ The 'graph' nodes must have names. Links must have weights if
 'weight = TRUE'.
 }
 \examples{
-data(pts_pop_simul)
-suppressWarnings(mat_geo <- mat_geo_dist(pts_pop_simul,
+data(pts_pop_ex)
+suppressWarnings(mat_geo <- mat_geo_dist(pts_pop_ex,
                  ID = "ID",
                  x = "x",
                 y = "y"))

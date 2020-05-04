@@ -39,8 +39,8 @@ Note that in the paper of Bowcock et al. (1994), the denominator is 2D.
 But, in MSA software manual, the denominator is D.
 }
 \examples{
-data("data_simul_genind")
-dist_bowcock <- mat_pw_dps(data_simul_genind)
+data("data_ex_genind")
+dist_bowcock <- mat_pw_dps(data_ex_genind)
 }
 \references{
 \insertRef{bowcock1994high}{graph4lg}

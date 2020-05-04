@@ -19,36 +19,31 @@ dmc <- data_tuto[[4]]
 
 ## -----------------------------------------------------------------------------
 data_genind <- genepop_to_genind(path = paste0(system.file('extdata', 
-                                                           package = 'graph4lg'), "/gpop_51_sim22_01_25.txt"),
-                                 n.loci = 20, pop_names = as.character(1:50))
+                                                           package = 'graph4lg'), "/gpop_simul_10_g100_04_20.txt"),
+                                 n.loci = 20, pop_names = as.character(1:10))
 data_genind
 
 ## ---- echo = TRUE, eval = FALSE-----------------------------------------------
 #  genind_to_genepop(x = data_genind, output = "data_gpop_test.txt")
 
 ## -----------------------------------------------------------------------------
-loci_names <- c("DkiD104", "DkiD124", "DkiD102", "CAM19",
-                "DkiC118", "DkiD128", "DkiB12",  "Lswmu7",
-                "DkiD109", "Lswmu5",  "TG12_15", "DkiD12" )
-data(data_pc_genind)
-ind_names <- row.names(data_pc_genind@tab)
-pop_names <- c("BT-1", "BT-10", "BT-11", "BT-12", "BT-13", "BT-2",
-               "BT-3",  "BT-4",  "BT-5",  "BT-6",  "BT-7",  "BT-8",
-               "BT-9",  "GT-1",  "GT-2", "GT-3",  "GT-4",  "GT-5",
-               "GT-6", "GT-7")
+loci_names <- paste0("LOCI-", as.character(1:20))
+
+ind_names <- as.character(1:200)
+pop_names <- as.character(1:10)
 data_paru <- structure_to_genind(path = paste0(system.file('extdata', 
                                                            package = 'graph4lg'), 
-                                               "/data_PC_str.txt"),
+                                               "/data_ex_str.txt"),
                                  loci_names = loci_names,
                                  pop_names = pop_names,
                                  ind_names = ind_names)
 data_paru
 
 ## -----------------------------------------------------------------------------
-head(data_pc_gstud)
+head(data_ex_gstud)
 
 ## -----------------------------------------------------------------------------
-gstud_to_genind(x = data_pc_gstud, pop_col = "Cluster",
+gstud_to_genind(x = data_ex_gstud, pop_col = "POP",
                 ind_col = "ID")
 
 ## ----eval=FALSE, echo =TRUE, message = FALSE, warning = FALSE-----------------

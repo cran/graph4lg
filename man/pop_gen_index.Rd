@@ -45,8 +45,8 @@ The function computes population-level genetic indices from an
 object of class \code{genind}.
 }
 \examples{
-data(data_simul_genind)
-x <- data_simul_genind
+data(data_ex_genind)
+x <- data_ex_genind
 pop_names <- levels(x@pop)
 df_pop_indices <- pop_gen_index(x = x,
                    pop_names = pop_names,
