@@ -25,6 +25,7 @@
 #' in \code{pop_names} must be the same as in the GENEPOP file.
 #' }
 #' Negative values are converted into 0
+#' @keywords internal
 #' @export
 #' @author P. Savary
 #' @references \insertRef{jost2008gst}{graph4lg}
@@ -37,7 +38,8 @@
 #'                        package = 'graph4lg')
 #' file_n <- file.path(tempdir(), "gpop_simul_10_g100_04_20.txt")
 #' file.copy(path_in, file_n, overwrite = TRUE)
-#' mat_pw_d_j(x = file_n, pop_names = as.character(order(as.character(1:10))))
+#' mat_pw_d_j(x = file_n,
+#'            pop_names = as.character(order(as.character(1:10))))
 #' file.remove(file_n)
 
 ##################################

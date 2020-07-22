@@ -23,6 +23,7 @@
 #' @return An object of class \code{data.frame} with the same columns as 'data'
 #' and 4 columns more : z1, z2 (respective z-scores), Z (test's statistic) and
 #' p (p-value) of the test.
+#' @keywords internal
 #' @export
 #' @author P. Savary
 #' @examples

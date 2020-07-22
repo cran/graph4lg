@@ -5,7 +5,8 @@
 #' two components. The returned graph is the last graph with only one
 #' component.
 #'
-#' @param x A symmetric \code{matrix} of pairwise distances between nodes
+#' @param x A symmetric \code{matrix} or a \code{dist} object with pairwise
+#' distances between nodes
 #' @param val_step The number of classes to create to search for the
 #' threshold value without testing all the possibilities. By default,
 #' 'val_step = 20'.
@@ -23,17 +24,27 @@
 g_percol <- function(x, val_step = 20){
 
   # Check whether x is a symmetric matrix
-  if(!inherits(x, "matrix")){
-    stop("'x' must be a matrix")
-  } else if(!isSymmetric(x)){
-    stop("The matrix 'x' must be symmetric")
-  } else {
-    # Creation of the complete initial graph
-    g1 <- igraph::graph.adjacency(x,
-                                  mode = "undirected",
-                                  weighted = TRUE,
-                                  diag = FALSE)
+  if(!inherits(x, c("matrix", "dist"))){
+    stop("'x' must be a matrix or a dist object")
   }
+
+  if(inherits(x, "matrix")){
+    if(!isSymmetric(x)){
+      stop("The matrix 'x' must be symmetric")
+    }
+  }
+
+  if(inherits(x, "dist")){
+    x <- as.matrix(x)
+  }
+
+
+  # Creation of the complete initial graph
+  g1 <- igraph::graph.adjacency(x,
+                                mode = "undirected",
+                                weighted = TRUE,
+                                diag = FALSE)
+
 
   # Edge list of the complete graph
   g1_df <- data.frame(igraph::as_edgelist(g1))

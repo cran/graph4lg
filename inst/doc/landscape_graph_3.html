@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="UMR ThéMA - UBFC-CNRS, UMR Biogéosciences - UBFC-CNRS, ARP-Astrance" />
+
+
+<title>3 - Landscape graph construction and analysis with Graphab and graph4lg</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">3 - Landscape graph construction and analysis with Graphab and <code>graph4lg</code></h1>
+<h4 class="author">UMR ThéMA - UBFC-CNRS, UMR Biogéosciences - UBFC-CNRS, ARP-Astrance</h4>
+<h4 class="date">Paul SAVARY</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a><ul>
+<li><a href="#what-is-graphab">What is Graphab?</a></li>
+<li><a href="#data-used-in-this-tutorial">Data used in this tutorial</a></li>
+</ul></li>
+<li><a href="#landscape-graph-construction">Landscape graph construction</a><ul>
+<li><a href="#project-creation">Project creation</a></li>
+<li><a href="#link-set-creation">Link set creation</a></li>
+<li><a href="#graph-construction">Graph construction</a></li>
+</ul></li>
+<li><a href="#landscape-graph-analysis">Landscape graph analysis</a><ul>
+<li><a href="#metric-calculation">Metric calculation</a></li>
+<li><a href="#graph-partitioning">Graph partitioning</a></li>
+</ul></li>
+<li><a href="#using-landscape-graphs-in-landscape-genetic-analyses">Using landscape graphs in landscape genetic analyses</a><ul>
+<li><a href="#point-set-import">Point set import</a></li>
+<li><a href="#graph-link-and-node-properties">Graph link and node properties</a></li>
+<li><a href="#landscape-graph-import">Landscape graph import</a></li>
+</ul></li>
+<li><a href="#conclusion">Conclusion</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The rationale of <code>graph4lg</code> package in R is to make easier the construction and analysis of genetic and landscape graphs in landscape genetic studies (hence the name <code>graph4lg</code>, meaning Graphs for Landscape Genetics). This package provides users with tools for:</p>
+<ul>
+<li>Landscape and genetic data processing</li>
+<li>Genetic graph construction and analysis</li>
+<li>Landscape graph construction and analysis</li>
+<li>Landscape and genetic graph comparisons</li>
+</ul>
+<p>Each one of the included tutorials focuses on one of these points. This third tutorial will focus on <strong>landscape graph construction and analysis</strong>. It will describe the package functions allowing users to:</p>
+<ul>
+<li>Create a landscape graph</li>
+<li>Analyse the landscape graph</li>
+<li>Import the landscape graph to perform landscape genetic analyses</li>
+</ul>
+<p><strong>NOTA BENE</strong>: The package <code>graph4lg</code> integrates functions making possible the construction and analysis of landscape graphs but most of them are only <strong>wrappers that launch computations with Graphab software</strong>.</p>
+<div id="what-is-graphab" class="section level2">
+<h2>What is Graphab?</h2>
+<p><strong>Graphab</strong> is an open source software tool dedicated to the <strong>modelling of landscape networks</strong> <span class="citation">(Foltête, Clauzel, and Vuidel 2012)</span>. It was developed in ThéMA laboratory (Besançon, France) to make possible the <strong>creation of landscape graphs</strong> and to integrate a complete set of <strong>connectivity analysis</strong> functions in a single application.</p>
+<p>Integrating Graphab functionalities into <code>graph4lg</code> aims at facilitating the import of Graphab output into R for subsequent analyses, including the comparison of genetic graphs and landscape graphs. All the functions calling Graphab software are described in <code>graph4lg</code> help files. However, users are invited to read the <strong>complete documentation manuals</strong> as well as other resources on <a href="https://sourcesup.renater.fr/www/graphab/en/home.html"><strong>Graphab project website</strong></a>. Some computations are not possible when using <code>graph4lg</code> but are possible when using directly Graphab software which can be downloaded for free on the same website. <span class="citation">Foltête, Clauzel, and Vuidel (2012)</span> paper also provides users with a synthetic description of the tool.</p>
+<p>The function <code>get_graphab</code> from <code>graph4lg</code> package <strong>downloads automatically Graphab</strong> in the user’s machine, provided Java is installed on the machine. If it has already been downloaded, a message is displayed. Once Graphab has been downloaded in a machine, it is not necessary to download it again.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">get_graphab</span>()</a></code></pre></div>
+<p>In the table below, we present <strong>all the functions from <code>grapha4lg</code> calling Graphab software</strong>:</p>
+<table>
+<colgroup>
+<col width="7%"></col>
+<col width="92%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>get_graphab</code></td>
+<td>Check if Graphab software (<code>graphab-2.4.jar</code>) is in the user’s machine and downloads it if necessary, provided Java is installed.</td>
+</tr>
+<tr class="even">
+<td><code>graphab_project</code></td>
+<td>Creates a Graphab project from a raster file (.tif)</td>
+</tr>
+<tr class="odd">
+<td><code>graphab_link</code></td>
+<td>Creates a set of links (Euclidean or least cost paths, planar or complete)</td>
+</tr>
+<tr class="even">
+<td><code>graphab_graph</code></td>
+<td>Creates a graph from a set of links</td>
+</tr>
+<tr class="odd">
+<td><code>graphab_metric</code></td>
+<td>Computes graph-theoretic metrics from a graph</td>
+</tr>
+<tr class="even">
+<td><code>graphab_modul</code></td>
+<td>Partition the graph into modules</td>
+</tr>
+<tr class="odd">
+<td><code>graphab_pointset</code></td>
+<td>Imports a set of points in the project and relates them to habitat patches and corresponding metrics</td>
+</tr>
+<tr class="even">
+<td><code>get_graphab_metric</code></td>
+<td>Imports a table with the metrics computed and the patch properties</td>
+</tr>
+<tr class="odd">
+<td><code>get_graphab_linkset</code></td>
+<td>Imports a table with the link properties for a given link set</td>
+</tr>
+<tr class="even">
+<td><code>graphab_to_igraph</code></td>
+<td>Imports a graph created with Graphab as an <code>igraph</code> graph object with node and link attributes</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="data-used-in-this-tutorial" class="section level2">
+<h2>Data used in this tutorial</h2>
+<p>Here, we do not rely on genetic data sets and will only use Graphab projects already created for the vignettes.</p>
+</div>
+</div>
+<div id="landscape-graph-construction" class="section level1">
+<h1>Landscape graph construction</h1>
+<div id="project-creation" class="section level2">
+<h2>Project creation</h2>
+<p>When using Graphab, input data consists of an <strong>8-bit raster file (.tif)</strong> with discrete cell values. One (or several) of these values will correspond to habitat cells on the raster. Contiguous habitat cells will form habitat patches (8-neighbourhood criterion), as soon as they exceed the minimum patch area when specified</p>
+<p>This is the first step of habitat network modelling with Graphab. At this stage, a <strong>project is created</strong>. This project is given a name (<code>proj_name</code>), which will be the name of a directory containing geographical information layers relative to the project as well as a .xml file (“proj_name.xml”), which is the main project file.</p>
+<p>The function <code>graphab_project</code> creates the project directory called <code>proj_name</code> either in the current working directory (default) or in the directory whose path is given as a <code>proj_path</code> argument. The function takes as arguments:</p>
+<ul>
+<li><code>proj_name</code>: Name of the project (project and .xml file directory)</li>
+<li><code>raster</code>: Path to the raster file on which habitat patches are identified</li>
+<li><code>habitat</code>: Cell value(s) corresponding to habitat patches (possibly a vector with several values (e.g. <code>c(1,2</code>))</li>
+<li><code>minarea</code> (optional): Minimum habitat patch size in hectares</li>
+<li><code>nodata</code> (optional): Cell value corresponding to no data values, thereafter ignored</li>
+<li><code>alloc_ram</code> (optional): Integer or numeric value indicating RAM gigabytes allocated to the java process. Increasing this value can speed up the computations. Too large values may not be compatible with user’s machine settings</li>
+<li><code>proj_path</code>(optional): Path to the directory that contains the project directory. It should be used when the project directory is not in the current working directory. Default is <code>NULL</code>. When <code>&#39;proj_path = NULL&#39;</code>, the project directory is equal to <code>getwd()</code>.</li>
+</ul>
+<p>The two latter arguments are included in almost every function calling Graphab.</p>
+<p>As an example, we will create a landscape graph from a simulated landscape raster with 5 land use categories (see map below).</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">load</span>(<span class="dt">file =</span> <span class="kw">paste0</span>(<span class="kw">system.file</span>(<span class="st">&#39;extdata&#39;</span>, <span class="dt">package =</span> <span class="st">&#39;graph4lg&#39;</span>), </a>
+<a class="sourceLine" id="cb2-2" title="2">                               <span class="st">&quot;/&quot;</span>, <span class="st">&quot;rast_simul50.RDa&quot;</span>))</a>
+<a class="sourceLine" id="cb2-3" title="3"></a>
+<a class="sourceLine" id="cb2-4" title="4">r.spdf &lt;-<span class="st"> </span><span class="kw">as</span>(rast, <span class="st">&quot;SpatialPixelsDataFrame&quot;</span>)</a>
+<a class="sourceLine" id="cb2-5" title="5">r.df &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(r.spdf)</a>
+<a class="sourceLine" id="cb2-6" title="6"></a>
+<a class="sourceLine" id="cb2-7" title="7">r.df<span class="op">$</span>layer &lt;-<span class="st"> </span><span class="kw">as.factor</span>(r.df<span class="op">$</span>rast_simul50)</a>
+<a class="sourceLine" id="cb2-8" title="8"></a>
+<a class="sourceLine" id="cb2-9" title="9">g &lt;-<span class="st"> </span><span class="kw">ggplot</span>(r.df, <span class="kw">aes</span>(<span class="dt">x=</span>x, <span class="dt">y=</span>y)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_tile</span>(<span class="kw">aes</span>(<span class="dt">fill =</span> layer)) <span class="op">+</span><span class="st"> </span><span class="kw">coord_equal</span>()<span class="op">+</span></a>
+<a class="sourceLine" id="cb2-10" title="10"><span class="st">  </span><span class="kw">theme_bw</span>()<span class="op">+</span></a>
+<a class="sourceLine" id="cb2-11" title="11"><span class="st">  </span><span class="co">#scale_fill_brewer(palette=&quot;Dark2&quot;)+</span></a>
+<a class="sourceLine" id="cb2-12" title="12"><span class="st">  </span><span class="kw">scale_fill_manual</span>(<span class="dt">values =</span> <span class="kw">c</span>(<span class="st">&quot;#396D35&quot;</span>, <span class="st">&quot;#FB9013&quot;</span>, <span class="st">&quot;#EDC951&quot;</span>, <span class="st">&quot;#80C342&quot;</span>, <span class="st">&quot;black&quot;</span>, <span class="st">&quot;#396D35&quot;</span>),</a>
+<a class="sourceLine" id="cb2-13" title="13">                    <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&quot;0 - Forest&quot;</span>, <span class="st">&quot;1 - Shrublands&quot;</span>, <span class="st">&quot;2 - Crops&quot;</span>, </a>
+<a class="sourceLine" id="cb2-14" title="14">                               <span class="st">&quot;3 - Grasslands&quot;</span>,<span class="st">&quot;4 - Artificial areas&quot;</span>, <span class="st">&quot;5 - Forest&quot;</span>),</a>
+<a class="sourceLine" id="cb2-15" title="15">                    <span class="dt">name =</span> <span class="st">&quot;Land use type&quot;</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb2-16" title="16"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x=</span><span class="st">&quot;Longitude&quot;</span>,<span class="dt">y=</span><span class="st">&quot;Latitude&quot;</span>)</a>
+<a class="sourceLine" id="cb2-17" title="17">g</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>Habitat patches will correspond to contiguous patches of raster cells equal to 0 or 5, as soon as they are larger than 200 hectares. They correspond to forests.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">proj_name &lt;-<span class="st"> &quot;graphab_example&quot;</span></a>
+<a class="sourceLine" id="cb3-2" title="2"></a>
+<a class="sourceLine" id="cb3-3" title="3"><span class="kw">graphab_project</span>(<span class="dt">proj_name =</span> proj_name,</a>
+<a class="sourceLine" id="cb3-4" title="4">                <span class="dt">raster =</span> <span class="st">&quot;rast_simul50.tif&quot;</span>,</a>
+<a class="sourceLine" id="cb3-5" title="5">                <span class="dt">habitat =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">5</span>),</a>
+<a class="sourceLine" id="cb3-6" title="6">                <span class="dt">minarea =</span> <span class="dv">200</span>)</a></code></pre></div>
+</div>
+<div id="link-set-creation" class="section level2">
+<h2>Link set creation</h2>
+<p>The project has been created and we will now <strong>create a link set between the habitat patches</strong>. We will consider <strong>least cost paths</strong> between habitat patches on the raster. To that purpose, we need to create a <code>data.frame</code> specifying the <strong>cost values associated with every raster cell value</strong>. In the following example, these values are:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Code</th>
+<th>Description</th>
+<th>Cost value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>Forests (habitat)</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>Shrublands</td>
+<td>5</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>Crops</td>
+<td>60</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>Grasslands</td>
+<td>40</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>Artificial areas</td>
+<td>1000</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>Forest (habitat)</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>They are stored into the <code>cost</code> object (<code>data.frame</code>):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">cost &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">code =</span> <span class="dv">0</span><span class="op">:</span><span class="dv">5</span>,</a>
+<a class="sourceLine" id="cb4-2" title="2">                   <span class="dt">cost =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">60</span>, <span class="dv">40</span>, <span class="dv">1000</span>, <span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb4-3" title="3"></a>
+<a class="sourceLine" id="cb4-4" title="4">cost</a></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["code"],"name":[1],"type":["int"],"align":["right"]},{"label":["cost"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"0","2":"1"},{"1":"1","2":"5"},{"1":"2","2":"60"},{"1":"3","2":"40"},{"1":"4","2":"1000"},{"1":"5","2":"1"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>The link set is created with <code>graphab_link</code> function with the following arguments:</p>
+<ul>
+<li><code>proj_name</code>: Name of the project</li>
+<li><code>distance</code>: Type of distance computed. By default, <code>distance=&quot;cost&quot;</code>, meaning that <strong>cost distances</strong> are computed between patches according the cost values specified in <code>cost</code> data.frame. Alternatively, <code>distance=&quot;euclid&quot;</code>, meaning that straight line <strong>Euclidean distances</strong> are computed.</li>
+<li><code>name</code>: A character string indicating the name of link set</li>
+<li><code>cost</code>: A <code>data.frame</code> with the cost values (<code>cost</code> in our example)</li>
+<li><code>topo</code>: A character string indicating the <strong>topology</strong> of the created link set. It can be <strong>planar</strong> (<code>topo=&#39;planar&#39;</code> (default)). It speeds up the computation but will prevent from creating complete graphs with <code>graphab_graph</code>, or it can be <strong>complete</strong> (<code>topo=&#39;complete&#39;</code>).</li>
+</ul>
+<p>See more details in the help file (<code>?graphab_link</code>).</p>
+<p>In our example, we create a planar link set in cost-distances:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"></a>
+<a class="sourceLine" id="cb5-2" title="2"><span class="kw">graphab_link</span>(<span class="dt">proj_name =</span> proj_name,</a>
+<a class="sourceLine" id="cb5-3" title="3">             <span class="dt">distance =</span> <span class="st">&quot;cost&quot;</span>,</a>
+<a class="sourceLine" id="cb5-4" title="4">             <span class="dt">cost =</span> cost,</a>
+<a class="sourceLine" id="cb5-5" title="5">             <span class="dt">name =</span> <span class="st">&quot;lkst1&quot;</span>,</a>
+<a class="sourceLine" id="cb5-6" title="6">             <span class="dt">topo =</span> <span class="st">&quot;planar&quot;</span>)</a></code></pre></div>
+<p><strong>NOTA BENE</strong>: Several link sets can be created in the same project.</p>
+</div>
+<div id="graph-construction" class="section level2">
+<h2>Graph construction</h2>
+<p>We can now <strong>create a landscape graph</strong> with <code>graphab_graph</code>. This function takes as arguments:</p>
+<ul>
+<li><code>proj_name</code>: Name of the project</li>
+<li><code>linkset</code>: Name of the link set used to create the graph</li>
+<li><code>name</code>: A character string indicating the name of the graph created, if only one is created</li>
+<li><code>thr</code>: An integer or numeric value indicating the <strong>maximum distance associated with the links of the created graph</strong>. It allows users to create a <strong>pruned graph</strong> based on a distance threshold. Note that when the link set used has a planar topology, the graph is necessarily a pruned graph (not complete) and adding this threshold parameter can remove other links. When the link set has been created with cost-distances, the parameter is expressed in cost-distance units whereas when the link set is based upon Euclidean distances, the parameter is expressed in meters.</li>
+<li><code>cost_conv</code>: Logical (<code>TRUE</code> or <code>FALSE</code>) indicating whether numeric <code>thr</code> values are <strong>converted from cost-distance into Euclidean distance</strong> using a log-log linear regression. See also <code>convert_cd</code> function presented in the first tutorial.</li>
+</ul>
+<p><code>proj_name</code> is <strong>the only mandatory argument</strong>. Without any other argument, a non-thresholded graph is created for every link set present in the project. Names are created automatically.</p>
+<p>In our example, we can create a planar graph with the following command:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">graphab_graph</span>(<span class="dt">proj_name =</span> proj_name,</a>
+<a class="sourceLine" id="cb6-2" title="2">              <span class="dt">linkset =</span> <span class="st">&quot;lkst1&quot;</span>,</a>
+<a class="sourceLine" id="cb6-3" title="3">              <span class="dt">name =</span> <span class="st">&quot;graph&quot;</span>)</a></code></pre></div>
+</div>
+</div>
+<div id="landscape-graph-analysis" class="section level1">
+<h1>Landscape graph analysis</h1>
+<p>Once the graph has been created, it can be analysed by <strong>computing graph-theoretic connectivity metrics</strong> or by <strong>partitioning its nodes</strong>.</p>
+<div id="metric-calculation" class="section level2">
+<h2>Metric calculation</h2>
+<p>Many <strong>connectivity metrics</strong> can be computed from a landscape graph (see <span class="citation">Baranyi et al. (2011)</span> and <span class="citation">Rayfield, Fortin, and Fall (2011)</span> among other reviews on the subject). Graphab software includes a large range of connectivity metrics and its manual provides users with a <strong>comprehensive description of every one of them</strong> (see <a href="https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf">Graphab 2.4 manual</a>).</p>
+<p>The function <code>graphab_metric</code> computes these metrics. It takes as arguments:</p>
+<ul>
+<li><p><code>proj_name</code>: Name of the project</p></li>
+<li><p><code>graph</code>: Name of the graph on which the metric is computed</p></li>
+<li><p><code>metric</code>: Name of the metric among:</p>
+<ul>
+<li>Probability of Connectivity (<code>&quot;PC&quot;</code>),</li>
+<li>Integral Index of Connectivity (<code>&quot;IIC&quot;</code>),</li>
+<li>Flux (<code>&quot;F&quot;</code>),</li>
+<li>Interaction Flux (<code>&quot;IF&quot;</code>),</li>
+<li>Degree (<code>&quot;Dg&quot;</code>),</li>
+<li>Clustering Coefficient (<code>&quot;CCe&quot;</code>),</li>
+<li>Current Flow (<code>&quot;CF&quot;</code>)</li>
+<li>delta Probability of Connectivity (<code>&quot;dPC&quot;</code>).</li>
+</ul></li>
+<li><p><code>dist</code>: A numeric or integer value specifying the distance at which dispersal probability is equal to <code>prob</code>. This argument is mandatory for weighted metrics (PC, F, IF, BC, dPC, CCe, CF) but not used for others. It is used to set <span class="math inline">\(\alpha\)</span> for computing dispersal probabilities associated with all inter-patch distances such that dispersal probability between patches <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is <span class="math inline">\(p_{ij}= e^{-\alpha d_{ij}}\)</span>.</p></li>
+<li><p><code>prob</code>: A numeric or integer value specifying the dispersal probability at distance <code>dist</code>. By default, <code>code=0.05</code>. It is used to set <span class="math inline">\(\alpha\)</span> (see argument <code>dist</code> above).</p></li>
+<li><p><code>beta</code>: A numeric or integer value between 0 and 1 specifying the exponent associated with patch areas in the computation of metrics weighted by patch area. By default, <code>beta=1</code>. When <code>beta=0</code>, patch areas do not have any influence in the computation.</p></li>
+<li><p><code>cost_conv</code>: Logical (<code>TRUE</code> or <code>FALSE</code>) indicating whether numeric <code>dist</code> values are converted from cost-distance into Euclidean distance using a log-log linear regression.</p></li>
+<li><p><code>return_val</code>: Logical (default = <code>TRUE</code>) indicating whether metric values are returned in R (<code>TRUE</code>) or only stored in the patch attribute layer (<code>FALSE</code>)</p></li>
+</ul>
+<p>Metrics fall into different categories. PC and IIC are <strong>global metrics</strong> and take only one value for the entire graph, which is returned in R environment when <code>return_val=TRUE</code>.</p>
+<p>The other metrics are computed at the <strong>node level</strong>. When <code>return_val=TRUE</code>, a <code>data.frame</code> is returned in R environment specifying the value of the metric for every graph node.</p>
+<p>The description of every metric is beyond the scope of this tutorial. We again invite users to read the help file (<code>?graphab_metric</code>) as well as the <a href="https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf">Graphab 2.4 user manual</a>.</p>
+<p>We will compute metrics on the graph <code>&quot;graph&quot;</code> in our example. First, we will compute the probability of connectivity at the global level. We set the <code>dist</code> and <code>prob</code> parameter such that: <span class="math inline">\(p(10km)=e^{-\alpha \times d_{ij}}=0.05\)</span>. We convert 10 km in cost-distance units for the computation.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="co"># Global metric: PC</span></a>
+<a class="sourceLine" id="cb7-2" title="2"><span class="kw">graphab_metric</span>(<span class="dt">proj_name =</span> proj_name,</a>
+<a class="sourceLine" id="cb7-3" title="3">               <span class="dt">graph =</span> <span class="st">&quot;graph&quot;</span>,</a>
+<a class="sourceLine" id="cb7-4" title="4">               <span class="dt">metric =</span> <span class="st">&quot;PC&quot;</span>,</a>
+<a class="sourceLine" id="cb7-5" title="5">               <span class="dt">dist =</span> <span class="dv">10000</span>,</a>
+<a class="sourceLine" id="cb7-6" title="6">               <span class="dt">prob =</span> <span class="fl">0.05</span>,</a>
+<a class="sourceLine" id="cb7-7" title="7">               <span class="dt">beta =</span> <span class="dv">1</span>,</a>
+<a class="sourceLine" id="cb7-8" title="8">               <span class="dt">cost_conv =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<pre><code>#&gt; [1] &quot;Project : graphab_example&quot;    &quot;Graph : graph&quot;               
+#&gt; [3] &quot;Metric : PC&quot;                  &quot;Dist : 10000&quot;                
+#&gt; [5] &quot;Prob : 0.05&quot;                  &quot;Beta : 1&quot;                    
+#&gt; [7] &quot;Value : 0.000903573300776615&quot;</code></pre>
+<p>We obtain the value in an object of class <code>list</code>.</p>
+<p>Now, using the same parameters, we compute the local metric Flux.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">f &lt;-<span class="st"> </span><span class="kw">graphab_metric</span>(<span class="dt">proj_name =</span> proj_name,</a>
+<a class="sourceLine" id="cb9-2" title="2">               <span class="dt">graph =</span> <span class="st">&quot;graph&quot;</span>,</a>
+<a class="sourceLine" id="cb9-3" title="3">               <span class="dt">metric =</span> <span class="st">&quot;F&quot;</span>,</a>
+<a class="sourceLine" id="cb9-4" title="4">               <span class="dt">dist =</span> <span class="dv">10000</span>,</a>
+<a class="sourceLine" id="cb9-5" title="5">               <span class="dt">prob =</span> <span class="fl">0.05</span>,</a>
+<a class="sourceLine" id="cb9-6" title="6">               <span class="dt">beta =</span> <span class="dv">1</span>,</a>
+<a class="sourceLine" id="cb9-7" title="7">               <span class="dt">cost_conv =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
+<pre><code>#&gt; [[1]]
+#&gt; [1] &quot;Project : graphab_example&quot; &quot;Graph : graph&quot;            
+#&gt; [3] &quot;Metric : F&quot;                &quot;Dist : 10000&quot;             
+#&gt; [5] &quot;Prob : 0.05&quot;               &quot;Beta : 1&quot;</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Id"],"name":[1],"type":["int"],"align":["right"]},{"label":["F_d1889.4356657600988_p0.05_beta1_graph"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"26657076.8","_rn_":"1"},{"1":"2","2":"16294717.6","_rn_":"2"},{"1":"3","2":"2621667.5","_rn_":"3"},{"1":"4","2":"705995.2","_rn_":"4"},{"1":"5","2":"18215710.3","_rn_":"5"},{"1":"6","2":"21918505.4","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>Every time a local metric is computed, it can be returned in R environment (here stored in <code>f</code>) but is also stored in the habitat patch attribute table, such that at the end this table contains every metric computed. We will see later that it can be very useful.</p>
+</div>
+<div id="graph-partitioning" class="section level2">
+<h2>Graph partitioning</h2>
+<p>Another way to analyse landscape graph connectivity and topology is to make a <strong>partitioning</strong>. The principle is the same as that of <strong>modularity analyses</strong> of genetic graphs described in the second tutorial.</p>
+<p><code>graphab_modul</code> function carries out such an analysis, but before we perform some modifications in the current code, we recommend doing this analysis directly in Graphab software.</p>
+<p>For the moment, it only creates a shapefile polygon layer with the Voronoi polygons corresponding to the groups of patches forming modules.</p>
+<p>It takes as arguments:</p>
+<ul>
+<li><code>proj_name</code>: Name of the project</li>
+<li><code>graph</code>: Name of the graph on which the partition is performed</li>
+<li><code>dist</code>: A numeric or integer value specifying the distance at which dispersal probability is equal to <code>prob</code>. This argument is used to weight the links when modularity is computed.</li>
+<li><code>prob</code>: A numeric or integer value specifying the dispersal probability at distance <code>dist</code>. By default, <code>code=0.05</code>. It is used to set <span class="math inline">\(\alpha\)</span> (see argument <code>dist</code> above).</li>
+<li><code>beta</code>: A numeric or integer value between 0 and 1 specifying the exponent associated with patch areas in the computation of the modularity. By default, <code>beta=1</code>. When <code>beta=0</code>, patch areas do not have any influence in the computation.</li>
+<li><code>nb</code>: Optional argument indicating the number of modules to create. By default, the number of modules maximising the modularity index is used.</li>
+</ul>
+<p>For example:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">graphab_modul</span>(<span class="dt">proj_name =</span> proj_name,</a>
+<a class="sourceLine" id="cb11-2" title="2">              <span class="dt">graph =</span> <span class="st">&quot;graph&quot;</span>,</a>
+<a class="sourceLine" id="cb11-3" title="3">              <span class="dt">dist =</span> <span class="dv">10000</span>,</a>
+<a class="sourceLine" id="cb11-4" title="4">              <span class="dt">prob =</span> <span class="fl">0.05</span>,</a>
+<a class="sourceLine" id="cb11-5" title="5">              <span class="dt">beta =</span> <span class="dv">1</span>)</a></code></pre></div>
+<p><strong>NOTA BENE</strong>: All these analyses can be performed for several graphs created in the same project, provided their name is correctly indicated in the function arguments.</p>
+</div>
+</div>
+<div id="using-landscape-graphs-in-landscape-genetic-analyses" class="section level1">
+<h1>Using landscape graphs in landscape genetic analyses</h1>
+<p>Landscape graphs have been created and analysed by computing connectivity metrics and/or by partitioning them. The output of these analyses can be used in landscape genetic analyses, e.g. to assess the relationship between genetic variables measured in populations inhabiting the study landscape and the connectivity of its habitat patches. To do that, two approaches are here presented:</p>
+<ul>
+<li>1 - Import external point data in Graphab project to link every point to the nearest habitat patch</li>
+<li>2 - Import Graphab output in R environment to use it in subsequent (statistical) analyses</li>
+</ul>
+<div id="point-set-import" class="section level2">
+<h2>Point set import</h2>
+<p>Imagine that we have sampled several populations in the forests of the study landscape. We want to know in which landscape graph node lives every population, to get the corresponding connectivity metrics and compare them with the genetic response.</p>
+<p>To do that, the function <code>graphab_pointset</code> imports a set of points into the Graphab project. It takes as arguments:</p>
+<ul>
+<li><p><code>proj_name</code>: Name of the project</p></li>
+<li><p><code>linkset</code>: Name of the link set used to compute the distance from each point to the nearest patch (in cost-distance or Euclidean distance units depending on the way the link set was created)</p></li>
+<li><p><code>pointset</code>: it can be either:</p>
+<ul>
+<li>A character string indicating the path (absolute or relative) to a shapefile point layer</li>
+<li>A character string indicating the path to a .csv file with three columns: ID, x and y, respectively indicating the point ID, longitude and latitude</li>
+<li>A <code>data.frame</code> with three columns: ID, x and y, respectively indicating the point ID, longitude and latitude.</li>
+<li>A <code>SpatialPointsDataFrame</code></li>
+</ul></li>
+</ul>
+<p>Point coordinates must be in the same coordinate reference system as the habitat patches (and initial raster layer). The function returns a <code>data.frame</code> with the properties of the nearest patch to every point in the point set, as well as the distance from each point to the nearest patch.</p>
+<p>For example, we can add the point <code>data.frame</code> <code>pts_pop_simul</code> to the project with the following command.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="co"># Point data frame</span></a>
+<a class="sourceLine" id="cb12-2" title="2"><span class="kw">head</span>(pts_pop_simul)</a></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["ID"],"name":[1],"type":["chr"],"align":["left"]},{"label":["x"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["y"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"25650","3":"54150","_rn_":"0"},{"1":"2","2":"22550","3":"53650","_rn_":"1"},{"1":"3","2":"7250","3":"51750","_rn_":"2"},{"1":"4","2":"32350","3":"50550","_rn_":"3"},{"1":"5","2":"27350","3":"49650","_rn_":"4"},{"1":"6","2":"15950","3":"49550","_rn_":"5"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw">graphab_pointset</span>(<span class="dt">proj_name =</span> proj_name,</a>
+<a class="sourceLine" id="cb13-2" title="2">                 <span class="dt">linkset =</span> <span class="st">&quot;lkst1&quot;</span>,</a>
+<a class="sourceLine" id="cb13-3" title="3">                 <span class="dt">pointset =</span> pts_pop_simul)</a></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Nearest_patch_ID"],"name":[1],"type":["int"],"align":["right"]},{"label":["Point_ID"],"name":[2],"type":["fctr"],"align":["left"]},{"label":["Dist_to_patch"],"name":[3],"type":["int"],"align":["right"]},{"label":["Area"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["Perim"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Capacity"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["F_d1889.4356657600988_p0.05_beta1_graph"],"name":[7],"type":["dbl"],"align":["right"]}],"data":[{"1":"9","2":"file15143e6c31ff.2","3":"0","4":"5250000","5":"19200","6":"5250000","7":"6430186","_rn_":"1"},{"1":"11","2":"file15143e6c31ff.1","3":"0","4":"4730000","5":"15800","6":"4730000","7":"5682508","_rn_":"2"},{"1":"14","2":"file15143e6c31ff.10","3":"121","4":"3750000","5":"19200","6":"3750000","7":"6774869","_rn_":"3"},{"1":"17","2":"file15143e6c31ff.6","3":"0","4":"3120000","5":"12600","6":"3120000","7":"11837650","_rn_":"4"},{"1":"18","2":"file15143e6c31ff.4","3":"1065","4":"3660000","5":"15000","6":"3660000","7":"2221650","_rn_":"5"},{"1":"18","2":"file15143e6c31ff.5","3":"0","4":"3660000","5":"15000","6":"3660000","7":"2221650","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>Note that when <code>pointset</code> is not the path to a shapefile point layer, such a layer will be created in the temp files of the user’s machine. It is therefore preferable to give the path to a shapefile layer as a <code>pointset</code> argument.</p>
+</div>
+<div id="graph-link-and-node-properties" class="section level2">
+<h2>Graph link and node properties</h2>
+<p>Users can also import in R environment the link set properties in a <code>data.frame</code> with an edge list format with the function <code>get_graphab_linkset</code> which takes as arguments the project name and the link set name.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">get_graphab_linkset</span>(<span class="dt">proj_name =</span> proj_name,</a>
+<a class="sourceLine" id="cb14-2" title="2">                    <span class="dt">linkset =</span> <span class="st">&quot;lkst1&quot;</span>)</a></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Id"],"name":[1],"type":["fctr"],"align":["left"]},{"label":["ID1"],"name":[2],"type":["int"],"align":["right"]},{"label":["ID2"],"name":[3],"type":["int"],"align":["right"]},{"label":["Dist"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["DistM"],"name":[5],"type":["dbl"],"align":["right"]}],"data":[{"1":"6-1","2":"6","3":"1","4":"956.73717","5":"5704.1631","_rn_":"1"},{"1":"7-1","2":"7","3":"1","4":"82.24264","5":"641.4214","_rn_":"2"},{"1":"2-1","2":"2","3":"1","4":"206.00000","5":"900.0000","_rn_":"3"},{"1":"7-2","2":"7","3":"2","4":"313.62742","5":"3679.8990","_rn_":"4"},{"1":"9-2","2":"9","3":"2","4":"1508.91084","5":"6311.2698","_rn_":"5"},{"1":"8-3","2":"8","3":"3","4":"122.82843","5":"1982.8427","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>Similarly, users can import the table in which are stored all the metrics computed in the project as well as the node properties (including their areas). The function <code>get_graphab_metric</code> takes as argument the project name.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw">get_graphab_metric</span>(<span class="dt">proj_name =</span> proj_name)</a></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Id"],"name":[1],"type":["int"],"align":["right"]},{"label":["Area"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["Perim"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Capacity"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["F_d1889.4356657600988_p0.05_beta1_graph"],"name":[5],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"2610000","3":"13000","4":"2610000","5":"26657076.8","_rn_":"1"},{"1":"2","2":"8800000","3":"23000","4":"8800000","5":"16294717.6","_rn_":"2"},{"1":"3","2":"3270000","3":"10800","4":"3270000","5":"2621667.5","_rn_":"3"},{"1":"4","2":"5330000","3":"18800","4":"5330000","5":"705995.2","_rn_":"4"},{"1":"5","2":"6580000","3":"18200","4":"6580000","5":"18215710.3","_rn_":"5"},{"1":"6","2":"2620000","3":"8800","4":"2620000","5":"21918505.4","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+<div id="landscape-graph-import" class="section level2">
+<h2>Landscape graph import</h2>
+<p>Finally, users can also create a graph from a Graphab link set and convert it into a graph object of class <code>igraph</code>. The imported graph has weighted links. Nodes attributes present in the Graphab project are included, including connectivity metrics when computed. A figure can be displayed automatically representing the graph on a map. The graph is given the topology of the selected link set.</p>
+<p>The function <code>graphab_to_igraph</code> takes as arguments:</p>
+<ul>
+<li><code>proj_name</code>: Name of the project</li>
+<li><code>linkset</code>: Name of the link set used to compute the distance from each point to the nearest patch (in cost-distance or Euclidean distance units depending on the way the link set was created)</li>
+<li><code>nodes</code>: A character string indicating whether the nodes of the created graph are given all the attributes (<code>nodes=&quot;patches&quot;</code>, default) or metrics computed in Graphab or only those specific to a given graph previously created (<code>nodes=&quot;graph name&quot;</code>).</li>
+<li><code>weight</code>: A character string (<code>weight=&quot;euclid&quot;</code> or <code>weight=&quot;cost&quot;</code>) indicating whether to weight the links with Euclidean distance or cost-distance (default) values.</li>
+<li><code>fig</code>: Logical (<code>TRUE</code> or <code>FALSE</code>) indicating whether to plot a figure of the resulting spatial graph with <code>plot_graph_lg</code>.</li>
+<li><code>crds</code>: Logical (<code>TRUE</code> or <code>FALSE</code>) indicating whether to create an object of class <code>data.frame</code> with the node centroid spatial coordinates.</li>
+</ul>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1">land_graph &lt;-<span class="st"> </span><span class="kw">graphab_to_igraph</span>(<span class="dt">proj_name =</span> proj_name,</a>
+<a class="sourceLine" id="cb16-2" title="2">                                <span class="dt">linkset =</span> <span class="st">&quot;lkst1&quot;</span>,</a>
+<a class="sourceLine" id="cb16-3" title="3">                                <span class="dt">nodes =</span> <span class="st">&quot;patches&quot;</span>,</a>
+<a class="sourceLine" id="cb16-4" title="4">                                <span class="dt">weight =</span> <span class="st">&quot;cost&quot;</span>,</a>
+<a class="sourceLine" id="cb16-5" title="5">                                <span class="dt">fig =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb16-6" title="6">                                <span class="dt">crds =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb16-7" title="7"></a>
+<a class="sourceLine" id="cb16-8" title="8">crds_patches &lt;-<span class="st"> </span>land_graph[[<span class="dv">2</span>]]</a>
+<a class="sourceLine" id="cb16-9" title="9">land_graph &lt;-<span class="st"> </span>land_graph[[<span class="dv">1</span>]]</a></code></pre></div>
+<p>The function returns a list of two objects:</p>
+<ul>
+<li>The graph in itself (<code>land_graph[[1]]</code>)</li>
+<li>The patch centroid coordinates (<code>land_graph[[2]]</code>)</li>
+</ul>
+<p>This graph can be plotted on a map with <code>plot_graph_lg</code> with node sizes proportional to habitat patch area and link width inversely proportional to cost-distances:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1"><span class="kw">plot_graph_lg</span>(land_graph,</a>
+<a class="sourceLine" id="cb17-2" title="2">              <span class="dt">crds =</span> crds_patches,</a>
+<a class="sourceLine" id="cb17-3" title="3">              <span class="dt">mode =</span> <span class="st">&quot;spatial&quot;</span>,</a>
+<a class="sourceLine" id="cb17-4" title="4">              <span class="dt">node_size =</span> <span class="st">&quot;Area&quot;</span>)</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>We have seen in this third tutorial how to construct, analyse and import landscape graphs with Graphab and <code>graph4lg</code>. In the next and last tutorial, we will see <strong>how to compare genetic graphs and landscape graphs</strong>.</p>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-baranyi2011contribution">
+<p>Baranyi, Gabriella, Santiago Saura, János Podani, and Ferenc Jordán. 2011. “Contribution of Habitat Patches to Network Connectivity: Redundancy and Uniqueness of Topological Indices.” <em>Ecological Indicators</em> 11 (5): 1301–10.</p>
+</div>
+<div id="ref-foltete2012software">
+<p>Foltête, Jean-Christophe, Céline Clauzel, and Gilles Vuidel. 2012. “A Software Tool Dedicated to the Modelling of Landscape Networks.” <em>Environmental Modelling &amp; Software</em> 38: 316–27.</p>
+</div>
+<div id="ref-rayfield2011connectivity">
+<p>Rayfield, Bronwyn, Marie-Josée Fortin, and Andrew Fall. 2011. “Connectivity for Conservation: A Framework to Classify Network Measures.” <em>Ecology</em> 92 (4): 847–58.</p>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -4,14 +4,14 @@
 \alias{genepop_to_genind}
 \title{Convert a GENEPOP file into a genind object}
 \usage{
-genepop_to_genind(path, n.loci, pop_names = NULL)
+genepop_to_genind(path, n.loci, pop_names = NULL, allele.digit.coding = 3)
 }
 \arguments{
 \item{path}{A character string with the path leading to the GENEPOP file
 in format .txt, or alternatively the name of this file in the working
 directory.}
 
-\item{n.loci}{The number of loci in the GENEPOP file (integer).}
+\item{n.loci}{The number of loci in the GENEPOP file (integer or numeric).}
 
 \item{pop_names}{(optional) Populations' names in the same order
 as in the GENEPOP file.
@@ -19,6 +19,9 @@ Vector object (class character) of the same length as the number
 of populations.
 Without this parameter, populations are numbered from 1 to the number
 of populations.}
+
+\item{allele.digit.coding}{Number indicating whether alleles are coded
+with 3 (default) or 2 digits.}
 }
 \value{
 An object of type \code{genind}.
@@ -29,8 +32,8 @@ software into a genind object
 }
 \details{
 This function uses functions from \pkg{pegas} package.
-GENEPOP file should only include microsatellites loci with allele names
-of length 3.
+GENEPOP file should can include microsatellites loci or SNPs with allele names
+of length 2 or 3 (noted as 01, 02, 03 or 04 for SNPs).
 The loci line(s) must not start with a spacing.
 }
 \examples{

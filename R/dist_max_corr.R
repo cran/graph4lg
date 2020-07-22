@@ -12,18 +12,20 @@
 #' identified. A figure showing the evolution of the correlation coefficients
 #' when landscape distance threshold increases is plotted.
 #'
-#' @param mat_gd A symmetric \code{matrix} with pairwise genetic distances
-#' between populations or sample sites.
-#' @param mat_ld A symmetric \code{matrix} with pairwise landscape distances
-#' between populations or sample sites. These distances can be
-#' Euclidean distances, cost-distances or resistance distances, among others.
-#' @param interv A numeric value indicating the interval between the different
-#' distance thresholds for which the correlation coefficients are computed.
+#' @param mat_gd A symmetric \code{matrix} or \code{dist} object with pairwise
+#' genetic distances between populations or sample sites.
+#' @param mat_ld A symmetric \code{matrix} or \code{dist} object with pairwise
+#' landscape distances between populations or sample sites. These distances
+#' can be Euclidean distances, cost-distances or resistance distances,
+#' among others.
+#' @param interv A numeric or integer value indicating the interval between
+#' the different distance thresholds for which the correlation coefficients
+#' are computed.
 #' @param from (optional) The minimum distance threshold value at which the
 #' correlation coefficient is computed.
 #' @param to (optional) The maximum distance threshold value at which the
 #' correlation coefficient is computed.
-#' @param thr_gd (optional) A numeric value used to remove
+#' @param thr_gd (optional) A numeric or integer value used to remove
 #' genetic distance values from the data before the calculation.
 #' All genetic distances values above 'thr_gd' are removed from the data.
 #' This parameter can be used especially when there are outliers.
@@ -81,16 +83,26 @@ dist_max_corr <- function(mat_gd, mat_ld,
                           line_col = "black",
                           pts_col = "#999999"){
 
-  # Check whether mat_gd and mat_ld are symmetric matrices
-  if(!inherits(mat_gd, "matrix")){
-    stop("'mat_gd' must be an object of class 'matrix'.")
-  } else if (!inherits(mat_ld, "matrix")){
-    stop("'mat_ld' must be an object of class 'matrix'.")
-  } else if (!Matrix::isSymmetric(mat_gd)){
-    stop("'mat_gd' must be a symmetric pairwise matrix.")
-  } else if (!Matrix::isSymmetric(mat_ld)){
-    stop("'mat_ld' must be a symmetric pairwise matrix.")
+
+  # Check whether mat_gd and mat_ld are symmetric matrices or dist objects
+  if(!inherits(mat_gd, c("matrix", "dist"))){
+    stop("'mat_gd' must be an object of class 'matrix' or 'dist'.")
+  } else if (!inherits(mat_ld, c("matrix", "dist"))){
+    stop("'mat_lc' must be an object of class 'matrix' or 'dist'.")
+  } else if (inherits(mat_gd, "matrix")){
+    if(!Matrix::isSymmetric(mat_gd)){
+      stop("'mat_gd' must be a symmetric pairwise matrix.")
+    }
+  } else if (inherits(mat_ld, "matrix")){
+    if (!Matrix::isSymmetric(mat_ld)){
+      stop("'mat_ld' must be a symmetric pairwise matrix.")
+    }
+  } else if (inherits(mat_gd, "dist")){
+    mat_gd <- as.matrix(mat_gd)
+  } else if (inherits(mat_ld, "dist")){
+    mat_ld <- as.matrix(mat_ld)
   }
+
 
   # Check whether mat_gd and mat_lad have same row names and column names
   # and are ordered in the same way
@@ -101,8 +113,8 @@ dist_max_corr <- function(mat_gd, mat_ld,
   }
 
   # Check whether interv is numeric
-  if (!inherits(interv, "numeric")){
-    stop("'interv' must be a numeric value.")
+  if (!inherits(interv, c("numeric", "integer"))){
+    stop("'interv' must be a numeric or integer value.")
   }
 
   # Get maximum and minimum landscape distances values
@@ -122,8 +134,9 @@ dist_max_corr <- function(mat_gd, mat_ld,
   if(all(c(is.null(from), is.null(to)))){
     from <- min_ld
     to <- max_ld
-  } else if(!all(c(is.numeric(from), is.numeric(to)))){
-    stop("'from' and 'to' must be numeric values.")
+  } else if(!all(c(inherits(from, c("numeric", "integer")),
+                   inherits(to, c("numeric", "integer"))))){
+    stop("'from' and 'to' must be numeric or integer values.")
   }
 
   # Create a vector with the threshold values
@@ -152,7 +165,7 @@ dist_max_corr <- function(mat_gd, mat_ld,
   cc_val <- c()
 
   if (!is.null(thr_gd)){
-    if (is.numeric(thr_gd)){
+    if (inherits(thr_gd, c("integer", "numeric"))){
       if(thr_gd < max(mat_gd, na.rm = TRUE)){
         mat_gd2 <- mat_gd
         mat_gd2[mat_gd2 > thr_gd] <- NA

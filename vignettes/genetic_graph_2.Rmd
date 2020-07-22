@@ -1,0 +1,447 @@
+---
+title: "2 - Genetic graph construction and analysis with `graph4lg`"
+author: "UMR ThéMA - UBFC-CNRS, UMR Biogéosciences - UBFC-CNRS, ARP-Astrance"
+date: "Paul SAVARY"
+output:
+  html_vignette:
+    df_print: paged
+    toc: true
+    toc_depth: 2
+    fig_width: 6
+    fig_height: 6
+bibliography: biblio_vignette.bib
+vignette: |
+  %\VignetteIndexEntry{2 - Genetic graph construction and analysis with `graph4lg`}     
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+collapse = TRUE,
+comment = "#>"
+)
+
+library(graph4lg)
+library(igraph)
+
+```
+
+
+
+# Introduction
+
+The rationale of `graph4lg` package in R is to make easier the construction and analysis of genetic and landscape graphs in landscape genetic studies (hence the name `graph4lg`, meaning Graphs for Landscape Genetics). This package provides users with tools for:
+
+* Landscape and genetic data processing
+* Genetic graph construction and analysis
+* Landscape graph construction and analysis
+* Landscape and genetic graph comparisons
+
+
+Each one of the included tutorials focuses on one of these points. This second tutorial will focus on **genetic graph construction and analysis**. It will describe the package functions allowing users to:
+
+* Make preliminary analyses to choose a pruning method
+* Construct genetic graphs with different pruning methods and link weighting
+* Analyse genetic graphs (metrics, partition, plots, export)
+
+## Data used in this tutorial
+
+The package already includes genetic and spatial simulated data sets allowing users to discover its different functionalities. The first data set (`data_simul`) was simulated with CDPOP [@landguth2010cdpop] on a simulated landscape. It consists of 1500 individuals from 50 populations genotyped at 20 microsatellite loci. Individuals dispersed less when the cost-distance between populations was large. A landscape graph was created with Graphab [@foltete2012software] whose nodes were the 50 simulated populations and the links were weighted by cost-distance values between populations. The project created with Graphab was included into the package such that the landscape graphs and the cost-distance matrix can be easily imported into the R environment.
+
+Here, we also rely on a data set created only for the vignettes (`data_tuto`) and containing several objects created from the same data as that used to create `data_simul`:
+
+```{r, echo = TRUE, eval = TRUE}
+data("data_tuto")
+
+mat_dps <- data_tuto[[1]]
+mat_pg <- data_tuto[[2]]
+graph_ci <- data_tuto[[3]]
+dmc <- data_tuto[[4]]
+land_graph <- data_tuto[[5]]
+mat_ld <- data_tuto[[6]]
+```
+
+# Preliminary analyses: diagnostic plots
+
+A **genetic graph** is made of a set of nodes corresponding to sampled populations connected by a set of links between them. Usually, links are weighted by genetic distances between populations. A lot of different methods exist for constructing genetic graphs. They mainly differ in the way they conserve or remove links between population pairs, i.e. the way they **prune** the graph, and in the way **links are weighted** (which genetic distance?).
+
+To choose a genetic distance and a pruning method for the genetic graph construction, we developed functions to perform **preliminary analyses** of the **spatial pattern of genetic differentiation**. Indeed, a genetic graph can be created in order to i) identify the direct dispersal paths between populations or to ii) select the set of population pairs to consider to infer landscape effects on dispersal. According to the use of a genetic graph and to the spatial pattern of genetic differentiation (type-I or type-IV pattern of IBD [@hutchison1999correlation, @van2015isolation]), the choice of a genetic distance and of a pruning method will not be the same.  
+
+@van2015isolation computed the so-called **distance of maximum correlation (DMC)** as the distance between populations below which population pairs should be considered in order to maximise the correlation between landscape distance (geographical distance in their case, but applies similarly to cost-distance) and genetic distance. This distance threshold is computed by increasing iteratively the maximum distance between populations above which population pairs are not taken into account to compute the correlation. Thus, an increasing number of population pairs is considered in the inference. When the correlation coefficient between landscape distance and genetic distance reaches a maximum, the distance threshold considered is the DMC. When the DMC is equal to the maximum distance between populations, it means that an equilibrium established between gene flow and genetic drift at the scale of the study area. Conversely, when the DMC is lower than this maximum distance, it means that there is a "plateau" in the relationship between landscape distance and genetic distance because migration-drift equilibrium has not been reached yet at the scale considered. It can be due to recent modifications of the landscape which consistently reduced the connectivity in a previously connected context. In this case, graph pruning is needed to well infer landscape effect on dispersal. Similarly, genetic distances that do not assume this equilibrium should be used.
+
+## Distance of maximum correlation
+
+The function `dist_max_corr` calculates the DMC from two distance matrices. We need to specify the interval between two distance thresholds iteratively considered to select population pairs and compute the correlation coefficient. 
+```{r, echo = TRUE, eval = FALSE}
+dmc <- dist_max_corr(mat_gd = mat_dps, mat_ld = mat_ld, 
+                     interv = 500, pts_col = "black")
+```
+
+The `dmc` object is a list with 1) the DMC value, 2) a vector containing all the computed correlation coefficients, 3) a vector with all the distance thresholds tested and 4) a graphic object created with the `ggplot2` package.
+
+```{r}
+# DMC value
+dmc[[1]]
+# Correlation coefficients
+dmc[[2]]
+# Threshold distances tested
+dmc[[3]]
+```
+
+The figure below represents the evolution of the correlation coefficient values when distance thresholds increase.
+
+```{r, eval = TRUE, echo = FALSE}
+
+vec_t <- c(500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000,
+           6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 10230.05)
+
+cc_val <- c(NA, 0.2986565, 0.3154498, 0.5188747, 0.7059633, 0.7559539, 
+            0.7850267, 0.7947691, 0.8038470, 0.7853646, 0.7760106, 
+            0.7641339, 0.7530264, 0.7462445, 0.7386713, 0.7333936, 
+            0.7305631, 0.7226695, 0.7137972, 0.7110962, 0.7041702)
+
+
+dat <- data.frame(vec_t = vec_t, cc_val = cc_val)
+if(any(is.na(dat$cc_val))){
+  dat <- dat[-which(is.na(dat$cc_val)), ]
+}
+
+plot_dmc <- ggplot2::ggplot(data = dat, ggplot2::aes(x = vec_t, y = cc_val)) +
+  ggplot2::geom_point(color = "#999999", size = 1, shape = 16) +
+  ggplot2::geom_line(color = "black") +
+  ggplot2::labs(x = "Distance threshold",
+                y = "Correlation coefficient") +
+  ggplot2::theme_bw()
+plot_dmc
+
+```
+
+
+## IBD pattern as a scatter plot
+
+The function `scatter_dist`, on the other hand, allows users to **visualise the relationship between two distance matrices** by making a **scatter plot**. The shape of this relationship can be compared to the **four different types of IBD patterns** described by @hutchison1999correlation in order to characterise the **spatial pattern of genetic differentiation**. 
+
+For example:
+
+```{r}
+scatter_dist(mat_gd = mat_dps, mat_ld = mat_ld, 
+             pts_col = "black")
+```
+
+In this particular case, we notice a **type-IV pattern of isolation by distance** with a "plateau" in the relationship between cost-distance and genetic-distance (D~PS~). **Graph pruning will be needed** to select the population pairs to include in the inference of landscape effects on dispersal.
+
+# Genetic graph construction
+
+
+Once the diagnostic plots have been created, users do have some indications to construct the genetic graphs. Pruning is especially needed when there is a "plateau" in the relationship between genetic distance and landscape distance. In the following section, we present the different pruning methods available.
+
+## Pruning based on distance thresholds
+
+To prune a graph whose links are weighted by distances, we can remove all the links associated to geographical or genetic distances larger (or lower) than a specific threshold distance. This distance can for example be equal to the maximum dispersal distance of an individual of the study species at the scale of its lifespan so that the resulting graph represents the direct dispersal paths of the species. It can also be equal to the DMC if the objective is to infer landscape effects on dispersal. 
+
+The function `gen_graph_thr` takes as arguments a distance matrix used to weight the links of the resulting graph (`mat_w`) and a distance matrix on which the "thresholding" is based (`mat_thr`). The selected links are selected according to the values of this latter matrix. The argument `thr` is the numerical value of the threshold distance. If `mat_thr` is not specified, `mat_w` is used by default for the thresholding. Lastly, we have to specify if the links to remove take larger or lower values than the threshold value.
+
+```{r}
+# First compute the geographical distance between populations
+mat_geo <- mat_geo_dist(data = pts_pop_simul,
+                        ID = "ID", x = "x", y = "y",
+                        crds_type = "proj")
+# Reorder the matrix
+mat_geo <- reorder_mat(mat_geo, order = row.names(mat_dps))
+
+# Create the thresholded graph
+graph_thr <- gen_graph_thr(mat_w = mat_dps, mat_thr = mat_geo,
+                           thr = 12000, mode = "larger")
+graph_thr
+```
+
+The function returns a graph in the form of an `igraph` object, which is consequently compatible with all functions from `igraph` package [@csardi2006igraph], one of the most used R package to create and analyse graphs (together with `sna` and `networks`). In the latter example, the graph has 50 nodes and 162 links when we prune it using a 12-km distance threshold. Its links are weighted with the values of the `mat_dps` matrix.
+
+## Pruning based on topological constraints
+
+A graph can be pruned according to a topological criterion. The function `gen_graph_topo` can use 5 different criteria. As with the previous function, topological criteria are applied by considering the distance values of the `mat_topo` matrix, but the links are weighted with the values of the `mat_w` matrix (except when `mat_topo` is not specified, cf. previous section).
+
+**Gabriel graph**: in the created graph, two nodes are connected by a link if, when we draw a circle whose center is set at the middle of the segment linking them and whose radius is equal to half the length of this segment, there is no other node inside the circle. In mathematical terms, it means that there is a segment between $x$ and $y$ if and only if for every other point $z$, we have: $d_{xy}\leq \sqrt{d_{xz}^{2}+d_{yz}^{2}}$. We can compute such a graph from geographical distances [@gabriel1969new] (`graph_gab_geo` below) but also, less commonly, from genetic distances [@naujokaitis2013implications] (`graph_gab_gen` below). In the latter case, it is to some extent as if Pythagoras's theorem was applied to genetic distances, which has already been done by @naujokaitis2013implications.
+
+```{r}
+graph_gab_geo <- gen_graph_topo(mat_w = mat_dps, mat_topo = mat_geo,
+                                topo = "gabriel")
+graph_gab_geo
+graph_gab_gen <- gen_graph_topo(mat_w = mat_dps, mat_topo = mat_dps,
+                                topo = "gabriel")
+```
+
+**Minimum Spanning Tree (MST)**: it creates a minimum spanning tree, i.e a graph in which every node is connected by a link to at least another node and whose total link weight is minimum. By definition, its number of links is equal to the number of nodes - 1.
+
+```{r}
+graph_mst <- gen_graph_topo(mat_w = mat_dps, mat_topo = mat_dps,
+                            topo = "mst")
+graph_mst
+```
+
+**"Percolation" graph**: the graph is created by removing iteratively some links, beginning with those with the highest weights until the graph breaks into more than one component. We conserve the link whose removal entails the creation of another component to obtain a connected graph. This method is also called the *edge-thinning method* [@urban2009graph]. Such a method is linked to percolation theory [@rozenfeld2008network]. The function `gen_graph_topo` indicates the number of conserved links and the weight of the link whose removal disconnects the graph (maximum link weight of the created graph).
+
+```{r}
+graph_percol <- gen_graph_topo(mat_w = mat_dps, mat_topo = mat_dps,
+                               topo = "percol")
+```
+
+
+
+**"k-nearest-neighbors" graph**: it creates a graph in which every node is connected to its $k$-nearest neighbors according to the distance matrix `mat_topo`. Its links are weighted with values from `mat_w`. It means that if the distance between node $i$ and node $j$ is among the $k$-th smallest distances between node $i$ and the other nodes, there is a link between $i$ and $j$ in the graph. Therefore, a node can be connected to more than $k$ nodes because the nearest node to node $j$ is not necessarily among the $k$ nearest neighbors to node $i$. The function `gen_graph_topo` takes `topo="knn"` and `k=x` as arguments in that case. For example :
+
+```{r}
+graph_k3 <- gen_graph_topo(mat_w = mat_dps, mat_topo = mat_dps,
+                               topo = "knn", k = 3)
+```
+
+**Complete graph**: the function allows users to create a complete graph from a distance matrix. In that case, there is no pruning and, by definition, all population pairs are connected.
+
+```{r}
+graph_comp <- gen_graph_topo(mat_w = mat_dps, mat_topo = mat_dps,
+                             topo = "comp")
+```
+
+Finally, the function `graph_plan` creates a planar graph. However, this method relies upon a Voronoi triangulation that needs spatial coordinates as input. Hence, it is not part of the `gen_graph_topo` function. The function `graph_plan` can be used as following:
+
+```{r, echo = FALSE}
+g_plan <- graph_plan(crds = pts_pop_simul,
+                     ID = "ID", x = "x", y = "y",
+                     weight = TRUE)
+g_plan
+```
+
+
+## Pruning based on the conditional independence principle
+
+The last pruning method implemented by the `graph4lg` package is based upon the **conditional independence principle**. The function `gen_graph_indep` is largely **inspired by the function `popgraph` created by R. Dyer** [@dyer2004population], but does not need the package `popgraph` to function. Besides, as some calculations are performed with functions from the `adegenet` package (coded in C), it is faster than the original `popgraph` function. It is also more flexible than `popgraph` function given we can vary i) the way we compute genetic distances used to weight the links and to compute the covariance between populations, ii) the formula used to compute the covariance from squared distances or alternatively simple distances, iii) the statistical tolerance threshold, iv) the p-values adjustment and v) the returned objects created by the function. Without entering further into the details, here is an implementation example. 
+
+```{r, eval = FALSE, echo = TRUE}
+graph_ci <- gen_graph_indep(x = data_genind,
+                            dist = "PCA",
+                            cov = "sq",
+                            adj = "holm")
+```
+```{r}
+graph_ci
+```
+
+# Genetic graph analysis
+
+Once the genetic graphs have been created, we can perform calculations from them, visualise and export them. 
+
+## Computing graph-theoretic metrics
+
+First, we can compute **graph-theoretic metrics at the node-level** from graphs with the function `compute_node_metric` (that uses in part functions from `igraph` package in R). This function takes a graph object and a vector indicating the metrics to compute as arguments. Available metrics are:
+
+* **Degree** (`"deg"`): number of links connected to each node
+* **Closeness centrality** (`"close"`): number of links between a node and every other nodes in the graph, measured as the inverse of the average length of the shortest paths to/from the focal node to/from all the other nodes in the graph.
+* **Betweeness centrality** (`"btw"`): number of times each node is a step on the shortest path from a node to another, when considering all possible combinations.
+* **Strength** (`"str"`): sum of the weights of the links connected to a node
+* **Sum of inverse weights** (`"siw"`): sum of the inverse weights of the links connected to a node
+* **Mean of inverse weights** (`"miw"`): mean of the inverse weights of the links connected to a node
+
+The two latter metrics, when applied to genetic graphs whose links are weighted by genetic distances, reflect how similar a population is from the others and has been shown to be correlated with the number of migrants going to/from this population [@koen2016node].
+
+Link weights can be considered or not in the computation (`weight = TRUE` or `weight = FALSE`).
+
+When used, this function returns a `data.frame` with the values of the computed metrics for each node.
+
+```{r}
+df_metric <- compute_node_metric(graph = graph_percol)
+head(df_metric)
+```
+
+
+**Metric values** can then be **associated with the nodes to which they correspond in the graph object** itself. To that purpose, we use the function `add_nodes_attr` and give it as arguments:
+
+* the name of the graph (which must have node names)(`graph`), 
+* (if `input = "df"`) the name of the `data.frame` containing the values to add as node attributes (`data`),
+* the name of the column in which node names are stored. It will be used to merge the graph node attribute table with the `data.frame` (`index`)
+* the name of the columns to include as node attributes. If not specified, all columns are included (`ìnclude="all"`(by default) or `include=c("metric1", "metric2", ...)`).
+
+For example, we can add the metrics from `df_metric` to the nodes of the graph `graph_percol` from which they were computed:
+```{r}
+graph_percol <- add_nodes_attr(graph = graph_percol,
+                               data = df_metric,
+                               index = "ID",
+                               include = "all")
+graph_percol
+```
+
+The resulting object is the graph object of class `igraph` in which node attributes were added.
+
+We can also associate metric values to the nodes of the `igraph` object by specifying the **path to a shapefile layer** whose attribute table contains a field with the graph node names. In this case, argument `data` is not used and we have to specify the path of the directory in which the shapefile layer is located (`dir_path`) and the root name of this layer (`layer`).
+
+```{r, eval = FALSE, echo = TRUE}
+graph_percol <- add_nodes_attr(graph_percol,
+                             input = "shp",
+                             dir_path = system.file('extdata', package = 'graph4lg'),
+                             layer = "patches",
+                             index = "Id",
+                             include = "Area")
+```
+
+
+## Graph partitioning
+
+In a graph, some groups of nodes are more connected then they are connected to nodes from other groups. These groups form **communities or modules**. They can be identified through **modularity analyses**. The function `compute_graph_modul` makes possible this identification. **Several algorithms** can be used (argument `algo`): `fast greedy` [@clauset2004finding], `louvain` [@blondel2008fast], `optimal` [@brandes2008modularity] and `walktrap` [@pons2006computing]. 
+
+The number of created modules in each graph is adjustable but by default depends on the optimal value obtained when performing the modularity analysis (argument `nb_modul`). 
+
+Besides, the modularity calculation can take into account the way link weights represent the node interaction. When taken into account, the weight given to a link in the calculation can be:
+
+* Considered as a distance (`node_inter = "distance"`): in that case, a link corresponding to a large distance between nodes is given a small weight in the analysis
+* Considered as a similarity index (`node_inter = "similarity"`): in that case, a link corresponding to a large similarity between nodes is given a large weight in the analysis
+
+For example:
+```{r}
+df_modul <- compute_graph_modul(graph = graph_percol, 
+                    algo = "fast_greedy",
+                    node_inter = "distance")
+
+head(df_modul)
+# Unique values of module ID
+unique(df_modul$module)
+```
+
+In this example, the optimal number of modules is 4. The returned object is a `data.frame` indicating the ID of the module to which each node pertains.
+
+This information can also be added as a node attribute to the graph object.
+
+```{r}
+graph_percol <- add_nodes_attr(graph = graph_percol, 
+                               input = "df",
+                               data = df_modul,
+                               index = "ID")
+```
+
+Now, `graph_percol` has many attributes which can be used in subsequent analyses. They can be displayed using the command `igraph::get.vertex.attribute(graph_percol)`.
+
+
+## Visual analysis
+
+**Visual representation of the graph on a map**
+
+Graphs, and especially spatial graphs, are particularly adapted to visual analyses. The function `plot_graph_lg` integrates functions from `igraph` and `ggplot2` to represent graphs on a map. 
+
+*Spatial graphs*:
+
+Most frequently, graphs are spatial and a table with population coordinates must be given as an argument. It must have exactly the same structure as the table given as an argument to `mat_geo_dist` (3 columns : ID, x, y). The visual representation can make visible the link weights by plotting the links with a width proportional to the weight (`link_width = "w"`) or the inverse weight (`link_width = "inv_w"`) of the links.
+
+For example, with the graph `graph_mst` with `mode="spatial"`:
+```{r}
+p <- plot_graph_lg(graph = graph_mst, 
+                   mode = "spatial",
+                   crds = pts_pop_simul,
+                   link_width = "inv_w")
+p
+```
+
+Besides, the node size can be proportional to one of the node attributes, and their color can depend on the module of the node if a modularity analysis has been performed whose results were added to the graph object. For example, if we want to display both node metrics and modules for the graph `graph_mst`, the steps to follow are:
+
+```{r, eval = TRUE, echo = TRUE}
+# Compute the metrics
+df_metric_mst <- compute_node_metric(graph = graph_mst)
+
+# Associate them to the graph
+graph_mst <- add_nodes_attr(graph = graph_mst,
+                               data = df_metric_mst,
+                               index = "ID",
+                               include = "all")
+# Compute the modules
+df_module_mst <- compute_graph_modul(graph = graph_mst, 
+                    algo = "fast_greedy",
+                    node_inter = "distance")
+# Associate them to the graph
+graph_mst <- add_nodes_attr(graph = graph_mst,
+                               data = df_module_mst,
+                               index = "ID",
+                               include = "all")
+
+
+# Plot the graph
+# Link width is inversely proportional to genetic distance
+# Node size is proportional to MIW metric
+# Node color depends on the node module
+
+plot_graph_lg(graph = graph_mst,
+              mode = "spatial",
+              crds = pts_pop_simul,
+              link_width = "inv_w",
+              node_size = "miw",
+              module = "module")
+
+```
+
+
+*Aspatial graph*:
+
+If the population spatial coordinates are not available, we can still display the graph on a two-dimensional plane. In that case, the node positions are computed with @fruchterman1991graph algorithm to optimise the representation. This algorithm is based upon a principle of attraction-repulsion so that nodes with strong connections are close to each other, but not so close in order to avoid their overlap. This algorithm is used by the function `plot_graph_lg` when `mode="aspatial"`. The way nodes interact can be specified and indicates if link weights correspond to distances or similarities. In the first case, links with large weights tend to separate nodes whereas in the latter case, large weights tend to attract nodes (`node_inter = "distance"` or `node_inter = "similarity"`). 
+
+With the graph `graph_mst`, we obtain:
+
+```{r}
+p <- plot_graph_lg(graph = graph_mst, 
+                   mode = "aspatial", 
+                   node_inter = "distance", 
+                   link_width = "inv_w",
+                   node_size = "miw",
+                   module = "module")
+p
+```
+
+
+Note that this aspatial representation can be useful even when spatial coordinates are available. Indeed, it indicates if neighbor populations from a geographical point of view are also neighbors in the aspatial representation only based on their genetic distances.
+
+We see in that example that nodes from the same modules are direct neighbors in both the spatial and aspatial representations.
+
+**Representation of the links on a scatterplot**
+
+In landscape genetics, a graph is generally pruned from a distance matrix in which a set of distance values between population pairs or sample sites are chosen. This matrix is usually a genetic distance matrix. The relationship between these genetic distances and corresponding landscape distances (geographical or cost-distance) can be studied. When a scatterplot is created to do that (with the function `scatter_dist`), we can display the points corresponding to population pairs connected in the pruned graph in a different color. The function `scatter_dist_g` thereby allows users to understand the pruning and to assess its intensity. 
+
+In the following example, we can see that all connected population pairs from `graph_gab_geo` are separated by short landscape distances.
+
+```{r}
+scatter_dist_g(mat_y = mat_dps , 
+               mat_x = mat_ld, 
+               graph = graph_gab_geo)
+```
+
+**Link weight distribution**
+
+Finally, in order to have further information about genetic differentiation patterns, we can create histograms depicting the link weight distribution with the function `plot_hist_w`.
+
+```{r}
+p <- plot_w_hist(graph = graph_gab_gen)
+p
+```
+
+
+
+## Export to shapefile layers
+
+Even if the function `plot_graph_lg` enables to visualise a spatial graph on a geographical plane, it is often useful to confront the population and link locations to other types of spatial data. To that purpose, we can export the graph into shapefile layers in order to open them in a GIS. The graph nodes must have spatial coordinates. When exporting, we can choose to export only the node shapefile layer, the link shapefile layer or both. We can also export node attributes (`metrics=TRUE`). These attributes will be included in the attribute table of the exported node shapefile layer. For the links, the attribute table contains the weights associated to every link, if they exist. 
+
+The function `graph_to_shp` takes also as an argument the coordinates reference system (CRS) in which the point coordinates from the table are expressed. It will be the CRS of the created shapefile layers, expressed as an integer EPSG code. The last argument is the suffix given to the shapefile layer names beginning with "node" or "link".
+
+
+```{r, eval = FALSE, echo = TRUE}
+graph_to_shp(graph = graph_mst, 
+             crds = pts_pop_simul, 
+             mode = "both",
+             layer = "test_shp_mst", 
+             dir_path = "wd",
+             metrics = TRUE,
+             crds_crs = 2154)
+```
+
+Shapefile layers are created in the working directory and can be imported into a GIS.
+
+
+# Conclusion
+
+In the next tutorial, we will present how to construct and analyse a landscape graph using Graphab with `graph4lg`.
+
+# References

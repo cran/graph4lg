@@ -3,9 +3,13 @@
 #' @description The function converts a pairwise matrix into an edge-list
 #' data.frame
 #'
-#' @param pw_mat A pairwise matrix of class \code{matrix}. It must have
+#' @param pw_mat A pairwise matrix which can be:\itemize{
+#' \item{An object of class \code{matrix}. It must have
 #' the same row names and column names. If values represent distances,
-#' diagonal elements should be equal to 0.
+#' diagonal elements should be equal to 0.}
+#' \item{An object of class \code{dist}. In that, its column numbers are
+#' used to create IDs in the resulting data.frame.}
+#' }
 #' @return An object of class \code{data.frame}
 #' @export
 #' @author P. Savary
@@ -17,23 +21,30 @@
 
 pw_mat_to_df <- function(pw_mat){
 
+  if(!inherits(pw_mat, c("matrix", "dist"))){
+    stop("'pw_mat' must be a matrix or dist object")
+  } else if (inherits(pw_mat, "matrix")){
 
-  if(is.null(row.names(pw_mat))){
-    stop("'pw_mat' must have row names")
-  } else if(is.null(colnames(pw_mat))){
-    stop("'pw_mat' must have column names")
-  }
+    if(is.null(row.names(pw_mat))){
+      stop("'pw_mat' must have row names")
+    } else if(is.null(colnames(pw_mat))){
+      stop("'pw_mat' must have column names")
+    }
 
-  if(!isSymmetric(pw_mat)){
-    stop("'pw_mat' must be a symmetric matrix")
-  }
+    if(!isSymmetric(pw_mat)){
+      stop("'pw_mat' must be a symmetric matrix")
+    }
 
-  if(!all(row.names(pw_mat) == colnames(pw_mat))){
-    stop("Row names and column names of 'pw_mat' must be equal")
-  }
+    if(!all(row.names(pw_mat) == colnames(pw_mat))){
+      stop("Row names and column names of 'pw_mat' must be equal")
+    }
 
-  if(!all(diag(pw_mat) == 0)){
-    warning("All diagonal elements of pw_mat were not equal to 0.")
+    if(!all(diag(pw_mat) == 0)){
+      warning("All diagonal elements of pw_mat were not equal to 0.")
+    }
+
+  } else if (inherits(pw_mat, "dist")){
+    pw_mat <- as.matrix(pw_mat)
   }
 
   vec_name <- row.names(pw_mat)
@@ -61,13 +72,13 @@ pw_mat_to_df <- function(pw_mat){
 
 
   # Create a unique ID
-  df_pw$id_lien <- paste0(df_pw$Var1, "_", df_pw$Var2)
+  df_pw$id_link <- paste0(df_pw$Var1, "_", df_pw$Var2)
 
   # Set column names
-  colnames(df_pw) <- c("id_1", "id_2", "id_lien")
+  colnames(df_pw) <- c("id_1", "id_2", "id_link")
 
   # Set row names
-  row.names(df_pw) <- df_pw$id_lien
+  row.names(df_pw) <- df_pw$id_link
 
   # Create a column 'value' with NA at first
   df_pw$value <- NA

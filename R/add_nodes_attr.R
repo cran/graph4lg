@@ -32,8 +32,8 @@
 #' Alternatively, 'include' can be a vector with the names of the columns to add
 #' (ex.: "c('x', 'y', 'pop_name')").
 #' @details The graph can be created with the function
-#' \code{\link{graphab_to_igraph}} from shapefile layers created with GRAPHAB.
-#' Values of the metrics computed at the node level with GRAPHAB can then be
+#' \code{\link{graphab_to_igraph}} by importing output from Graphab projects.
+#' Values of the metrics computed at the node level with Graphab can then be
 #' added to such a graph with this function.
 #' @return A graph object of class \code{igraph}
 #' @export
@@ -48,6 +48,7 @@
 #'                         input = "df",
 #'                         index = "Id",
 #'                         include = "Area")
+
 
 add_nodes_attr <- function(graph,
                            input = "df",
@@ -89,7 +90,9 @@ add_nodes_attr <- function(graph,
     } else {
       # If 'dir_path' and 'layer' are well defined, open the GIS layer
       sink("aux")
-      data <- rgdal::readOGR(dsn = dir_path, layer = layer)
+      data <- suppressWarnings(sf::as_Spatial(sf::st_read(dsn = dir_path,
+                                                          layer = layer)))
+      #data <- rgdal::readOGR(dsn = dir_path, layer = layer)
       sink(NULL)
       # Get the attribute table of the layer as a data.frame
       data <- data.frame(data@data)

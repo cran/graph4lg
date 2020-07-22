@@ -22,19 +22,16 @@
 #' \item{If 'mode = 'node'', a shapefile layer is created for the nodes only.}
 #' \item{If 'mode = 'link'', a shapefile layer is created for the links only.}
 #' }
-#' @param metrics (not possible if 'mode = 'link'') Logical. Should metrics
-#' be calculated and integrated in the attribute table of the node shapefile
+#' @param metrics (not considered if 'mode = 'link'') Logical. Should graph
+#' node attributes integrated in the attribute table of the node shapefile
 #' layer? (default: FALSE)
-#' Metrics calculated are degrees, betweenness centrality and sum of
-#' inverse weight (if links are weighted)
-#' @param crds_crs A character string indicating the Coordinates
-#' Reference System of the spatial coordinates of the nodes and of the
-#' shapefile layers created.
+#' @param crds_crs An integer indicating the EPSG code of the coordinates
+#' reference system to use.
 #' The projection and datum are given in the PROJ.4 format.
 #' @param dir_path A character string corresponding to the path to the directory
 #' in which the shapefile layers will be exported. If \code{dir_path = "wd"},
 #' then the layers are created in the current working directory.
-#' @param layer_name A character string indicating the suffix of the name of
+#' @param layer A character string indicating the suffix of the name of
 #' the layers to be created.
 #' @return Create shapefile layers in the directory specified with the parameter
 #' 'dir_path'.
@@ -44,20 +41,19 @@
 #' data(data_tuto)
 #' mat_w <- data_tuto[[1]]
 #' gp <- gen_graph_topo(mat_w = mat_w, topo = "gabriel")
-#' crds_crs1 <- "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 "
-#' crds_crs2 <- "+x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs"
-#' crds_crs <- paste(crds_crs1, crds_crs2, sep = "")
+#' crds_crs <- 2154
 #' crds <- pts_pop_simul
-#' layer_name <- "graph_dps_gab"
+#' layer <- "graph_dps_gab"
 #' graph_to_shp(graph = gp, crds = pts_pop_simul, mode = "both",
 #'              crds_crs = crds_crs,
-#'              layer_name = "test_fonct",
+#'              layer = "test_fonct",
 #'              dir_path = tempdir(),
-#'              metrics = TRUE)
+#'              metrics = FALSE)
+
 
 
 graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
-                         layer_name, dir_path,
+                         layer, dir_path,
                          metrics = FALSE){
 
   # Check whether 'graph' is a graph object of class igraph
@@ -70,14 +66,16 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
     stop("crds must be an objet of class data.frame")
   }
 
-  # Check whether 'crds_crs' is a character string
-  if(!inherits(crds_crs, "character")){
-    stop("crds_crs must be a character string")
+  # Check whether 'crds_crs' is an integer
+  if(!is.null(crds_crs)){
+    if(!inherits(crds_crs, c("integer", "numeric"))){
+      stop("crds_crs must be an integer or a numeric value")
+    }
   }
 
-  # Check whether 'layer_name' is a character string
-  if(!inherits(layer_name, "character")){
-    stop("layer_name must be a character string")
+  # Check whether 'layer' is a character string
+  if(!inherits(layer, "character")){
+    stop("layer must be a character string")
   }
 
   # Check whether 'dir_path' is a character string
@@ -89,6 +87,7 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
   if(dir_path == "wd"){
     dir_path <- getwd()
   }
+
 
   # Check whether 'dir_path' is the path to an existing directory
   if(!(file.exists(dir_path))){
@@ -123,6 +122,14 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
     crds$ID <- as.character(crds$ID)
   }
 
+  # Check whether 'metrics' is a logical
+  if(!is.logical(metrics)){
+    stop("'metrics' must be a logical")
+  } else if(metrics){
+    if(mode == "link"){
+      message("'metrics' argument will not be used.")
+    }
+  }
 
   # If 'mode = 'link'' or 'mode = 'both'', then export the links
   if(any(c(mode, mode) == c("link", "both"))){
@@ -162,7 +169,7 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
     l_sfc <- sf::st_sfc(l_sf, crs = crds_crs)
 
     # Convert to `sp` object
-    lines_sp <- methods::as(l_sfc, "Spatial")
+    lines_sp <- suppressWarnings(methods::as(l_sfc, "Spatial"))
 
     # Create a data.frame with edge attributes
     edge_att <- graph_df
@@ -171,49 +178,71 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
 
     #lines_sp@lines
     # Create a spatial lines data.frame
-    link_lay <- sp::SpatialLinesDataFrame(lines_sp, edge_att)
-
-    # Add the CRS to 'link_lay'
-    raster::crs(link_lay) <- crds_crs
+    link_lay <- suppressWarnings(sp::SpatialLinesDataFrame(lines_sp, edge_att))
 
     # Export the shapefile layer
-    rgdal::writeOGR(link_lay,
-                    dsn = dir_path,
-                    layer = paste("link", layer_name, sep = "_"),
-                    driver = "ESRI Shapefile")
+    sf::st_write(obj = sf::st_as_sf(link_lay),
+                 dsn = dir_path,
+                 layer = paste0("link_", layer),
+                 driver = "ESRI Shapefile")
 
   }
 
   # If 'mode = 'node'' or 'mode = 'both'', then export the nodes
   if(any(c(mode, mode) == c("node", "both"))){
 
+    # If 'metrics = TRUE', then add the node attributes to the shp
+    if(metrics){
+
+      attr <- as.data.frame(igraph::get.vertex.attribute(graph))
+
+      if(ncol(attr) != 1){
+        crds2 <- merge(crds, attr, by.x = "ID", by.y = "name")
+      } else {
+        stop("The graph does not have any attribute to include
+             apart from node names, already present in crds")
+      }
+      # Order 'crds2' as will be reordered crds to ensure concordance
+      crds2 <- crds2[order(crds2$ID),]
+    }
+
     # Order 'crds' according to the alphabetical order of the column 'ID'
     crds <- crds[order(crds$ID),]
 
-    # If 'metrics = TRUE', then compute three node-level metrics
-    if (metrics){
-      crds$btw <- igraph::betweenness(graph)
-      crds$degree <- igraph::degree(graph)
 
-      if(!is.null(igraph::E(graph)$weight)){
-        crds$siw <- igraph::strength(graph,
-                                     weights = 1/igraph::E(graph)$weight)
-      }
-    }
     # Create a data.frame with the node coordinates
     xy <- crds[,c('x','y')]
-    # Create a spatial points data.frame
-    node_lay <- sp::SpatialPointsDataFrame(coords = xy, data = crds,
-                                         proj4string = sp::CRS(crds_crs))
 
+    # Create a list with the spatial points coordinates
+    mxy <- as.matrix(xy)
+
+    # Create a list of point objects
+    list_pts <- list()
+    for(i in 1:nrow(xy)){
+      list_pts[[i]] <- sf::st_point(mxy[i, ])
+    }
+
+    # Create the point layer
+    node_lay <- sf::st_sfc(list_pts, crs = crds_crs)
+
+    # If metrics, add crds2 with the attributes
+
+    if(metrics){
+      node_lay <- sf::st_sf(node_lay,
+                            crds2)
+    } else {
+      node_lay <- sf::st_sf(node_lay,
+                            crds)
+    }
 
     # Export the shapefile layer
-    rgdal::writeOGR(node_lay,
-                    dsn = dir_path,
-                    layer = paste("node", layer_name, sep = "_"),
-                    driver = "ESRI Shapefile")
+    sf::st_write(obj = node_lay,
+                 dsn = dir_path,
+                 layer = paste0("node_", layer),
+                 driver = "ESRI Shapefile")
+
   }
 
   message(paste("Created layer(s) were saved in the following directory: ",
-              dir_path, sep = ""))
+                dir_path, sep = ""))
 }

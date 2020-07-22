@@ -4,14 +4,16 @@
 \name{data_ex_gstud}
 \alias{data_ex_gstud}
 \title{data_ex_gstud genetic dataset}
-\format{A 'data.frame' with columns:
+\format{
+A 'data.frame' with columns:
 \describe{
 \item{ID}{Individual ID}
 \item{POP}{Population name}
 \item{LOCI-1 to LOCI-20}{20 loci columns with microsatellite data with
 3 digits coding, alleles separated by ":", and blank missing data
 (class 'locus' from \pkg{gstudio})}
-}}
+}
+}
 \usage{
 data_ex_gstud
 }

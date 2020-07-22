@@ -50,7 +50,8 @@ path_in <- system.file('extdata', 'gpop_simul_10_g100_04_20.txt',
                        package = 'graph4lg')
 file_n <- file.path(tempdir(), "gpop_simul_10_g100_04_20.txt")
 file.copy(path_in, file_n, overwrite = TRUE)
-mat_pw_d_j(x = file_n, pop_names = as.character(order(as.character(1:10))))
+mat_pw_d_j(x = file_n,
+           pop_names = as.character(order(as.character(1:10))))
 file.remove(file_n)
 }
 \references{
@@ -60,3 +61,4 @@ file.remove(file_n)
 \author{
 P. Savary
 }
+\keyword{internal}

@@ -56,6 +56,10 @@ pop_gen_index <- function(x,
   # Get the number of populations
   nb_pop <- length(pop_x)
 
+  if(nb_pop == 1){
+    message("There is only one population in your dataset")
+  }
+
   # If 'pop_names' is NULL (default), then population names are the same as in
   # the 'genind' object
   # ELSE they are derived from 'pop_names' vector when provided.

@@ -4,7 +4,9 @@
 \name{data_simul_genind}
 \alias{data_simul_genind}
 \title{data_simul_genind genetic dataset}
-\format{An object of type 'genind'}
+\format{
+An object of type 'genind'
+}
 \usage{
 data_simul_genind
 }

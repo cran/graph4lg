@@ -19,13 +19,14 @@
 #' individual \eqn{i} (0, 0.5 or 1).
 #' More information in :
 #' \href{https://www.ncbi.nlm.nih.gov/pubmed/7510853}{Bowcock et al., 1994}
-#' and \href{http://i122server.vu-wien.ac.at/MSA/info.html/Distances.html#DPS}{MSA manual}.
+#' and Microsatellite Analyser software (MSA) manual.
 #' This function uses functions from \pkg{adegenet} package
 #' Note that in the paper of Bowcock et al. (1994), the denominator is 2D.
 #' But, in MSA software manual, the denominator is D.
 #'
 #' @param x An object of class \code{genind}
 #' @return A pairwise matrix of genetic distances between populations
+#' @keywords internal
 #' @export
 #' @author P. Savary
 #' @examples

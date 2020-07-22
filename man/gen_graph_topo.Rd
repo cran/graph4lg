@@ -8,11 +8,11 @@ a specific topology}
 gen_graph_topo(mat_w, mat_topo = NULL, topo = "gabriel", k = NULL)
 }
 \arguments{
-\item{mat_w}{A symmetric (pairwise) \code{matrix} whose elements
-will be the links' weights}
+\item{mat_w}{A symmetric (pairwise) \code{matrix} or a \code{dist} object
+whose elements will be the links' weights}
 
 \item{mat_topo}{(optional) A symmetric (pairwise) distance \code{matrix}
-whose values will be used for the pruning method.}
+or a \code{dist} object whose values will be used for the pruning method.}
 
 \item{topo}{Which topology does the created graph have?
 \itemize{
@@ -65,6 +65,8 @@ Note that the topology 'knn' works best when 'mat_topo' contains distance
 values from a continuous value range, thereby avoiding equal distances
 between a node and the others.  are more than k nodes located
 at distances in the k-th smallest distances
+If dist objects are specified, it is assumed that colnames and
+row.names of mat_w and mat_topo refer to the same populations/locations.
 }
 \examples{
 mat_w <- mat_gen_dist(x = data_ex_genind, dist = 'DPS')

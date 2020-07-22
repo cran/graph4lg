@@ -6,8 +6,8 @@
 #' its derived package \pkg{GENEPOP} on R, as well as some functions
 #' from other packages (differentiation test, F-stats calculations,
 #' HWE test,...).
-#' It is designed to be used with diploid microsatellite data and
-#' alleles coded with 3 digits
+#' It is designed to be used with diploid microsatellite data with
+#' alleles coded with 2 or 3 digits or SNPs genind objects.
 #'
 #' @param x An object of class \code{genind}
 #' from package \pkg{adegenet}.
@@ -39,11 +39,9 @@
 #' GENEPOP software (Rousset, 2008).
 #' }
 #' \subsection{Allele coding}{
-#' This function can handle genetic data with different alleles coding lengths
-#' (for example alleles '99' and '101' at one locus).
-#' BUT, it is highly advisable not to use it with this type
-#' of data because applications using GENEPOP file won't be able to use the
-#' output file.
+#' This function can handle genetic data with different allele coding: 2 or 3
+#' digit coding for microsatellite data or 2 digit coding for SNPs (A,C,T,G
+#' become respectively 01, 02, 03, 04).
 #' }
 #' \subsection{Individuals order}{
 #' When individuals in input data are not ordered by populations, individuals
@@ -80,6 +78,11 @@ genind_to_genepop <- function(x, output = "data.frame"){
   # Get pop_names
   pop_names <- x@pop
 
+  ### Return a message if there is only one population
+  if(length(unique(pop_names)) == 1){
+    message("There is only one population in your dataset")
+  }
+
   # If the individuals are not ordered by populations, they are reordered
   # with their populations in alphabetic order.
   if(!all(pop_names == rep(pop_names[-which(duplicated(pop_names))],
@@ -94,6 +97,22 @@ genind_to_genepop <- function(x, output = "data.frame"){
     pop_names <- as.character(x@pop)[order(as.character(x@pop))]
     data <- x@tab[order(as.character(x@pop)),]
 
+  }
+
+  ### Identify the type of markers and modify SNPs data for GENEPOP usage
+  if(all(unlist(unique(x@all.names)) %in% c("A", "T", "C", "G"))){
+    m_type <- "snp"
+    message("Your dataset is treated as a SNP dataset.
+            Alleles initially coded A, T, C, G were respectively coded
+            01, 02, 03 and 04")
+
+    colnames(data) <- gsub(colnames(data),pattern=".A",replacement=".01")
+    colnames(data) <- gsub(colnames(data),pattern=".T",replacement=".02")
+    colnames(data) <- gsub(colnames(data),pattern=".C",replacement=".03")
+    colnames(data) <- gsub(colnames(data),pattern=".G",replacement=".04")
+    #####
+  } else {
+    m_type <- "msat"
   }
 
   # Get loci names
@@ -141,8 +160,10 @@ genind_to_genepop <- function(x, output = "data.frame"){
       # If heterozygote, then copy the code of the two alleles of ind j
       # the lower code number is the first
       } else if (length(het) != 0){
-        if (as.numeric(loc_all[col_loc[het[1]], 'allele']) <
-            as.numeric(loc_all[col_loc[het[2]], 'allele'])){
+
+        if (as.character(loc_all[col_loc[het[1]], 'allele']) <
+            as.character(loc_all[col_loc[het[2]], 'allele'])){
+
           a[j] <- paste(loc_all[col_loc[het[1]], 'allele'],
                         loc_all[col_loc[het[2]], 'allele'],
                         sep = "")
@@ -151,9 +172,15 @@ genind_to_genepop <- function(x, output = "data.frame"){
                         loc_all[col_loc[het[1]], 'allele'],
                         sep = "")
         }
-      # If missing data, set 000000
+
       } else {
-        a[j] <- "000000"
+        # If missing data, set 000000 or 0000
+        if(nchar(loc_all[1, 'allele'] == 6)){
+          a[j] <- "000000"
+        } else {
+          a[j] <- "0000"
+        }
+        ###
       }
 
     }

@@ -39,8 +39,8 @@ It then allows to use the functionalities of the GENEPOP software and
 its derived package \pkg{GENEPOP} on R, as well as some functions
 from other packages (differentiation test, F-stats calculations,
 HWE test,...).
-It is designed to be used with diploid microsatellite data and
-alleles coded with 3 digits
+It is designed to be used with diploid microsatellite data with
+alleles coded with 2 or 3 digits or SNPs genind objects.
 }
 \section{Warning}{
 
@@ -52,11 +52,9 @@ converts an object of class \code{genind} into a text file compatible with
 GENEPOP software (Rousset, 2008).
 }
 \subsection{Allele coding}{
-This function can handle genetic data with different alleles coding lengths
-(for example alleles '99' and '101' at one locus).
-BUT, it is highly advisable not to use it with this type
-of data because applications using GENEPOP file won't be able to use the
-output file.
+This function can handle genetic data with different allele coding: 2 or 3
+digit coding for microsatellite data or 2 digit coding for SNPs (A,C,T,G
+become respectively 01, 02, 03, 04).
 }
 \subsection{Individuals order}{
 When individuals in input data are not ordered by populations, individuals

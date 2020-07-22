@@ -7,9 +7,13 @@
 pw_mat_to_df(pw_mat)
 }
 \arguments{
-\item{pw_mat}{A pairwise matrix of class \code{matrix}. It must have
+\item{pw_mat}{A pairwise matrix which can be:\itemize{
+\item{An object of class \code{matrix}. It must have
 the same row names and column names. If values represent distances,
 diagonal elements should be equal to 0.}
+\item{An object of class \code{dist}. In that, its column numbers are
+used to create IDs in the resulting data.frame.}
+}}
 }
 \value{
 An object of class \code{data.frame}

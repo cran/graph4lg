@@ -4,12 +4,13 @@
 #' @description The function allows to construct a genetic graph whose
 #' links' weights are larger or lower than a specific threshold
 #'
-#' @param mat_w A symmetric (pairwise) \code{matrix} whose elements
-#' will be the links' weights
-#' @param mat_thr (optional) A symmetric (pairwise) distance \code{matrix} whose
-#' values will be used for the pruning based on the threshold value.
+#' @param mat_w A symmetric (pairwise) \code{matrix} or a \code{dist} object
+#' whose elements will be the links' weights
+#' @param mat_thr (optional) A symmetric (pairwise) distance \code{matrix}
+#' or a \code{dist} object whose values will be used for the pruning based
+#' on the threshold value.
 #' @param thr The threshold value (logically between min(mat_thr)
-#' and max(mat_thr))
+#' and max(mat_thr))(integer or numeric)
 #' @param mode
 #' \itemize{
 #' \item{If 'mode = 'larger'' (default), all the links whose weight is larger
@@ -26,6 +27,8 @@
 #' Values in 'mat_thr' matrix must be positive. Negative values from
 #' 'mat_w' are transformed into zeros.
 #' The function works only for undirected graphs.
+#' If dist objects are specified, it is assumed that colnames and
+#' row.names of mat_w and mat_thr refer to the same populations/locations.
 #' @examples
 #' mat_w <- mat_gen_dist(x = data_ex_genind, dist = 'DPS')
 #' suppressWarnings(mat_thr <- mat_geo_dist(pts_pop_ex,
@@ -40,9 +43,30 @@ gen_graph_thr <- function(mat_w, mat_thr = NULL, thr, mode = "larger"){
   # Check whether mat_thr is specified, else mat_w is used as mat_thr
   if(is.null(mat_thr)){
     mat_thr <- mat_w
-  # Also check whether mat_w and mat_thr have same dimensions and
+  }
+
+  # Check whether mat_w and mat_thr are symmetric matrices or dist objects
+  if(!inherits(mat_w, c("matrix", "dist"))){
+    stop("'mat_w' must be an object of class 'matrix' or 'dist'.")
+  } else if (!inherits(mat_thr, c("matrix", "dist"))){
+    stop("'mat_lc' must be an object of class 'matrix' or 'dist'.")
+  } else if (inherits(mat_w, "matrix")){
+    if(!Matrix::isSymmetric(mat_w)){
+      stop("'mat_w' must be a symmetric pairwise matrix.")
+    }
+  } else if (inherits(mat_thr, "matrix")){
+    if (!Matrix::isSymmetric(mat_thr)){
+      stop("'mat_thr' must be a symmetric pairwise matrix.")
+    }
+  } else if (inherits(mat_w, "dist")){
+    mat_w <- as.matrix(mat_w)
+  } else if (inherits(mat_thr, "dist")){
+    mat_thr <- as.matrix(mat_thr)
+  }
+
+  # Check whether mat_w and mat_thr have same dimensions and
   # same rows' and columns' names
-  } else if(!all(dim(mat_w) == dim(mat_thr))){
+  if(!all(dim(mat_w) == dim(mat_thr))){
     stop("Matrices 'mat_w' and 'mat_thr' must have the same dimensions.")
   } else {
     if(!all(row.names(mat_w) == row.names(mat_thr))){
@@ -65,7 +89,7 @@ gen_graph_thr <- function(mat_w, mat_thr = NULL, thr, mode = "larger"){
   }
 
   # Check whether thr is a valid numerci value
-  if(!is.numeric(thr)){
+  if(!inherits(thr, c("numeric", "integer"))){
     stop("'thr' must be a numeric value")
   }
 

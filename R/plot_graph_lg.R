@@ -3,8 +3,9 @@
 #' @description The function enables to plot graphs, whether spatial or not.
 #'
 #' @param graph A graph object of class \code{igraph}
-#' @param crds (if 'mode = 'spatial'') A \code{data.frame} with the spatial
-#' coordinates of the graph nodes. It must have three columns :
+#' @param crds (optional, default = NULL) If 'mode = 'spatial'', it is a
+#' \code{data.frame} with the spatial coordinates of the graph nodes.
+#' It must have three columns :
 #' \itemize{
 #' \item{ID: A character string indicating the name of the graph nodes.
 #' The names must be the same as the node names of the graph of
@@ -12,22 +13,42 @@
 #' \item{x: A numeric or integer indicating the longitude of the graph nodes.}
 #' \item{y: A numeric or integer indicating the latitude of the graph nodes.}
 #' }
+#' This argument is not used when 'mode = 'aspatial'' and mandatory when 'mode =
+#' 'spatial''.
 #' @param mode A character string indicating whether the graph is
-#' spatial ('mode = 'spatial'' (default)) or not ('mode = 'aspatial'')
-#' @param weight A character string indicating whether the links of
-#' the graph have weights (TRUE)(default) or not (FALSE)
-#' @param width A character string indicating whether the width of the link
-#' should be proportional to link weights ("w", default) or to the inverse
-#' of link weights ("inv", convenient with distances)
-#' @param pts_col (optional) A character string indicating the color
-#' used to plot the nodes (default: "#F2B950"). It must be a hexadecimal color
-#' code or a color used by default in R.
+#' spatial ('mode = 'spatial'') or not ('mode = 'aspatial'' (default))
+#' @param node_inter (optional, default = NULL) A character string indicating
+#' whether the links of the graph are weighted by distances or by similarity
+#' indices. It is only used when 'mode = 'aspatial'' to compute the node
+#' positions with Fruchterman and Reingold algorithm. It can be equal to:
+#' \itemize{
+#' \item{'distance': Link weights correspond to distances. Nodes that are close
+#' to each other will be close on the figure.}
+#' \item{'similarity': Link weights correspond to similarity indices. Nodes that
+#' are similar to each other will be close on the figure.}
+#' }
+#' @param link_width (optional, default = NULL) A character string indicating
+#' how the width of the link is set on the figure. Their width can be:\itemize{
+#' \item{inversely proportional to link weights ("inv_w", convenient with
+#' distances, default)}
+#' \item{proportional to link weights ("w")}
+#' }
+#' @param node_size (optional, default = NULL) A character string indicating
+#' the graph node attribute used to set the node size on the figure. It must be
+#' the name of a numeric or integer node attribute from the graph.
+#' @param module (optional, default = NULL) A character string indicating
+#' the graph node modules used to set the node color on the figure. It must be
+#' the name of a node attribute from the graph with discrete values.
+#' @param pts_col (optional, default = NULL) A character string indicating the
+#' color used to plot the nodes (default: "#F2B950"). It must be a hexadecimal
+#' color code or a color used by default in R. It cannot be used if 'module' is
+#' specified.
 #' @return A ggplot2 object to plot
 #' @import ggplot2
 #' @export
 #' @details When the graph is not spatial ('mode = 'aspatial''),
 #' the nodes coordinates are calculated with Fruchterman et Reingold algorithm.
-#' The graph object \code{x} of class \code{igraph} must have node names
+#' The graph object \code{graph} of class \code{igraph} must have node names
 #' (not necessarily in the same order as IDs in crds, given a merging is done).
 #' @author P. Savary
 #' @references \insertRef{fruchterman1991graph}{graph4lg}
@@ -39,41 +60,110 @@
 #' g <- plot_graph_lg(graph = gp,
 #'                              crds = pts_pop_ex,
 #'                              mode = "spatial",
-#'                              weight = TRUE)
-
-
+#'                              link_width = "inv_w")
 
 plot_graph_lg <- function(graph,
-                          crds,
-                          mode = "spatial",
-                          weight = TRUE,
-                          width = "w",
-                          pts_col = "#F2B950"){
+                          crds = NULL,
+                          mode = "aspatial",
+                          node_inter = NULL,
+                          link_width = NULL,
+                          node_size = NULL,
+                          module = NULL,
+                          pts_col = NULL){
 
+
+  # Check arguments
+  ###########################################################################
+
+  # Check whether graph is a graph
+  if(!inherits(graph, "igraph")){
+    stop("'graph' must be a graph object of class 'igraph'.")
+  }
 
   # Check whether the graph has node names
   if(is.null(igraph::V(graph)$name)){
     stop("Your graph must have node names.")
   }
 
-  # If the graph nodes have spatial coordinates
-  if(mode == "spatial"){
+  # Check if mode is a valid argument
+  if(!inherits(mode, "character")){
+    stop("'mode' must be a character string.")
+  } else if(!(mode %in% c("spatial", "aspatial"))){
+    stop("'mode' must be either 'spatial' or 'aspatial'.")
+  }
+
+
+  # Check if link_width is a valid argument
+  if(!is.null(link_width)){
+    if(!inherits(link_width, "character")){
+      stop("'link_width' must be a character string.")
+    } else if(!(link_width %in% c("w", "inv_w"))){
+      stop("'link_width' must be either 'w' or 'inv_w'.")
+    } else {
+      if(is.null(igraph::E(graph)$weight)){
+        stop("Your graph must have link weights when 'link_width' is not NULL.")
+      }
+    }
+  }
+
+
+  # Check if node_size is a valid argument
+  if(!is.null(node_size)){
+    if(!inherits(node_size, "character")){
+      stop("When specified, 'node_size' must be a character string.")
+    } else if(is.null(igraph::get.vertex.attribute(graph, name = node_size))){
+      stop("'node_size' doest not correspond to any graph node attribute.")
+    }
+  }
+
+  # Check if module is a valid argument
+  if(!is.null(module)){
+    if(!inherits(module, "character")){
+      stop("When specified, 'module' must be a character string.")
+    } else if(is.null(igraph::get.vertex.attribute(graph, name = module))){
+      stop("'module' doest not correspond to any graph node attribute.")
+    }
+  }
+
+  # Check if pts_col is a valid argument
+  if(!is.null(pts_col)){
+    if(!inherits(pts_col, "character")){
+      stop("When specified, 'pts_col' must be a character string.")
+    } else if(!is.null(module)){
+      stop("'pts_col' cannot be specified when 'module' is specified.")
+    } else if(length(pts_col) != 1){
+      stop("'pts_col' must be a character value, not a vector.")
+    } else if(stringr::str_sub(pts_col, 1, 1) != "#"){
+      stop("'pts_col' must be a color code.")
+    }
+  }
+
+  # Check crds and compute when needed and create nodes data.frame
+  ###########################################################################
+
+  # When mode is spatial
+  if (mode == "spatial"){
+
+    # Warning if node_inter is specified
+    if(!is.null(node_inter)){
+      warning("When 'mode == 'spatial'', 'node_inter' argument is ignored")
+    }
 
     # If 'crds' is given, check whether it has as many elements
     # as there are nodes
-    if(!exists("crds")){
+    if(is.null(crds)){
       stop("You must provide the spatial coordinates of the graph nodes.")
     } else if( nrow(crds) != length(igraph::V(graph) ) ) {
       stop("'crds' must have the same number of rows as there
            are nodes in 'graph'")
-    # Check whether 'crds' has valid column names
+      # Check whether 'crds' has valid column names
     } else if( !all( colnames(crds) == c("ID","x","y") ) ){
       stop("Column names of crds must be 'ID', 'x' and 'y'.")
-    # Check whether IDs from 'crds' match with the graph nodes names
+      # Check whether IDs from 'crds' match with the graph nodes names
     } else if( !any( as.character(crds$ID) %in% igraph::V(graph)$name ) ){
       stop("The IDs of 'crds' elements are not the same as the names
            of the nodes in 'graph'")
-    # Check whether spatial coordinates are numeric or integer
+      # Check whether spatial coordinates are numeric or integer
     } else if(!inherits(crds$x, c("integer", "numeric"))){
       stop("'x' must be of class 'numeric' or 'integer'")
     } else if(!inherits(crds$y, c("integer", "numeric"))){
@@ -82,190 +172,159 @@ plot_graph_lg <- function(graph,
       crds$ID <- as.character(crds$ID)
     }
 
-    # Create a data.frame from the links of the graph
-    graph_df <- data.frame(igraph::as_edgelist(graph))
 
-    # Add weights or not to the links
-    if (weight == TRUE){
-      graph_df$w <- igraph::E(graph)$weight
-      names(graph_df) <- c("from", "to", "w")
-    } else {
-      names(graph_df) <- c("from", "to")
+  } else if(mode == "aspatial"){
+
+    # When mode is aspatial
+
+    # Warning if crds is specified
+    if(!is.null(crds)){
+      warning("When 'mode == 'aspatial'', 'crds' argument is ignored")
     }
 
-    # Merge 'graph_df' and 'crds' in order to get spatial
-    # coordinates of the nodes
-    graph_df <- merge(graph_df, crds, by.x = 1, by.y = 1)
-    graph_df <- merge(graph_df, crds, by.x = 2, by.y = 1)
+    # Check node_inter and compute crds with Fruchterman and Reingold
+    if(inherits(node_inter, "character")){
 
-    # If links are weighted
-    if (weight == TRUE){
-      # Give colnames to 'graph_df'
-      names(graph_df) <- c("to", "from", "weight", "x", "y", "xend", "yend")
-      # Create a scaling function
-      sc01 <- function(x){(x-min(x))/(max(x)-min(x))}
+      if(!(node_inter %in% c("distance", "similarity"))){
+        stop("'node_inter' argument must be either 'distance', 'similarity'
+           or NULL.")
 
-      if (width == "w"){
-      # Compute the scaled weight
-      graph_df$w_sc <- sc01(graph_df$weight)
-      } else if (width == "inv"){
-      # Compute the inverse weight and scale it
-      graph_df$w_sc <- 1/sc01(graph_df$weight)
-      # Replace 'Inf' values by the largest values
-      graph_df[which(graph_df$w_sc == "Inf" ),
-               'w_sc'] <- max(graph_df[which(graph_df$w_sc < Inf), "w_sc"]) + 2
-      # Rescale again
-      graph_df$w_sc <- sc01(graph_df$w_sc)
-      } else {
-        stop("You must specify a correct 'width' option.")
+      } else if (is.null(igraph::E(graph)$weight)){
+        stop("Your graph must have link weights when 'node_inter' is not NULL.")
+      } else if(node_inter == "distance"){
+
+        # Vertices connected with a highly weighted link are placed closer
+        # to each other. With 1/w, nodes connected with small weighted link
+        # are closer.
+        crds <- igraph::layout_with_fr(graph,
+                                       weights = 1/(igraph::E(graph)$weight))
+      } else if(node_inter == "similarity"){
+
+        crds <- igraph::layout_with_fr(graph,
+                                       weights = igraph::E(graph)$weight)
+
       }
+    } else if(is.null(node_inter)){
 
-      # Create the plot
-      g <- ggplot() +
-        geom_segment(data = graph_df, aes_string(x = 'x', y = 'y',
-                                          xend = 'xend', yend = 'yend',
-                                          size = 'w_sc'), color = "black")+
-        scale_size_identity()+
-        geom_point(data = crds, aes_string(x = 'x', y = 'y'),
-                 size = 6, color = pts_col) +
-        geom_text(data = crds, aes_string(x = 'x', y = 'y', label = 'ID'),
-                  size = 3, color = "black", fontface = "bold")+
-        theme_bw()+
-        labs(x="Longitude", y="Latitude")
-        #theme(panel.background = element_rect(fill = 'black',
-      # colour = 'white'))
-
-    # If the links are not weighted
-    } else {
-      # Give column names to 'graph_df'
-      names(graph_df) <- c("to", "from", "x", "y", "xend", "yend")
-
-      # Create the plot
-      g <- ggplot() +
-        geom_segment(data = graph_df, aes_string(x = 'x', y = 'y',
-                                          xend = 'xend', yend = 'yend'),
-                                          color = "black")+
-        scale_size_identity()+
-        geom_point(data = crds, aes_string(x = 'x', y = 'y'),
-                   size = 6, color = pts_col) +
-        geom_text(data = crds, aes_string(x = 'x', y = 'y', label = 'ID'),
-                  size = 3, color = "black", fontface = "bold")+
-        theme_bw()+
-        labs(x="Longitude", y="Latitude")
-        #theme(panel.background = element_rect(fill = 'black',
-      # colour = 'white'))
+      crds <- igraph::layout_with_fr(graph,
+                                     weights = rep(1,
+                                                   length(igraph::E(graph))))
     }
 
-
-  # If the graph nodes do not have spatial coordinates
-  } else if (mode == "aspatial"){
-
-    # If links are weighted
-    if (weight == TRUE){
-
-    # Use the Fruchterman and Reingold algorithm to compute the node coordinates
-    # giving a weight to the links equal to the inverse of the distance they
-    # are weighted with in the graph
-    crds <- igraph::layout_with_fr(graph,
-                                   weights = 1/(igraph::E(graph)$weight))
-    } else {
-    # Use the Fruchterman and Reingold algorithm to compute the node coordinates
-    # giving a weight of 1 to the links
-    crds <- igraph::layout_with_fr(graph,
-                                   weights = rep(1,
-                                                length(igraph::E(graph))))
-    }
     # Create the data.frame 'crds'
     crds <- data.frame(crds)
-    names(crds) <- c("x", "y")
+    colnames(crds) <- c("x", "y")
 
     # IDs of 'crds' elements are graph nodes names
     crds$ID <- igraph::V(graph)$name
     crds <- crds[, c('ID', 'x', 'y')]
 
-    # Create a data.frame from the links of the graph
-    graph_df <- data.frame(igraph::as_edgelist(graph))
-
-    # Add weights or not to the links
-    if (weight == TRUE){
-      graph_df$w <- igraph::E(graph)$weight
-      names(graph_df) <- c("from", "to", "w")
-    } else {
-      names(graph_df) <- c("from", "to")
-    }
-
-    # Merge 'graph_df' and 'crds' in order to get spatial
-    # coordinates of the nodes
-    graph_df <- merge(graph_df, crds, by.x = 1, by.y = 1)
-    graph_df <- merge(graph_df, crds, by.x = 2, by.y = 1)
-
-    # If links are weighted
-    if (weight == TRUE){
-      # Give colnames to 'graph_df'
-      names(graph_df) <- c("to", "from", "weight", "x", "y", "xend", "yend")
-      # Create a scaling function
-      sc01 <- function(x){(x-min(x))/(max(x)-min(x))}
-
-
-      if (width == "w"){
-        # Compute the scaled weight
-        graph_df$w_sc <- sc01(graph_df$weight)
-      # Compute the inverse weight and scale it
-      } else if (width == "inv"){
-        graph_df$w_sc <- 1/sc01(graph_df$weight)
-        # Replace 'Inf' values by the largest values
-        graph_df[which(graph_df$w_sc == "Inf" ),
-                 'w_sc'] <- max(graph_df[which(graph_df$w_sc < Inf),
-                                         "w_sc"]) + 2
-        # Rescale again
-        graph_df$w_sc <- sc01(graph_df$w_sc)
-      } else {
-        stop("You must specify a correct 'width' option.")
-      }
-
-      # Create the plot
-      g <- ggplot() +
-        geom_segment(data = graph_df, aes_string(x = 'x', y = 'y',
-                                          xend = 'xend', yend = 'yend',
-                                          size = 'w_sc'), color = "black")+
-        scale_size_identity()+
-        geom_point(data = crds, aes_string(x = 'x', y = 'y'),
-                   size = 6, color = pts_col) +
-        geom_text(data = crds, aes_string(x = 'x', y = 'y', label = 'ID'),
-                  size = 3, color = "black", fontface = "bold")+
-        theme_bw()+
-        labs(x="x", y="y")
-        #theme(panel.background = element_rect(fill = 'black',
-      # colour = 'white'))
-
-    # If the links are not weighted
-    } else {
-      # Give column names to 'graph_df'
-      names(graph_df) <- c("to", "from", "x", "y", "xend", "yend")
-
-      # Create the plot
-      g <- ggplot() +
-        geom_segment(data = graph_df, aes_string(x = 'x', y = 'y',
-                                          xend = 'xend', yend = 'yend'),
-                     color = "black")+
-        scale_size_identity()+
-        geom_point(data = crds, aes_string(x = 'x', y = 'y'),
-                   size = 6, color = pts_col) +
-        geom_text(data = crds, aes_string(x = 'x', y = 'y', label = 'ID'),
-                  size = 3, color = "black", fontface = "bold")+
-        theme_bw()+
-        labs(x="x", y="y")
-        #theme(panel.background = element_rect(fill = 'black',
-      # colour = 'white'))
-    }
-
-  } else {
-    stop("You must specify a correct 'mode' option ('spatial' or 'aspatial')")
   }
- return(g)
+
+  ## Node size
+  if(is.null(node_size)){
+    crds$n_size <- 6
+  } else {
+    n_size <- data.frame(ID = igraph::get.vertex.attribute(graph = graph,
+                                                           name = "name"),
+                         n_size = igraph::get.vertex.attribute(graph = graph,
+                                                               name = node_size))
+    crds <- merge(crds, n_size, by = "ID")
+
+    if(length(unique(crds$n_size)) == 1){
+      crds$n_size <- 6
+    } else {
+      crds$n_size <- sc01(crds$n_size)*4 + 4
+    }
+  }
+
+  ## Modules
+  if(is.null(module)){
+    crds$module <- as.factor(1)
+  } else {
+    n_mod <- data.frame(ID = igraph::get.vertex.attribute(graph = graph,
+                                                          name = "name"),
+                        module = igraph::get.vertex.attribute(graph = graph,
+                                                              name = module))
+    crds <- merge(crds, n_mod, by = "ID")
+    crds$module <- as.factor(crds$module)
+  }
+
+  # Create links data.frame
+  ###########################################################################
+
+  # Create a data.frame from the links of the graph
+  graph_df <- data.frame(igraph::as_edgelist(graph))
+  colnames(graph_df) <- c("from", "to")
+
+  if(is.null(link_width)){
+    graph_df$l_w <- 0.5
+  } else if(link_width == "w"){
+    if(length(unique(igraph::E(graph)$weight)) == 1){
+      graph_df$l_w <- 0.5
+    } else {
+      graph_df$l_w <- sc01(igraph::E(graph)$weight)/2 + 0.5
+    }
+  } else if (link_width == "inv_w"){
+    if(length(unique(igraph::E(graph)$weight)) == 1){
+      graph_df$l_w <- 0.5
+    } else {
+      graph_df$l_w <- sc01(1/igraph::E(graph)$weight)/2 + 0.5
+    }
+  }
+
+  # Merge 'graph_df' and 'crds' in order to get spatial
+  # coordinates of the nodes
+  graph_df <- merge(graph_df, crds[, c("ID", "x", "y")], by.x = "from", by.y = "ID")
+  graph_df <- merge(graph_df, crds[, c("ID", "x", "y")], by.x = "to", by.y = "ID")
+
+
+  # Give colnames to 'graph_df'
+  colnames(graph_df) <- c("to", "from", "l_w", "x", "y", "xend", "yend")
+
+  graph_df <- graph_df[, c("from", "to", "l_w", "x", "y", "xend", "yend")]
+
+
+
+  # Create the plot
+  ###########################################################################
+
+  if(mode == "spatial"){
+    xlab <- "Longitude"
+    ylab <- "Latitude"
+  } else {
+    xlab <- "x"
+    ylab <- "y"
+  }
+
+  if(is.null(pts_col)){
+    pal <- mypalette
+  } else {
+    pal <- pts_col
+  }
+
+  g <- ggplot() +
+    geom_segment(data = graph_df, aes_string(x = 'x', y = 'y',
+                                             xend = 'xend', yend = 'yend',
+                                             size = 'l_w'),
+                 color = "black") +
+    geom_point(data = crds, aes_string(x = 'x', y = 'y',
+                                       size = "n_size",
+                                       color = "module")) +
+    geom_text(data = crds, aes_string(x = 'x', y = 'y',
+                                      label = 'ID'),
+              size = 4, color = "black", fontface = "bold") +
+    scale_size_identity() +
+    scale_color_manual(values = pal) +
+    theme_bw() +
+    labs(x = xlab,
+         y = ylab) +
+    theme(legend.position = "none")
+
+
+  return(g)
+
 
 }
-
-
 
 

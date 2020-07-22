@@ -20,8 +20,8 @@ Its nodes must have the same names as in graph \code{y}.}
 \item{y}{An object of class \code{igraph}.
 Its nodes must have the same names as in graph \code{x}.}
 
-\item{metrics}{Two-elements character vector specifying the graph-theoretic
-metrics computed at the node-level in the graphs or the nodes' attribute
+\item{metrics}{Two-element character vector specifying the graph-theoretic
+metrics computed at the node-level in the graphs or the node attribute
 values to be correlated to these metrics.
 Graph-theoretic metrics can be:
 \itemize{
@@ -35,11 +35,11 @@ node (\code{metrics = c("siw", ...)}, default)}
 \item{Mean of the inverse weights of the links connected to a
 node (\code{metrics = c("miw", ...)})}
 }
-Nodes' attributes must have the same names as in the \code{igraph} object,
+Node attributes must have the same names as in the \code{igraph} object,
 and must refer to an attribute with numerical values.
 The vector \code{metrics} is composed of two character values.
-When a nodes' attribute has the same name as a metric computable from the
-graph, nodes' attributes are given priority.}
+When a node attribute has the same name as a metric computable from the
+graph, node attributes are given priority.}
 
 \item{method}{A character string indicating which correlation coefficient
 is to be computed (\code{"pearson"}, \code{"kendall"} or
@@ -47,7 +47,7 @@ is to be computed (\code{"pearson"}, \code{"kendall"} or
 
 \item{weight}{Logical which indicates whether the links are weighted during
 the calculation of the centrality indices betweenness and closeness.
-(default: \code{weight = TRUE}). Links' weights are interpreted as distances
+(default: \code{weight = TRUE}). Link weights are interpreted as distances
 when computing the shortest paths. They should then be inversely proportional
 to the strength of the relationship between nodes (e.g. to fluxes).}
 

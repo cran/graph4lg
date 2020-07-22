@@ -25,6 +25,7 @@
 #' in \code{pop_names} must be the same as in the GENEPOP file.
 #' }
 #' Negative values are converted into 0
+#' @keywords internal
 #' @export
 #' @author P. Savary
 #' @references \insertRef{hedrick2005standardized}{graph4lg}

@@ -46,3 +46,4 @@ data <- compar_r_fisher(df)
 \author{
 P. Savary
 }
+\keyword{internal}

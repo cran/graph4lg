@@ -15,15 +15,15 @@ scatter_dist_g(
 )
 }
 \arguments{
-\item{mat_y}{A symmetric (complete) \code{matrix} with pairwise (genetic or
-landscape) distances between populations or sample sites. These values
-will be the point coordinates on the y axis. \code{mat_y} is the matrix
-used to weight the links of the graph \code{x}, whose nodes correspond to
-row and column names of \code{mat_y}.}
+\item{mat_y}{A symmetric (complete) \code{matrix} or \code{dist} object with
+pairwise (genetic or landscape) distances between populations or sample
+sites. These values will be the point coordinates on the y axis.
+\code{mat_y} is the matrix used to weight the links of the graph \code{x},
+whose nodes correspond to row and column names of \code{mat_y}.}
 
-\item{mat_x}{A symmetric (complete) \code{matrix} with pairwise (genetic or
-landscape) distances between populations or sample sites. These values
-will be the point coordinates on the x axis.
+\item{mat_x}{A symmetric (complete) \code{matrix} or \code{dist} object with
+pairwise (genetic or landscape) distances between populations or sample
+sites. These values will be the point coordinates on the x axis.
 \code{mat_x} and \code{mat_y} must have the same row and column names,
 ordered in the same way.}
 
@@ -33,12 +33,12 @@ Its nodes must have the same names as the row and column of
 Link weights have to be values from \code{mat_y} matrix. \code{graph} must
 be an undirected graph.}
 
-\item{thr_y}{(optional) A numeric value used to remove values from the
-data before to plot. All values from \code{mat_y} above \code{thr_y}
+\item{thr_y}{(optional) A numeric or integer value used to remove values
+from the data before to plot. All values from \code{mat_y} above \code{thr_y}
 are removed from the data.}
 
-\item{thr_x}{(optional) A numeric value used to remove values from the
-data before to plot. All values from \code{mat_x} above \code{thr_x}
+\item{thr_x}{(optional) A numeric or integer value used to remove values
+from the data before to plot. All values from \code{mat_x} above \code{thr_x}
 are removed from the data.}
 
 \item{pts_col_1}{(optional) A character string indicating the color used to

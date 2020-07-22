@@ -15,15 +15,16 @@ convert_cd(
 )
 }
 \arguments{
-\item{mat_euc}{A symmetric \code{matrix} with pairwise geographical Euclidean
-distances between populations or sample sites. It will be the explanatory
-variable, and only values from the off diagonal lower triangle will be used.}
+\item{mat_euc}{A symmetric \code{matrix} or \code{dist} object with
+pairwise geographical Euclidean distances between populations or sample
+sites. It will be the explanatory variable, and only values from the off
+diagonal lower triangle will be used.}
 
-\item{mat_ld}{A symmetric \code{matrix} with pairwise landscape distances
-between populations or sample sites. These distances can be
-cost-distances or resistance distances, among others.
-It will be the explained variable, and only values from the off diagonal
-lower triangle will be used.}
+\item{mat_ld}{A symmetric \code{matrix} or \code{dist} object with pairwise
+landscape distances between populations or sample sites. These distances can
+be cost-distances or resistance distances, among others. It will be the
+explained variable, and only values from the off diagonal lower triangle
+will be used.}
 
 \item{to_convert}{A numeric value or numeric vector with Euclidean distances
 to convert into cost-distances.}
@@ -52,7 +53,7 @@ and optionally a ggplot2 object to plot
 }
 \description{
 The function fits a model to convert cost-distances into
-Euclidean distances as implemented in GRAPHAB software.
+Euclidean distances as implemented in Graphab software.
 }
 \details{
 IDs in 'mat_euc' and 'mat_ld' must be the same and refer to the same
@@ -60,8 +61,8 @@ sampling site or populations, and both matrices must be ordered
 in the same way.
 Matrix of Euclidean distance 'mat_euc' can be computed using the function
 \code{\link{mat_geo_dist}}.
-Matrix of landscape distance 'mat_ld' can be computed using
-GRAPHAB software.
+Matrix of landscape distance 'mat_ld' can be computed using the function
+\code{\link{mat_cost_dist}}.
 Before the log calculation, 0 distance values are converted into 1,
 so that they are 0 after this calculation.
 }

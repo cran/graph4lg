@@ -5,21 +5,22 @@
 #' distance (Euclidean distance, cost-distance, etc.)between populations or
 #' sample sites.
 #'
-#' @param mat_gd A symmetric \code{matrix} with pairwise genetic distances
-#' between populations or sample sites.
-#' @param mat_ld A symmetric \code{matrix} with pairwise landscape distances
-#' between populations or sample sites. These distances can be
-#' Euclidean distances, cost-distances or resistance distances, among others.
+#' @param mat_gd A symmetric \code{matrix} or \code{dist} object with pairwise
+#' genetic distances between populations or sample sites.
+#' @param mat_ld A symmetric \code{matrix} or \code{dist} object with pairwise
+#' landscape distances between populations or sample sites. These distances
+#' can be Euclidean distances, cost-distances or resistance distances,
+#' among others.
 #' @param method A character string indicating the smoothing method
 #' used to fit a line on the scatterplot. Possible values are the same as
 #' with function 'geom_smooth()' from \pkg{ggplot2} : 'lm', 'glm', 'gam',
 #' 'loess' (default).
-#' @param thr_gd (optional) A numeric value used to remove values from the
-#' data before to plot. All genetic distances values above \code{thr_gd}
-#' are removed from the data.
-#' @param thr_ld (optional) A numeric value used to remove values from the
-#' data before to plot. All landscape distances values above \code{thr_ld}
-#' are removed from the data.
+#' @param thr_gd (optional) A numeric or integer value used to remove values
+#' from the data before to plot. All genetic distances values above
+#' \code{thr_gd} are removed from the data.
+#' @param thr_ld (optional) A numeric or integer value used to remove values
+#' from the data before to plot. All landscape distances values above
+#' \code{thr_ld} are removed from the data.
 #' @param se Logical (optional, default = TRUE) indicating whether the
 #' confidence interval around the smooth line is displayed.
 #' @param smooth_col (optional) A character string indicating the color
@@ -60,15 +61,24 @@ scatter_dist <- function(mat_gd,
                          smooth_col = "black",
                          pts_col = "#999999"){
 
-  # Check whether 'mat_gd' and 'mat_ld' are symmetric matrices
-  if(!inherits(mat_gd, "matrix")){
-    stop("'mat_gd' must be an object of class 'matrix'.")
-  } else if (!inherits(mat_ld, "matrix")){
-    stop("'mat_ld' must be an object of class 'matrix'.")
-  } else if (!Matrix::isSymmetric(mat_gd)){
-    stop("'mat_gd' must be a symmetric pairwise matrix.")
-  } else if (!Matrix::isSymmetric(mat_ld)){
-    stop("'mat_ld' must be a symmetric pairwise matrix.")
+
+  # Check whether mat_gd and mat_ld are symmetric matrices or dist objects
+  if(!inherits(mat_gd, c("matrix", "dist"))){
+    stop("'mat_gd' must be an object of class 'matrix' or 'dist'.")
+  } else if (!inherits(mat_ld, c("matrix", "dist"))){
+    stop("'mat_lc' must be an object of class 'matrix' or 'dist'.")
+  } else if (inherits(mat_gd, "matrix")){
+    if(!Matrix::isSymmetric(mat_gd)){
+      stop("'mat_gd' must be a symmetric pairwise matrix.")
+    }
+  } else if (inherits(mat_ld, "matrix")){
+    if (!Matrix::isSymmetric(mat_ld)){
+      stop("'mat_ld' must be a symmetric pairwise matrix.")
+    }
+  } else if (inherits(mat_gd, "dist")){
+    mat_gd <- as.matrix(mat_gd)
+  } else if (inherits(mat_ld, "dist")){
+    mat_ld <- as.matrix(mat_ld)
   }
 
   # Check whether 'mat_gd' and 'mat_ld' have the same rows' and columns' names
@@ -94,7 +104,7 @@ scatter_dist <- function(mat_gd,
 
   # Remove values larger the thresholds if specified
   if (!is.null(thr_gd)){
-    if(is.numeric(thr_gd)){
+    if(inherits(thr_gd, c("numeric", "integer"))){
       if(thr_gd < max(gen)){
         gen[which(gen > thr_gd)] <- NA
       } else {
@@ -107,7 +117,7 @@ scatter_dist <- function(mat_gd,
 
   # Remove values larger the thresholds if specified
   if (!is.null(thr_ld)){
-    if(is.numeric(thr_ld)){
+    if(inherits(thr_ld, c("numeric", "integer"))){
       if(thr_ld < max(land)){
         land[which(land > thr_ld)] <- NA
       } else {

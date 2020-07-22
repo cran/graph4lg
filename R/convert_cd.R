@@ -1,16 +1,17 @@
 #' Fit a model to convert cost-distances into Euclidean distances
 #'
 #' @description The function fits a model to convert cost-distances into
-#' Euclidean distances as implemented in GRAPHAB software.
+#' Euclidean distances as implemented in Graphab software.
 #'
-#' @param mat_euc A symmetric \code{matrix} with pairwise geographical Euclidean
-#' distances between populations or sample sites. It will be the explanatory
-#' variable, and only values from the off diagonal lower triangle will be used.
-#' @param mat_ld A symmetric \code{matrix} with pairwise landscape distances
-#' between populations or sample sites. These distances can be
-#' cost-distances or resistance distances, among others.
-#' It will be the explained variable, and only values from the off diagonal
-#' lower triangle will be used.
+#' @param mat_euc A symmetric \code{matrix} or \code{dist} object with
+#' pairwise geographical Euclidean distances between populations or sample
+#' sites. It will be the explanatory variable, and only values from the off
+#' diagonal lower triangle will be used.
+#' @param mat_ld A symmetric \code{matrix} or \code{dist} object with pairwise
+#' landscape distances between populations or sample sites. These distances can
+#' be cost-distances or resistance distances, among others. It will be the
+#' explained variable, and only values from the off diagonal lower triangle
+#' will be used.
 #' @param method A character string indicating the method used to fit the model.
 #' \itemize{
 #' \item{If 'method = "log-log"' (default), then the model takes the
@@ -32,8 +33,8 @@
 #' in the same way.
 #' Matrix of Euclidean distance 'mat_euc' can be computed using the function
 #' \code{\link{mat_geo_dist}}.
-#' Matrix of landscape distance 'mat_ld' can be computed using
-#' GRAPHAB software.
+#' Matrix of landscape distance 'mat_ld' can be computed using the function
+#' \code{\link{mat_cost_dist}}.
 #' Before the log calculation, 0 distance values are converted into 1,
 #' so that they are 0 after this calculation.
 #' @return A list of output (converted values, estimated parameters, R2)
@@ -59,15 +60,23 @@ convert_cd <- function(mat_euc, mat_ld,
                        line_col = "black",
                        pts_col = "#999999"){
 
-  # Check whether mat_euc and mat_ld are symmetric matrices
-  if(!inherits(mat_euc, "matrix")){
-    stop("'mat_euc' must be an object of class 'matrix'.")
-  } else if (!inherits(mat_ld, "matrix")){
-    stop("'mat_ld' must be an object of class 'matrix'.")
-  } else if (!Matrix::isSymmetric(mat_euc)){
-    stop("'mat_euc' must be a symmetric pairwise matrix.")
-  } else if (!Matrix::isSymmetric(mat_ld)){
-    stop("'mat_ld' must be a symmetric pairwise matrix.")
+  # Check whether mat_euc and mat_ld are symmetric matrices or dist objects
+  if(!inherits(mat_euc, c("matrix", "dist"))){
+    stop("'mat_euc' must be an object of class 'matrix' or 'dist'.")
+  } else if (!inherits(mat_ld, c("matrix", "dist"))){
+    stop("'mat_lc' must be an object of class 'matrix' or 'dist'.")
+  } else if (inherits(mat_euc, "matrix")){
+    if(!Matrix::isSymmetric(mat_euc)){
+      stop("'mat_euc' must be a symmetric pairwise matrix.")
+    }
+  } else if (inherits(mat_ld, "matrix")){
+    if (!Matrix::isSymmetric(mat_ld)){
+      stop("'mat_ld' must be a symmetric pairwise matrix.")
+    }
+  } else if (inherits(mat_euc, "dist")){
+    mat_euc <- as.matrix(mat_euc)
+  } else if (inherits(mat_ld, "dist")){
+    mat_ld <- as.matrix(mat_ld)
   }
 
   # Check whether mat_euc and mat_lad have same row names and column names

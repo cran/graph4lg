@@ -7,7 +7,8 @@
 g_percol(x, val_step = 20)
 }
 \arguments{
-\item{x}{A symmetric \code{matrix} of pairwise distances between nodes}
+\item{x}{A symmetric \code{matrix} or a \code{dist} object with pairwise
+distances between nodes}
 
 \item{val_step}{The number of classes to create to search for the
 threshold value without testing all the possibilities. By default,

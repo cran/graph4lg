@@ -17,7 +17,9 @@
 #' @param y A character string indicating the name of the column
 #' of \code{crds} with the point latitude
 #' @param weight A character string indicating whether the links of
-#' the graph have weights (TRUE)(default) or not (FALSE)
+#' the graph are weighted by Euclidean distances (TRUE)(default) or not (FALSE).
+#' When the graph links do not have weights in Euclidean distances, each link
+#' is given a weight of 1.
 #' @return A planar graph of class \code{igraph}
 #' @export
 #' @author P. Savary
@@ -29,7 +31,6 @@
 #'              ID = "ID",
 #'              x = "x",
 #'              y = "y")
-
 
 
 graph_plan <- function(crds, ID = NULL, x = NULL, y = NULL, weight = TRUE){
@@ -91,15 +92,16 @@ graph_plan <- function(crds, ID = NULL, x = NULL, y = NULL, weight = TRUE){
 
   # Compute the planar graph
   if(weight == TRUE){
-    g <- gen_graph_topo(mat_w = mat_geo,
-                        mat_topo = mat_plan,
-                        topo = "comp")
-  } else {
-    g <- gen_graph_topo(mat_w = mat_plan,
-                        mat_topo = mat_plan,
-                        topo = "comp")
-  }
 
+    mat_geo[mat_plan == 0] <- 0
+    g <- igraph::graph_from_adjacency_matrix(mat_geo,
+                                             mode = "undirected",
+                                             weighted = TRUE)
+  } else {
+    g <- igraph::graph_from_adjacency_matrix(mat_plan,
+                                        mode = "undirected",
+                                        weighted = TRUE)
+  }
 
   return(g)
 }

@@ -4,10 +4,10 @@
 #' @description The function constructs a genetic graph with
 #' a specific topology from genetic and/or geographical distance matrices
 #'
-#' @param mat_w A symmetric (pairwise) \code{matrix} whose elements
-#' will be the links' weights
+#' @param mat_w A symmetric (pairwise) \code{matrix} or a \code{dist} object
+#' whose elements will be the links' weights
 #' @param mat_topo (optional) A symmetric (pairwise) distance \code{matrix}
-#' whose values will be used for the pruning method.
+#' or a \code{dist} object whose values will be used for the pruning method.
 #' @param topo Which topology does the created graph have?
 #' \itemize{
 #' \item{If 'topo = 'gabriel'' (default), the resulting graph will be a
@@ -53,6 +53,8 @@
 #' values from a continuous value range, thereby avoiding equal distances
 #' between a node and the others.  are more than k nodes located
 #' at distances in the k-th smallest distances
+#' If dist objects are specified, it is assumed that colnames and
+#' row.names of mat_w and mat_topo refer to the same populations/locations.
 #' @examples
 #' mat_w <- mat_gen_dist(x = data_ex_genind, dist = 'DPS')
 #' suppressWarnings(mat_topo <- mat_geo_dist(pts_pop_ex,
@@ -69,20 +71,39 @@ gen_graph_topo <- function(mat_w, mat_topo = NULL, topo = "gabriel", k = NULL){
   # Check whether mat_topo is specified, else mat_w is used as mat_topo
   if(is.null(mat_topo)){
     mat_topo <- mat_w
-    # Also check whether mat_w and mat_topo have same dimensions and
-    # same row and column names
-  } else if(!all(dim(mat_w) == dim(mat_topo))){
+  }
+
+  # Check whether mat_w and mat_topo are symmetric matrices or dist objects
+  if(!inherits(mat_w, c("matrix", "dist"))){
+    stop("'mat_w' must be an object of class 'matrix' or 'dist'.")
+  } else if (!inherits(mat_topo, c("matrix", "dist"))){
+    stop("'mat_lc' must be an object of class 'matrix' or 'dist'.")
+  } else if (inherits(mat_w, "matrix")){
+    if(!Matrix::isSymmetric(mat_w)){
+      stop("'mat_w' must be a symmetric pairwise matrix.")
+    }
+  } else if (inherits(mat_topo, "matrix")){
+    if (!Matrix::isSymmetric(mat_topo)){
+      stop("'mat_topo' must be a symmetric pairwise matrix.")
+    }
+  } else if (inherits(mat_w, "dist")){
+    mat_w <- as.matrix(mat_w)
+  } else if (inherits(mat_topo, "dist")){
+    mat_topo <- as.matrix(mat_topo)
+  }
+
+  # Check whether mat_w and mat_topo have same dimensions and
+  # same rows' and columns' names
+  if(!all(dim(mat_w) == dim(mat_topo))){
     stop("Matrices 'mat_w' and 'mat_topo' must have the same dimensions.")
   } else {
     if(!all(row.names(mat_w) == row.names(mat_topo))){
       stop("Matrices 'mat_w' and 'mat_topo' must have the same rows' names.")
     }
-
     if(!all(colnames(mat_w) == colnames(mat_topo))){
       stop("Matrices 'mat_w' and 'mat_topo' must have the same columns' names.")
     }
   }
-
 
   # Check whether there are negative values in mat_topo
   if(min(mat_topo) < 0){

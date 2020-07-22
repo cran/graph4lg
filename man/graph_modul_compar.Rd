@@ -10,7 +10,7 @@ graph_modul_compar(
   mode = "graph",
   nb_modul = NULL,
   algo = "fast_greedy",
-  weight = "inv",
+  node_inter = "distance",
   data = NULL
 )
 }
@@ -40,9 +40,9 @@ Same classes possible as for \code{x}. Must be of the same format as \code{x}}
 vectors or columns from a data.frame. \code{mode} can be 'graph',
 'data.frame' or 'vector'.}
 
-\item{nb_modul}{(if x and y are igraph objects) A numeric value or numeric
-vector with 2 elements indicating the number of modules to create
-in both graphs.
+\item{nb_modul}{(if x and y are igraph objects) A numeric or integer value
+or a numeric vector with 2 elements indicating the number of modules to
+create in both graphs.
 \itemize{
 \item{If \code{nb_modul} is a numeric value, then the same number of modules
 are created in both graphs.}
@@ -68,29 +68,27 @@ from \pkg{igraph} is used (Brandes et al., 2008) (can be very long).
 In that case, the number of modules created in each graph is imposed.}
 }}
 
-\item{weight}{(optional, if x and y are igraph objects) A character string
-or character vector indicating how to weight graphs' links during the
-calculation of the modularity.
-\itemize{
-\item{If \code{weight = 'inv'} (default), then links are weighted with the
-inverse values of their initial weights.}
-\item{If \code{weight = 'w'}, then links are weighted with their initial
-weights values.}
-\item{If \code{weight = 'none'}, then links are not weighted during the
-calculation.}
+\item{node_inter}{(optional, if x and y are igraph objects,
+default is 'none') A character string indicating whether the links of the
+graph are weighted by distances or by similarity indices. It is only used
+to compute the modularity index. It can be: \itemize{
+\item{'distance': Link weights correspond to distances. Nodes that are close
+to each other will more likely be in the same module.}
+\item{'similarity': Link weights correspond to similarity indices. Nodes that
+are similar to each other will more likely be in the same module. Inverse
+link weights are then used to compute the modularity index.}
+\item{'none': Links are not weighted for the computation, which is only
+based on graph topology.}
 }
 Two different weightings can be used to create the modules of the two graphs.
 \itemize{
-\item{If \code{weight} is a character string, then the same algorithm is used
-for both graphs.}
-\item{If \code{weight} is a character vector of length 2, then
+\item{If \code{node_inter} is a character string, then the same link
+weighting is used for both graphs.}
+\item{If \code{node_inter} is a character vector of length 2, then
 the link weighting used by the algorithm to create the modules of
 graphs \code{x} and \code{y} is determined by the first and second elements
-of \code{weight}, respectively.}
-}
-If the graphs' links are not weighted, then this argument is ignored.
-Links with large weights are considered as stronger connections in the
-modularity calculation.}
+of \code{node_inter}, respectively.}
+}}
 
 \item{data}{(if x and y are columns from a data.frame) An object of class
 data.frame with at least two columns and as many rows as there are nodes
@@ -104,7 +102,7 @@ The value of the ARI
 The function computes the Adjusted Rand Index (ARI) to
 compare two graphs' partitions into modules or clusters more generally.
 Both graphs must have the same number of nodes, but not necessarily the same
-number of links. They must also have the same nodes' names and in the
+number of links. They must also have the same node names and in the
 same order.
 }
 \details{

@@ -4,13 +4,25 @@
 \name{data_tuto}
 \alias{data_tuto}
 \title{data_tuto : data used to generate the vignette}
-\format{Several outputs or inputs to show how the package works in a list
+\format{
+Several outputs or inputs to show how the package works in a list
+\describe{
+\item{mat_dps}{Genetic distance matrix example}
+\item{mat_pg}{Second genetic distance matrix example}
+\item{graph_ci}{Genetic independence graph example}
+\item{dmc}{Output of the function 'dist_max_corr'}
+\item{land_graph}{Landscape graph example}
+\item{mat_ld}{Landscape distance matrix example}
+}
+
+Several outputs or inputs to show how the package works in a list
 \describe{
 \item{dmc}{Output of the function 'dist_max_corr'}
 \item{graph_ci}{Genetic independence graph example}
 \item{mat_dps}{Genetic distance matrix example}
 \item{mat_pg}{Second genetic distance matrix example}
-}}
+}
+}
 \usage{
 data_tuto
 

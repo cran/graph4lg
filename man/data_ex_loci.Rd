@@ -4,13 +4,15 @@
 \name{data_ex_loci}
 \alias{data_ex_loci}
 \title{data_ex_loci genetic dataset}
-\format{An object of class 'loci' and 'data.frame' with the columns :
+\format{
+An object of class 'loci' and 'data.frame' with the columns :
 \describe{
 \item{population}{Population name}
 \item{Other columns}{20 loci columns with microsatellite data with
 3 digits coding, alleles separated by "/", and missing data noted "NA/NA"}
 }
-Row names correspond to individuals' ID}
+Row names correspond to individuals' ID
+}
 \usage{
 data_ex_loci
 }

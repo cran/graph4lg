@@ -27,7 +27,9 @@
 #' data_genind <- gstud_to_genind(x, pop_col, ind_col)
 
 
-gstud_to_genind <- function(x, pop_col, ind_col=NULL){
+gstud_to_genind <- function(x,
+                            pop_col,
+                            ind_col = NULL){
 
   # Check whether 'x' is a 'data.frame'
   if(!inherits(x, "data.frame")){
@@ -42,17 +44,8 @@ gstud_to_genind <- function(x, pop_col, ind_col=NULL){
   }
 
   # Check whether at least one column of 'x' is of class 'locus'
-  if(!any(unlist(lapply(x, class)) == "locus")){
+  if(!any(unlist(lapply(x, function(x){inherits(x, "locus")})))){
     stop("Columns corresponding to loci must be of class 'locus'.")
-  }
-
-  # Reorder individuals if necessary
-  if(!all(x[, pop_col] == x[order(x[, pop_col]), pop_col])){
-    message("Individuals in 'x' were not ordered, they have
-            been ordered by populations and populations ordered in alphabetic
-            order for the conversion.")
-
-    x <- x[order(x[, pop_col]), ]
   }
 
   # Get the number of the useful columns for this operation
@@ -69,14 +62,23 @@ gstud_to_genind <- function(x, pop_col, ind_col=NULL){
   col <- col[-which(col == 0)]
   col <- col[c(length(col), 1:(length(col)-1))]
 
+  # Reorder individuals if necessary
+  if(!all(x[, pop_col] == x[order(x[, pop_col]), pop_col])){
+    message("Individuals in 'x' were not ordered, they have
+            been ordered by populations and populations ordered in alphabetic
+            order for the conversion.")
+
+    x <- x[order(x[, pop_col]), ]
+  }
+
   # Create data, a data.frame with columns from x with locus and pop names
   data <- x[, col]
 
-  # The first column is the populations' names, following ones are loci
+  # The first column is the population names, following ones are loci
   # Loci columns become characters
   data[, 2:ncol(data)] <- lapply(data[, 2:ncol(data)], as.character)
 
-  # Alleles' separators become '/'
+  # Allele separators become '/'
   data[, 2:ncol(data)] <- lapply(data[, 2:ncol(data)],
                                  gsub,
                                  pattern = ':',
@@ -86,7 +88,7 @@ gstud_to_genind <- function(x, pop_col, ind_col=NULL){
   data[, 2:ncol(data)] <- lapply(data[, 2:ncol(data)],
                                 function(x) ifelse(x == "", "NA/NA", x))
 
-  # Rows' names become 'ind_col' column when specified
+  # Row names become 'ind_col' column when specified
   if(is.vector(ind_col)){
     row.names(data) <- x[,ind_col]
   }

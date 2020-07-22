@@ -9,7 +9,7 @@ graph_to_shp(
   crds,
   mode = "both",
   crds_crs,
-  layer_name,
+  layer,
   dir_path,
   metrics = FALSE
 )
@@ -37,23 +37,20 @@ one for the nodes and another for the links.}
 \item{If 'mode = 'link'', a shapefile layer is created for the links only.}
 }}
 
-\item{crds_crs}{A character string indicating the Coordinates
-Reference System of the spatial coordinates of the nodes and of the
-shapefile layers created.
+\item{crds_crs}{An integer indicating the EPSG code of the coordinates
+reference system to use.
 The projection and datum are given in the PROJ.4 format.}
 
-\item{layer_name}{A character string indicating the suffix of the name of
+\item{layer}{A character string indicating the suffix of the name of
 the layers to be created.}
 
 \item{dir_path}{A character string corresponding to the path to the directory
 in which the shapefile layers will be exported. If \code{dir_path = "wd"},
 then the layers are created in the current working directory.}
 
-\item{metrics}{(not possible if 'mode = 'link'') Logical. Should metrics
-be calculated and integrated in the attribute table of the node shapefile
-layer? (default: FALSE)
-Metrics calculated are degrees, betweenness centrality and sum of
-inverse weight (if links are weighted)}
+\item{metrics}{(not considered if 'mode = 'link'') Logical. Should graph
+node attributes integrated in the attribute table of the node shapefile
+layer? (default: FALSE)}
 }
 \value{
 Create shapefile layers in the directory specified with the parameter
@@ -67,16 +64,14 @@ shapefile layers.
 data(data_tuto)
 mat_w <- data_tuto[[1]]
 gp <- gen_graph_topo(mat_w = mat_w, topo = "gabriel")
-crds_crs1 <- "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 "
-crds_crs2 <- "+x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs"
-crds_crs <- paste(crds_crs1, crds_crs2, sep = "")
+crds_crs <- 2154
 crds <- pts_pop_simul
-layer_name <- "graph_dps_gab"
+layer <- "graph_dps_gab"
 graph_to_shp(graph = gp, crds = pts_pop_simul, mode = "both",
              crds_crs = crds_crs,
-             layer_name = "test_fonct",
+             layer = "test_fonct",
              dir_path = tempdir(),
-             metrics = TRUE)
+             metrics = FALSE)
 }
 \author{
 P. Savary

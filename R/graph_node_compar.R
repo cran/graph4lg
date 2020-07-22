@@ -18,8 +18,8 @@
 #' Its nodes must have the same names as in graph \code{y}.
 #' @param y An object of class \code{igraph}.
 #' Its nodes must have the same names as in graph \code{x}.
-#' @param metrics Two-elements character vector specifying the graph-theoretic
-#' metrics computed at the node-level in the graphs or the nodes' attribute
+#' @param metrics Two-element character vector specifying the graph-theoretic
+#' metrics computed at the node-level in the graphs or the node attribute
 #' values to be correlated to these metrics.
 #' Graph-theoretic metrics can be:
 #' \itemize{
@@ -33,17 +33,17 @@
 #' \item{Mean of the inverse weights of the links connected to a
 #' node (\code{metrics = c("miw", ...)})}
 #' }
-#' Nodes' attributes must have the same names as in the \code{igraph} object,
+#' Node attributes must have the same names as in the \code{igraph} object,
 #' and must refer to an attribute with numerical values.
 #' The vector \code{metrics} is composed of two character values.
-#' When a nodes' attribute has the same name as a metric computable from the
-#' graph, nodes' attributes are given priority.
+#' When a node attribute has the same name as a metric computable from the
+#' graph, node attributes are given priority.
 #' @param method A character string indicating which correlation coefficient
 #' is to be computed (\code{"pearson"}, \code{"kendall"} or
 #' \code{"spearman"} (default)).
 #' @param weight Logical which indicates whether the links are weighted during
 #' the calculation of the centrality indices betweenness and closeness.
-#' (default: \code{weight = TRUE}). Links' weights are interpreted as distances
+#' (default: \code{weight = TRUE}). Link weights are interpreted as distances
 #' when computing the shortest paths. They should then be inversely proportional
 #' to the strength of the relationship between nodes (e.g. to fluxes).
 #' @param test Logical. Should significance testing be performed?
@@ -84,23 +84,23 @@ graph_node_compar <- function(x,
     stop("'y' must be a graph object of class 'igraph'.")
   }
 
-  # Check whether they have the same nodes' number
+  # Check whether they have the same node number
   if(length(igraph::V(x)) != length(igraph::V(y))){
-    stop("Both graphs must have the same nodes' number.")
+    stop("Both graphs must have the same node number.")
   }
 
   n_nodes <- length(igraph::V(x))
 
-  # Check whether the graphs' nodes have names
+  # Check whether the graph nodes have names
   if(is.null(igraph::V(x)$name)){
     stop("The nodes of 'x' must have names.")
   } else if(is.null(igraph::V(y)$name)){
     stop("The nodes of 'y' must have names.")
   }
 
-  # Check whether the graphs have the same nodes' names and in the same order
+  # Check whether the graphs have the same node names and in the same order
   if(!all(igraph::V(x)$name == igraph::V(y)$name)){
-    stop("Both graphs must have the same nodes' names and the nodes ranked
+    stop("Both graphs must have the same node names and the nodes ranked
          in the same order.")
   }
 
@@ -114,18 +114,18 @@ graph_node_compar <- function(x,
   # Vector of metrics options available
   metrics_options <- c("deg", "close", "btw", "siw", "miw", "str")
 
-  # Names of the nodes' attributes of x and y
+  # Names of the node attributes of x and y
   attrib_x <- names(igraph::vertex.attributes(x))
   attrib_y <- names(igraph::vertex.attributes(y))
 
   # Check whether 'metrics' options are valid
   if(!all(metrics %in% c(metrics_options, attrib_x, attrib_y))){
-    stop("You must specify valid metrics' names, either among the values
-           'deg', 'close', 'btw', 'siw', 'miw' and 'str', or from the nodes'
+    stop("You must specify valid metric names, either among the values
+           'deg', 'close', 'btw', 'siw', 'miw' and 'str', or from the node
            attributes names.")
   }
 
-  # Check whether the graphs' links are weighted to compute some metrics
+  # Check whether the graph links are weighted to compute some metrics
   if(metrics[1] %in% c("close", "btw", "siw", "miw", "str")){
     if(is.null(igraph::E(x)$weight)){
       stop("x must have weighted links in order to compute the
@@ -140,7 +140,7 @@ graph_node_compar <- function(x,
     }
   }
 
-  # Check whether the metric considered from graph x is a nodes' attribute
+  # Check whether the metric considered from graph x is a node attribute
   # or is to be computed.
   # Nodes attribute are given priority
   if(metrics[1] %in% attrib_x){
@@ -151,7 +151,7 @@ graph_node_compar <- function(x,
     met_from_x <- "comput"
   }
 
-  # Check whether the metric considered from graph y is a nodes' attribute
+  # Check whether the metric considered from graph y is a node attribute
   # or is to be computed.
   # Nodes attribute are given priority
   if(metrics[2] %in% attrib_y){
@@ -173,14 +173,14 @@ graph_node_compar <- function(x,
   ### Graph x
 
   if(met_from_x == "attrib"){
-    # Get the nodes' attribute from the attributes of the igraph object
+    # Get the node attribute from the attributes of the igraph object
     met_val_x <- igraph::vertex.attributes(x)[[num_met_x]]
   # Check whether met_val_x is of class numeric or integer
     if(!inherits(met_val_x, c("numeric", "integer"))){
-      stop("Nodes' attributes must be of class 'numeric' or 'integer'")
+      stop("Node attributes must be of class 'numeric' or 'integer'")
     }
 
-  # Compute the nodes' attributes
+  # Compute the node attributes
   } else if (met_from_x == "comput"){
     if (metrics[1] == "deg"){
       # Degree
@@ -225,7 +225,7 @@ graph_node_compar <- function(x,
     met_val_y <- igraph::vertex.attributes(y)[[num_met_y]]
 
     if(!inherits(met_val_y, c("numeric", "integer"))){
-      stop("Nodes' attributes must be of class 'numeric' or 'integer'")
+      stop("Node attributes must be of class 'numeric' or 'integer'")
     }
 
   } else if (met_from_y == "comput"){

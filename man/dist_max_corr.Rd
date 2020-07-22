@@ -18,15 +18,17 @@ dist_max_corr(
 )
 }
 \arguments{
-\item{mat_gd}{A symmetric \code{matrix} with pairwise genetic distances
-between populations or sample sites.}
+\item{mat_gd}{A symmetric \code{matrix} or \code{dist} object with pairwise
+genetic distances between populations or sample sites.}
 
-\item{mat_ld}{A symmetric \code{matrix} with pairwise landscape distances
-between populations or sample sites. These distances can be
-Euclidean distances, cost-distances or resistance distances, among others.}
+\item{mat_ld}{A symmetric \code{matrix} or \code{dist} object with pairwise
+landscape distances between populations or sample sites. These distances
+can be Euclidean distances, cost-distances or resistance distances,
+among others.}
 
-\item{interv}{A numeric value indicating the interval between the different
-distance thresholds for which the correlation coefficients are computed.}
+\item{interv}{A numeric or integer value indicating the interval between
+the different distance thresholds for which the correlation coefficients
+are computed.}
 
 \item{from}{(optional) The minimum distance threshold value at which the
 correlation coefficient is computed.}
@@ -36,7 +38,7 @@ correlation coefficient is computed.}
 
 \item{fig}{Logical (default = TRUE) indicating whether a figure is plotted.}
 
-\item{thr_gd}{(optional) A numeric value used to remove
+\item{thr_gd}{(optional) A numeric or integer value used to remove
 genetic distance values from the data before the calculation.
 All genetic distances values above 'thr_gd' are removed from the data.
 This parameter can be used especially when there are outliers.}

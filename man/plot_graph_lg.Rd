@@ -6,39 +6,64 @@
 \usage{
 plot_graph_lg(
   graph,
-  crds,
-  mode = "spatial",
-  weight = TRUE,
-  width = "w",
-  pts_col = "#F2B950"
+  crds = NULL,
+  mode = "aspatial",
+  node_inter = NULL,
+  link_width = NULL,
+  node_size = NULL,
+  module = NULL,
+  pts_col = NULL
 )
 }
 \arguments{
 \item{graph}{A graph object of class \code{igraph}}
 
-\item{crds}{(if 'mode = 'spatial'') A \code{data.frame} with the spatial
-coordinates of the graph nodes. It must have three columns :
+\item{crds}{(optional, default = NULL) If 'mode = 'spatial'', it is a
+\code{data.frame} with the spatial coordinates of the graph nodes.
+It must have three columns :
 \itemize{
 \item{ID: A character string indicating the name of the graph nodes.
 The names must be the same as the node names of the graph of
 class \code{igraph} (\code{igraph::V(graph)$name})}
 \item{x: A numeric or integer indicating the longitude of the graph nodes.}
 \item{y: A numeric or integer indicating the latitude of the graph nodes.}
-}}
+}
+This argument is not used when 'mode = 'aspatial'' and mandatory when 'mode =
+'spatial''.}
 
 \item{mode}{A character string indicating whether the graph is
-spatial ('mode = 'spatial'' (default)) or not ('mode = 'aspatial'')}
+spatial ('mode = 'spatial'') or not ('mode = 'aspatial'' (default))}
 
-\item{weight}{A character string indicating whether the links of
-the graph have weights (TRUE)(default) or not (FALSE)}
+\item{node_inter}{(optional, default = NULL) A character string indicating
+whether the links of the graph are weighted by distances or by similarity
+indices. It is only used when 'mode = 'aspatial'' to compute the node
+positions with Fruchterman and Reingold algorithm. It can be equal to:
+\itemize{
+\item{'distance': Link weights correspond to distances. Nodes that are close
+to each other will be close on the figure.}
+\item{'similarity': Link weights correspond to similarity indices. Nodes that
+are similar to each other will be close on the figure.}
+}}
 
-\item{width}{A character string indicating whether the width of the link
-should be proportional to link weights ("w", default) or to the inverse
-of link weights ("inv", convenient with distances)}
+\item{link_width}{(optional, default = NULL) A character string indicating
+how the width of the link is set on the figure. Their width can be:\itemize{
+\item{inversely proportional to link weights ("inv_w", convenient with
+distances, default)}
+\item{proportional to link weights ("w")}
+}}
 
-\item{pts_col}{(optional) A character string indicating the color
-used to plot the nodes (default: "#F2B950"). It must be a hexadecimal color
-code or a color used by default in R.}
+\item{node_size}{(optional, default = NULL) A character string indicating
+the graph node attribute used to set the node size on the figure. It must be
+the name of a numeric or integer node attribute from the graph.}
+
+\item{module}{(optional, default = NULL) A character string indicating
+the graph node modules used to set the node color on the figure. It must be
+the name of a node attribute from the graph with discrete values.}
+
+\item{pts_col}{(optional, default = NULL) A character string indicating the
+color used to plot the nodes (default: "#F2B950"). It must be a hexadecimal
+color code or a color used by default in R. It cannot be used if 'module' is
+specified.}
 }
 \value{
 A ggplot2 object to plot
@@ -49,7 +74,7 @@ The function enables to plot graphs, whether spatial or not.
 \details{
 When the graph is not spatial ('mode = 'aspatial''),
 the nodes coordinates are calculated with Fruchterman et Reingold algorithm.
-The graph object \code{x} of class \code{igraph} must have node names
+The graph object \code{graph} of class \code{igraph} must have node names
 (not necessarily in the same order as IDs in crds, given a merging is done).
 }
 \examples{
@@ -60,7 +85,7 @@ gp <- gen_graph_topo(mat_w = mat_w, topo = "mst")
 g <- plot_graph_lg(graph = gp,
                              crds = pts_pop_ex,
                              mode = "spatial",
-                             weight = TRUE)
+                             link_width = "inv_w")
 }
 \references{
 \insertRef{fruchterman1991graph}{graph4lg}

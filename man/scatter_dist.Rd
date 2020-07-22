@@ -16,25 +16,26 @@ scatter_dist(
 )
 }
 \arguments{
-\item{mat_gd}{A symmetric \code{matrix} with pairwise genetic distances
-between populations or sample sites.}
+\item{mat_gd}{A symmetric \code{matrix} or \code{dist} object with pairwise
+genetic distances between populations or sample sites.}
 
-\item{mat_ld}{A symmetric \code{matrix} with pairwise landscape distances
-between populations or sample sites. These distances can be
-Euclidean distances, cost-distances or resistance distances, among others.}
+\item{mat_ld}{A symmetric \code{matrix} or \code{dist} object with pairwise
+landscape distances between populations or sample sites. These distances
+can be Euclidean distances, cost-distances or resistance distances,
+among others.}
 
 \item{method}{A character string indicating the smoothing method
 used to fit a line on the scatterplot. Possible values are the same as
 with function 'geom_smooth()' from \pkg{ggplot2} : 'lm', 'glm', 'gam',
 'loess' (default).}
 
-\item{thr_gd}{(optional) A numeric value used to remove values from the
-data before to plot. All genetic distances values above \code{thr_gd}
-are removed from the data.}
+\item{thr_gd}{(optional) A numeric or integer value used to remove values
+from the data before to plot. All genetic distances values above
+\code{thr_gd} are removed from the data.}
 
-\item{thr_ld}{(optional) A numeric value used to remove values from the
-data before to plot. All landscape distances values above \code{thr_ld}
-are removed from the data.}
+\item{thr_ld}{(optional) A numeric or integer value used to remove values
+from the data before to plot. All landscape distances values above
+\code{thr_ld} are removed from the data.}
 
 \item{se}{Logical (optional, default = TRUE) indicating whether the
 confidence interval around the smooth line is displayed.}

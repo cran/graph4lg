@@ -59,8 +59,8 @@ The node IDs in the input objects must be the same as in the graph object.
 }
 \details{
 The graph can be created with the function
-\code{\link{graphab_to_igraph}} from shapefile layers created with GRAPHAB.
-Values of the metrics computed at the node level with GRAPHAB can then be
+\code{\link{graphab_to_igraph}} by importing output from Graphab projects.
+Values of the metrics computed at the node level with Graphab can then be
 added to such a graph with this function.
 }
 \examples{

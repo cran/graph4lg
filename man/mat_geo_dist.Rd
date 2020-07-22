@@ -4,7 +4,14 @@
 \alias{mat_geo_dist}
 \title{Compute Euclidean geographic distances between points}
 \usage{
-mat_geo_dist(data, ID = NULL, x = NULL, y = NULL)
+mat_geo_dist(
+  data,
+  ID = NULL,
+  x = NULL,
+  y = NULL,
+  crds_type = "proj",
+  gc_formula = "vicenty"
+)
 }
 \arguments{
 \item{data}{An object of class :\itemize{
@@ -20,25 +27,54 @@ indicating the name of the column of \code{data} with the point longitude}
 
 \item{y}{(if \code{data} is of class \code{data.frame}) A character string
 indicating the name of the column of \code{data} with the point latitude}
+
+\item{crds_type}{A character string indicating the type of coordinate
+reference system:\itemize{
+\item{'proj' (default): a projected coordinate reference system}
+\item{'polar': a polar coordinate reference system, such as WGS84}
+}}
+
+\item{gc_formula}{A character string indicating the formula used to compute
+the Great Circle distance:\itemize{
+\item{'vicenty'(default): Vincenty inverse formula for ellipsoids}
+\item{'slc': Spherical Law of Cosines}
+\item{'hvs': Harversine formula}
+}}
 }
 \value{
-A pairwise matrix of geographic distances between points
+A pairwise matrix of geographic distances between points in meters
 }
 \description{
 The function computes Euclidean geographic distance between
-points given their coordinates in a metric projected Coordinates
-Reference System.
+points given their spatial coordinates either in a metric projected
+Coordinate Reference System or in a polar coordinates system.
 }
 \details{
-Calculate classical Euclidean geographic distance (in m)
-between two points using Pythagora's theorem
+When a projected coordinate reference system is used, it calculates
+classical Euclidean geographic distance between two points using
+Pythagora's theorem. When a polar coordinate reference system is used, it
+calculates the Great circle distance between points using different methods.
+Unless \code{method = "polar"}, when \code{data} is a \code{data.frame},
+it assumes projected coordinates by default.
 }
 \examples{
+# Projected CRS
 data(pts_pop_simul)
 mat_dist <- mat_geo_dist(data=pts_pop_simul,
              ID = "ID",
              x = "x",
              y = "y")
+
+#Polar CRS
+city_us <- data.frame(name = c("New York City", "Chicago",
+                               "Los Angeles", "Atlanta"),
+                      lat  = c(40.75170,  41.87440,
+                               34.05420,  33.75280),
+                      lon  = c(-73.99420, -87.63940,
+                              -118.24100, -84.39360))
+mat_geo_us <- mat_geo_dist(data = city_us,
+                           ID = "name", x = "lon", y = "lat",
+                           crds_type = "polar")
 }
 \author{
 P. Savary

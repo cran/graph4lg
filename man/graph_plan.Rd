@@ -25,7 +25,9 @@ of \code{crds} with the point longitude}
 of \code{crds} with the point latitude}
 
 \item{weight}{A character string indicating whether the links of
-the graph have weights (TRUE)(default) or not (FALSE)}
+the graph are weighted by Euclidean distances (TRUE)(default) or not (FALSE).
+When the graph links do not have weights in Euclidean distances, each link
+is given a weight of 1.}
 }
 \value{
 A planar graph of class \code{igraph}

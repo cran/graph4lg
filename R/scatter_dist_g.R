@@ -7,14 +7,14 @@
 #' nodes are populations (or sample sites). It thereby allows to visualize the
 #' graph pruning intensity.
 #'
-#' @param mat_y A symmetric (complete) \code{matrix} with pairwise (genetic or
-#' landscape) distances between populations or sample sites. These values
-#' will be the point coordinates on the y axis. \code{mat_y} is the matrix
-#' used to weight the links of the graph \code{x}, whose nodes correspond to
-#' row and column names of \code{mat_y}.
-#' @param mat_x A symmetric (complete) \code{matrix} with pairwise (genetic or
-#' landscape) distances between populations or sample sites. These values
-#' will be the point coordinates on the x axis.
+#' @param mat_y A symmetric (complete) \code{matrix} or \code{dist} object with
+#' pairwise (genetic or landscape) distances between populations or sample
+#' sites. These values will be the point coordinates on the y axis.
+#' \code{mat_y} is the matrix used to weight the links of the graph \code{x},
+#' whose nodes correspond to row and column names of \code{mat_y}.
+#' @param mat_x A symmetric (complete) \code{matrix} or \code{dist} object with
+#' pairwise (genetic or landscape) distances between populations or sample
+#' sites. These values will be the point coordinates on the x axis.
 #' \code{mat_x} and \code{mat_y} must have the same row and column names,
 #' ordered in the same way.
 #' @param graph A graph object of class \code{igraph}.
@@ -22,11 +22,11 @@
 #' \code{mat_y} and \code{mat_x} matrices. \code{x} must have weighted links.
 #' Link weights have to be values from \code{mat_y} matrix. \code{graph} must
 #' be an undirected graph.
-#' @param thr_y (optional) A numeric value used to remove values from the
-#' data before to plot. All values from \code{mat_y} above \code{thr_y}
+#' @param thr_y (optional) A numeric or integer value used to remove values
+#' from the data before to plot. All values from \code{mat_y} above \code{thr_y}
 #' are removed from the data.
-#' @param thr_x (optional) A numeric value used to remove values from the
-#' data before to plot. All values from \code{mat_x} above \code{thr_x}
+#' @param thr_x (optional) A numeric or integer value used to remove values
+#' from the data before to plot. All values from \code{mat_x} above \code{thr_x}
 #' are removed from the data.
 #' @param pts_col_1 (optional) A character string indicating the color used to
 #' plot the points associated to all populations or sample sites
@@ -68,15 +68,23 @@ scatter_dist_g <- function(mat_y, mat_x,
                            pts_col_1 = "#999999",
                            pts_col_2 = "black"){
 
-  # Check whether 'mat_y' and 'mat_x' are symmetric matrices
-  if(!inherits(mat_y, "matrix")){
-    stop("'mat_y' must be an object of class 'matrix'.")
-  } else if (!inherits(mat_x, "matrix")){
-    stop("'mat_x' must be an object of class 'matrix'.")
-  } else if (!Matrix::isSymmetric(mat_y)){
-    stop("'mat_y' must be a symmetric pairwise matrix.")
-  } else if (!Matrix::isSymmetric(mat_x)){
-    stop("'mat_x' must be a symmetric pairwise matrix.")
+  # Check whether mat_x and mat_y are symmetric matrices or dist objects
+  if(!inherits(mat_x, c("matrix", "dist"))){
+    stop("'mat_x' must be an object of class 'matrix' or 'dist'.")
+  } else if (!inherits(mat_y, c("matrix", "dist"))){
+    stop("'mat_lc' must be an object of class 'matrix' or 'dist'.")
+  } else if (inherits(mat_x, "matrix")){
+    if(!Matrix::isSymmetric(mat_x)){
+      stop("'mat_x' must be a symmetric pairwise matrix.")
+    }
+  } else if (inherits(mat_y, "matrix")){
+    if (!Matrix::isSymmetric(mat_y)){
+      stop("'mat_y' must be a symmetric pairwise matrix.")
+    }
+  } else if (inherits(mat_x, "dist")){
+    mat_x <- as.matrix(mat_x)
+  } else if (inherits(mat_y, "dist")){
+    mat_y <- as.matrix(mat_y)
   }
 
   # Check whether 'mat_y' and 'mat_x' have the same row and column names
@@ -132,7 +140,7 @@ scatter_dist_g <- function(mat_y, mat_x,
 
   # Remove values larger the thresholds if specified
   if (!is.null(thr_y)){
-    if(is.numeric(thr_y)){
+    if(inherits(thr_y, c("numeric", "integer"))){
       if(thr_y < max(y_val)){
         y_val[which(y_val > thr_y)] <- NA
       } else {
@@ -144,7 +152,7 @@ scatter_dist_g <- function(mat_y, mat_x,
   }
   # Remove values larger the thresholds if specified
   if (!is.null(thr_x)){
-    if(is.numeric(thr_x)){
+    if(inherits(thr_x, c("numeric", "integer"))){
       if(thr_x < max(x_val)){
         x_val[which(x_val > thr_x)] <- NA
       } else {

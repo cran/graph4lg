@@ -1,3 +1,26 @@
+# graph4lg 1.0.0
+
+-- Major changes: 
+- Creation of functions to use Graphab java software tool (downloaded by users) 
+from R (get_graphab, graphab_project, graphab_link, graphab_graph, graphab_metric, graphab_modul,
+graphab_pointset, get_graphab_metric, get_graphab_linkset)
+- Creation of mat_cost_dist function integrating costDistance from gdistance
+and another java code (downloaded by users)
+- Inclusion of geographical distance calculations from polar coordinates in 
+mat_geo_dist function
+- Compatibility with SNPs markers and 2 allele-digits coded microsatellites
+- Creation of compute_node_metric and compute_graph_modul integrating options
+previously included in graph_node_compar and graph_modul_compar, and modification
+of these two latter functions to integrate the two former
+- plot_graph_lg now allows users to change node sizes according to node attribute variables
+- Change from proj4string CRS to EPSG when given by users
+- Change from rgdal functions to sf functions when the former returned too many
+warning messages
+- Creation of four vignettes instead of one
+
+- Bug fixes: bug fixes in graph_plan, genepop_to_genind and gstud_to_genind
+
+
 # graph4lg 0.5.0
 
 - Minor change: change in package dependencies to stick with CRAN requirements

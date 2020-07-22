@@ -3,7 +3,7 @@
 #' @description The function computes the Adjusted Rand Index (ARI) to
 #' compare two graphs' partitions into modules or clusters more generally.
 #' Both graphs must have the same number of nodes, but not necessarily the same
-#' number of links. They must also have the same nodes' names and in the
+#' number of links. They must also have the same node names and in the
 #' same order.
 #'
 #' @details This index takes values between -1 and 1. It measures how often
@@ -62,9 +62,30 @@
 #' from \pkg{igraph} is used (Brandes et al., 2008) (can be very long).
 #' In that case, the number of modules created in each graph is imposed.}
 #' }
-#' @param nb_modul (if x and y are igraph objects) A numeric value or numeric
-#' vector with 2 elements indicating the number of modules to create
-#' in both graphs.
+#' @param node_inter (optional, if x and y are igraph objects,
+#' default is 'none') A character string indicating whether the links of the
+#' graph are weighted by distances or by similarity indices. It is only used
+#' to compute the modularity index. It can be: \itemize{
+#' \item{'distance': Link weights correspond to distances. Nodes that are close
+#' to each other will more likely be in the same module.}
+#' \item{'similarity': Link weights correspond to similarity indices. Nodes that
+#' are similar to each other will more likely be in the same module. Inverse
+#' link weights are then used to compute the modularity index.}
+#' \item{'none': Links are not weighted for the computation, which is only
+#' based on graph topology.}
+#' }
+#' Two different weightings can be used to create the modules of the two graphs.
+#' \itemize{
+#' \item{If \code{node_inter} is a character string, then the same link
+#' weighting is used for both graphs.}
+#' \item{If \code{node_inter} is a character vector of length 2, then
+#' the link weighting used by the algorithm to create the modules of
+#' graphs \code{x} and \code{y} is determined by the first and second elements
+#' of \code{node_inter}, respectively.}
+#' }
+#' @param nb_modul (if x and y are igraph objects) A numeric or integer value
+#' or a numeric vector with 2 elements indicating the number of modules to
+#' create in both graphs.
 #' \itemize{
 #' \item{If \code{nb_modul} is a numeric value, then the same number of modules
 #' are created in both graphs.}
@@ -72,29 +93,6 @@
 #' numbers of modules created in graphs \code{x} and \code{y} are the
 #' first and second elements of \code{nb_modul}, respectively.}
 #' }
-#' @param weight (optional, if x and y are igraph objects) A character string
-#' or character vector indicating how to weight graphs' links during the
-#' calculation of the modularity.
-#' \itemize{
-#' \item{If \code{weight = 'inv'} (default), then links are weighted with the
-#' inverse values of their initial weights.}
-#' \item{If \code{weight = 'w'}, then links are weighted with their initial
-#' weights values.}
-#' \item{If \code{weight = 'none'}, then links are not weighted during the
-#' calculation.}
-#' }
-#' Two different weightings can be used to create the modules of the two graphs.
-#' \itemize{
-#' \item{If \code{weight} is a character string, then the same algorithm is used
-#' for both graphs.}
-#' \item{If \code{weight} is a character vector of length 2, then
-#' the link weighting used by the algorithm to create the modules of
-#' graphs \code{x} and \code{y} is determined by the first and second elements
-#' of \code{weight}, respectively.}
-#' }
-#' If the graphs' links are not weighted, then this argument is ignored.
-#' Links with large weights are considered as stronger connections in the
-#' modularity calculation.
 #' @param data (if x and y are columns from a data.frame) An object of class
 #' data.frame with at least two columns and as many rows as there are nodes
 #' in the graphs compared. The columns indicate the modules of each node in
@@ -129,7 +127,7 @@ graph_modul_compar <- function(x,
                                mode = "graph",
                                nb_modul = NULL,
                                algo = "fast_greedy",
-                               weight = "inv",
+                               node_inter = "distance",
                                data = NULL){
 
   if(mode == "graph"){
@@ -166,137 +164,92 @@ graph_modul_compar <- function(x,
            ranked in the same order.")
     }
 
-    # Weights of the links during the calculation
-    # If links are weighted
-    if (igraph::is.weighted(x)){
-      # If two elements in weight
-      if(length(weight) == 2){
-        # Get the first element for the first graph
-        m_w1 <- weight[1]
-      # If one element
-      } else if (length(weight) == 1) {
-        # Get the first element for the first graph
-        m_w1 <- weight
-      } else {
-        stop("'weight' must be a character string or a character
-             vector of length 2.")
-      }
-
-      # Get the link weights to use for the weighting according to the
-      # weight option
-      if(m_w1 == "inv"){
-        w1 <- 1/igraph::E(x)$weight
-      } else if (m_w1 == "w"){
-        w1 <- igraph::E(x)$weight
-      } else if (m_w1 == "none"){
-        w1 <- rep(1, length(igraph::E(x)))
-      } else {
-        stop("Elements of 'weight' must be either 'inv', 'w' or 'none'.")
-      }
-
-    # If links do not have weights, then links are given 1 values as weights
-    } else {
-      w1 <- rep(1, length(igraph::E(x)))
-      message("x is not a weighted graph and its links were given 1 values
-              as weights in the calculations.")
+    if(!inherits(algo, "character")){
+      stop("'algo' must be a character string.")
+    } else if(!(algo %in% c("fast_greedy", "walktrap",
+                            "louvain", "optimal"))){
+      stop("'algo' must be either 'fast_greedy', 'walktrap',
+            'louvain' or 'optimal'.")
     }
 
-    # Same steps for the second graph
 
-    if (igraph::is.weighted(y)){
-      if(length(weight) == 2){
-        m_w2 <- weight[2]
-      } else if (length(weight) == 1) {
-        m_w2 <- weight
-      } else {
-        stop("'weight' must be a character string or a character
-             vector of length 2.")
-      }
+    ### Node interaction mode
 
-      if(m_w2 == "inv"){
-        w2 <- 1/igraph::E(y)$weight
-      } else if (m_w2 == "w"){
-        w2 <- igraph::E(y)$weight
-      } else if (m_w2 == "none"){
-        w2 <- rep(1, length(igraph::E(y)))
-      } else {
-        stop("Elements of 'weight' must be either 'inv', 'w' or 'none'.")
-      }
-
-
-    } else {
-      w2 <- rep(1, length(igraph::E(y)))
-      message("y is not a weighted graph and its links were given 1 values
-              as weights in the calculations.")
+    if(!inherits(node_inter, "character")){
+      stop("'node_inter' must be a character string.")
     }
 
-    # Number of modules to create in both graphs
-    if (inherits(nb_modul, "numeric")){
-      if(length(nb_modul) == 2){
-        n_m1 <- nb_modul[1]
-        n_m2 <- nb_modul[2]
-      } else if (length(nb_modul) == 1) {
-        n_m1 <- n_m2 <- nb_modul
+    # node_inter length 1
+
+    if(length(node_inter) == 1){
+
+      if(!(node_inter %in% c("distance", "similarity", "none"))){
+        stop("'node_inter' must be 'distance', 'similarity' or 'none'.")
+      }
+
+      node_inter_x <- node_inter_y <- node_inter
+
+      # node_inter length 2
+
+    } else if (length(node_inter) == 2){
+
+      if(!(node_inter[1] %in% c("distance", "similarity", "none"))){
+        stop("Element 1 of 'node_inter' must be 'distance', 'similarity'
+             or 'none'.")
       } else {
-        stop("'nb_modul' must be NULL, a numeric value or a numeric
-             vector of length 2.")
-      }
-    } else if (is.null(nb_modul)){
-      n_m1 <- n_m2 <- NULL
-      ##########################################################
-      # Number of modules will be determined later
-    } else {
-      stop("'nb_modul' must be NULL, a numeric value or a numeric
-           vector of length 2.")
-    }
-
-    # Creation of the modules
-    if (algo == "fast_greedy"){
-      # If the number of module is not yet defined,
-      # it is the minimum number of modules in both graphs
-      # created by default by the algorithm.
-      if(is.null(n_m1)){
-        n_m1 <- n_m2 <- min(length(unique(igraph::cluster_fast_greedy(x,
-                                                    weights = w1)$membership)),
-                            length(unique(igraph::cluster_fast_greedy(y,
-                                                    weights = w2)$membership)))
+        node_inter_x <- node_inter
       }
 
-      # We create the modules with the right algorithm, the right weighting
-      # and we create the specified number of modules in each graph.
-      x1 <- igraph::cut_at(igraph::cluster_fast_greedy(x, weights = w1),
-                           no = n_m1)
-      y1 <- igraph::cut_at(igraph::cluster_fast_greedy(y, weights = w2),
-                           no = n_m2)
-
-    } else if (algo == "louvain"){
-      x1 <- igraph::cluster_louvain(x, weights = w1)$membership
-      y1 <- igraph::cluster_louvain(y, weights = w2)$membership
-      message("With this algorithm, 'nb_modul' parameter was not used and
-              the number of modules is the default number as computed
-              by the algorithm.")
-
-    } else if (algo == "optimal"){
-      x1 <- igraph::cluster_optimal(x, weights = w1)$membership
-      y1 <- igraph::cluster_optimal(y, weights = w2)$membership
-      message("With this algorithm, 'nb_modul' parameter was not used and
-              the number of modules is the default number as computed
-              by the algorithm.")
-
-    } else if (algo == "walktrap"){
-      if(is.null(n_m1)){
-        n_m1 <- n_m2 <- min(length(unique(igraph::cluster_walktrap(x,
-                                                    weights = w1)$membership)),
-                            length(unique(igraph::cluster_walktrap(y,
-                                                   weights = w2)$membership)))
+      if(!(node_inter[2] %in% c("distance", "similarity", "none"))){
+        stop("Element 2 of 'node_inter' must be 'distance', 'similarity'
+             or 'none'.")
+      } else {
+        node_inter_y <- node_inter
       }
-
-      x1 <- igraph::cut_at(igraph::cluster_walktrap(x, weights = w1), no = n_m1)
-      y1 <- igraph::cut_at(igraph::cluster_walktrap(y, weights = w2), no = n_m2)
 
     } else {
-      stop("You must specify a correct 'algo' option.")
+      stop("'node_inter' must be of length 1 or 2.")
     }
+
+    # Replace none by NULL to fit with compute_graph_modul
+    # function argument
+
+    if(node_inter_x == "none"){
+      node_inter_x <- NULL
+    }
+
+    if(node_inter_y == "none"){
+      node_inter_y <- NULL
+    }
+
+    ##### Nb_modul arguments
+
+    if(is.null(nb_modul)){
+      nb_modul_x <- nb_modul_y <- NULL
+    } else {
+      if(!inherits(nb_modul, c("numeric", "integer"))){
+        stop("'nb_modul' must be a numeric or integer value or vector.")
+      }
+      if(length(nb_modul) == 1){
+        nb_modul_x <- nb_modul_y <- nb_modul
+      } else if(length(nb_modul) == 2){
+        nb_modul_x <- nb_modul[1]
+        nb_modul_y <- nb_modul[2]
+      }
+    }
+
+
+    mx <- compute_graph_modul(graph = x, algo = algo,
+                              node_inter = node_inter_x,
+                              nb_modul = nb_modul_x)
+
+    my <- compute_graph_modul(graph = y, algo = algo,
+                              node_inter = node_inter_y,
+                              nb_modul = nb_modul_y)
+
+
+    x1 <- as.numeric(mx[, 'module'])
+    y1 <- as.numeric(my[, 'module'])
 
 
   } else if (mode == "data.frame"){
@@ -356,25 +309,27 @@ graph_modul_compar <- function(x,
 
   if(all(dim(tab) == c(1,1))){
     return(1)
+
+  } else {
+
+    # \sum {n_{ij} \choose 2}
+    a <- sum(choose(tab, 2))
+    # \sum {a_i \choose 2} - a
+    b <- sum(choose(rowSums(tab), 2)) - a
+    # \sum {b_j \choose 2} - a
+    c <- sum(choose(colSums(tab), 2)) - a
+    # \sum {n \choose 2} - a - b - c
+    d <- choose(sum(tab), 2) - a - b - c
+
+    ARI <- (a - (a + b) * (a + c)/(a + b + c + d)) /
+      ((a + b + a + c)/2 - (a + b) * (a + c)/(a + b + c + d))
+
+    print(paste(n_m1,"modules in graph 1 and", n_m2, "modules in graph 2",
+                sep = " "))
+    print(paste("Adjusted Rand Index: ", ARI, sep = ""))
+
+    return(ARI)
   }
-
-  # \sum {n_{ij} \choose 2}
-  a <- sum(choose(tab, 2))
-  # \sum {a_i \choose 2} - a
-  b <- sum(choose(rowSums(tab), 2)) - a
-  # \sum {b_j \choose 2} - a
-  c <- sum(choose(colSums(tab), 2)) - a
-  # \sum {n \choose 2} - a - b - c
-  d <- choose(sum(tab), 2) - a - b - c
-
-  ARI <- (a - (a + b) * (a + c)/(a + b + c + d)) /
-    ((a + b + a + c)/2 - (a + b) * (a + c)/(a + b + c + d))
-
-  print(paste(n_m1,"modules in graph 1 and", n_m2, "modules in graph 2",
-              sep = " "))
-  print(paste("Adjusted Rand Index: ", ARI, sep = ""))
-
-  return(ARI)
 }
 
 

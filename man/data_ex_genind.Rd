@@ -4,7 +4,9 @@
 \name{data_ex_genind}
 \alias{data_ex_genind}
 \title{data_ex_genind genetic dataset}
-\format{An object of type 'genind'}
+\format{
+An object of type 'genind'
+}
 \usage{
 data_ex_genind
 }

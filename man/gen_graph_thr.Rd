@@ -8,14 +8,15 @@ using a link weight threshold}
 gen_graph_thr(mat_w, mat_thr = NULL, thr, mode = "larger")
 }
 \arguments{
-\item{mat_w}{A symmetric (pairwise) \code{matrix} whose elements
-will be the links' weights}
+\item{mat_w}{A symmetric (pairwise) \code{matrix} or a \code{dist} object
+whose elements will be the links' weights}
 
-\item{mat_thr}{(optional) A symmetric (pairwise) distance \code{matrix} whose
-values will be used for the pruning based on the threshold value.}
+\item{mat_thr}{(optional) A symmetric (pairwise) distance \code{matrix}
+or a \code{dist} object whose values will be used for the pruning based
+on the threshold value.}
 
 \item{thr}{The threshold value (logically between min(mat_thr)
-and max(mat_thr))}
+and max(mat_thr))(integer or numeric)}
 
 \item{mode}{\itemize{
 \item{If 'mode = 'larger'' (default), all the links whose weight is larger
@@ -38,6 +39,8 @@ same rows' and columns' names.
 Values in 'mat_thr' matrix must be positive. Negative values from
 'mat_w' are transformed into zeros.
 The function works only for undirected graphs.
+If dist objects are specified, it is assumed that colnames and
+row.names of mat_w and mat_thr refer to the same populations/locations.
 }
 \examples{
 mat_w <- mat_gen_dist(x = data_ex_genind, dist = 'DPS')

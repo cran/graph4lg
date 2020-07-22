@@ -1,0 +1,165 @@
+<Project>
+  <name>grphb_ex</name>
+  <codes>
+    <int>1</int>
+    <int>2</int>
+    <int>3</int>
+    <int>4</int>
+    <int>5</int>
+  </codes>
+  <patchCodes>
+    <int>5</int>
+  </patchCodes>
+  <noData>NaN</noData>
+  <con8>true</con8>
+  <minArea>0.0</minArea>
+  <simplify>false</simplify>
+  <capacityParams>
+    <calcArea>true</calcArea>
+    <maxCost>0.0</maxCost>
+    <weightCost>false</weightCost>
+  </capacityParams>
+  <resolution>100.0</resolution>
+  <grid2space>
+    <m00>100.0</m00>
+    <m01>0.0</m01>
+    <m02>-100.0</m02>
+    <m10>0.0</m10>
+    <m11>-100.0</m11>
+    <m12>60100.0</m12>
+  </grid2space>
+  <space2grid>
+    <m00>0.01</m00>
+    <m01>0.0</m01>
+    <m02>1.0</m02>
+    <m10>0.0</m10>
+    <m11>-0.01</m11>
+    <m12>601.0</m12>
+  </space2grid>
+  <costLinks>
+    <entry>
+      <string>lkst1</string>
+      <Linkset>
+        <name>lkst1</name>
+        <type>1</type>
+        <type__dist>2</type__dist>
+        <type__length>1</type__length>
+        <costs>
+          <double>0.0</double>
+          <double>1.0</double>
+          <double>10.0</double>
+          <double>100.0</double>
+          <double>1000.0</double>
+          <double>1.0</double>
+        </costs>
+        <realPaths>true</realPaths>
+        <removeCrossPatch>false</removeCrossPatch>
+        <coefSlope>0.0</coefSlope>
+        <distMax>0.0</distMax>
+        <optimCirc>false</optimCirc>
+      </Linkset>
+    </entry>
+  </costLinks>
+  <exoDatas>
+    <entry>
+      <string>file28d41187f8d_lkst1</string>
+      <Pointset>
+        <name>file28d41187f8d_lkst1</name>
+        <cost reference="../../../../costLinks/entry/Linkset"/>
+        <maxCost>0.0</maxCost>
+        <agregType>0</agregType>
+      </Pointset>
+    </entry>
+  </exoDatas>
+  <graphs>
+    <entry>
+      <string>graph</string>
+      <Graph>
+        <name>graph</name>
+        <cost reference="../../../../costLinks/entry/Linkset"/>
+        <type>1</type>
+        <threshold>0.0</threshold>
+        <intraPatchDist>true</intraPatchDist>
+        <saved>true</saved>
+      </Graph>
+    </entry>
+    <entry>
+      <string>mod2_graph</string>
+      <org.thema.graphab.graph.ModGraphGenerator>
+        <name>mod2_graph</name>
+        <cost reference="../../../../costLinks/entry/Linkset"/>
+        <type>1</type>
+        <threshold>0.0</threshold>
+        <intraPatchDist>true</intraPatchDist>
+        <saved>true</saved>
+        <clusters>
+          <entry>
+            <int>1</int>
+            <int>16</int>
+          </entry>
+          <entry>
+            <int>2</int>
+            <int>18</int>
+          </entry>
+          <entry>
+            <int>3</int>
+            <int>18</int>
+          </entry>
+          <entry>
+            <int>4</int>
+            <int>18</int>
+          </entry>
+          <entry>
+            <int>5</int>
+            <int>18</int>
+          </entry>
+          <entry>
+            <int>6</int>
+            <int>16</int>
+          </entry>
+          <entry>
+            <int>7</int>
+            <int>18</int>
+          </entry>
+          <entry>
+            <int>8</int>
+            <int>16</int>
+          </entry>
+          <entry>
+            <int>9</int>
+            <int>18</int>
+          </entry>
+          <entry>
+            <int>10</int>
+            <int>16</int>
+          </entry>
+        </clusters>
+      </org.thema.graphab.graph.ModGraphGenerator>
+    </entry>
+  </graphs>
+  <zone class="java.awt.geom.Rectangle2D$Double">
+    <x>0.0</x>
+    <y>0.0</y>
+    <width>60000.0</width>
+    <height>60000.0</height>
+  </zone>
+  <wktCRS>PROJCS[&quot;unnamed&quot;, &#xd;
+  GEOGCS[&quot;GCS Name = GRS 1980(IUGG, 1980)&quot;, &#xd;
+    DATUM[&quot;Datum = unknown&quot;, &#xd;
+      SPHEROID[&quot;Ellipsoid = GRS80&quot;, 6378137.0, 298.257222101]], &#xd;
+    PRIMEM[&quot;Greenwich&quot;, 0.0], &#xd;
+    UNIT[&quot;degree&quot;, 0.017453292519943295], &#xd;
+    AXIS[&quot;Geodetic longitude&quot;, EAST], &#xd;
+    AXIS[&quot;Geodetic latitude&quot;, NORTH]], &#xd;
+  PROJECTION[&quot;Lambert_Conformal_Conic_2SP&quot;], &#xd;
+  PARAMETER[&quot;central_meridian&quot;, 3.0], &#xd;
+  PARAMETER[&quot;latitude_of_origin&quot;, 46.50000000000001], &#xd;
+  PARAMETER[&quot;standard_parallel_1&quot;, 48.99999999999999], &#xd;
+  PARAMETER[&quot;false_easting&quot;, 700000.0], &#xd;
+  PARAMETER[&quot;false_northing&quot;, 6600000.0], &#xd;
+  PARAMETER[&quot;scale_factor&quot;, 1.0], &#xd;
+  PARAMETER[&quot;standard_parallel_2&quot;, 44.0], &#xd;
+  UNIT[&quot;m&quot;, 1.0], &#xd;
+  AXIS[&quot;Easting&quot;, EAST], &#xd;
+  AXIS[&quot;Northing&quot;, NORTH]]</wktCRS>
+</Project>

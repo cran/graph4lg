@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="UMR ThéMA - UBFC-CNRS, UMR Biogéosciences - UBFC-CNRS, ARP-Astrance" />
+
+
+<title>1 - Landscape and genetic data processing with graph4lg</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">1 - Landscape and genetic data processing with <code>graph4lg</code></h1>
+<h4 class="author">UMR ThéMA - UBFC-CNRS, UMR Biogéosciences - UBFC-CNRS, ARP-Astrance</h4>
+<h4 class="date">Paul SAVARY</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a><ul>
+<li><a href="#data-used-in-this-tutorial">Data used in this tutorial</a></li>
+</ul></li>
+<li><a href="#genetic-data-loading-and-format-conversions">Genetic data loading and format conversions</a><ul>
+<li><a href="#genepop-to-genind">GENEPOP to genind</a></li>
+<li><a href="#genind-to-genepop">genind to GENEPOP</a></li>
+<li><a href="#structure-to-genind">STRUCTURE to genind</a></li>
+<li><a href="#gstud-to-genind">gstud to genind</a></li>
+</ul></li>
+<li><a href="#genetic-diversity-assessment">Genetic diversity assessment</a></li>
+<li><a href="#distance-calculations">Distance calculations</a><ul>
+<li><a href="#genetic-distances">Genetic distances</a></li>
+<li><a href="#geographical-distances">Geographical distances</a></li>
+<li><a href="#cost-distances">Cost-distances</a></li>
+</ul></li>
+<li><a href="#processing-tools">Processing tools</a><ul>
+<li><a href="#reorder-a-matrix">Reorder a matrix</a></li>
+<li><a href="#convert-euclidean-distances-into-cost-distances">Convert Euclidean distances into cost distances</a></li>
+<li><a href="#from-pairwise-matrix-to-data-frame">From pairwise matrix to data frame</a></li>
+<li><a href="#from-data-frame-to-pairwise-matrix">From data frame to pairwise matrix</a></li>
+</ul></li>
+<li><a href="#conclusion">Conclusion</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The rationale of <code>graph4lg</code> package in R is to make easier the construction and analysis of genetic and landscape graphs in landscape genetic studies (hence the name <code>graph4lg</code>, meaning Graphs for Landscape Genetics). This package provides users with tools for:</p>
+<ul>
+<li>Landscape and genetic data processing</li>
+<li>Genetic graph construction and analysis</li>
+<li>Landscape graph construction and analysis</li>
+<li>Landscape and genetic graph comparisons</li>
+</ul>
+<p>Each one of the included tutorials focuses on one of these points. This first tutorial will focus on <strong>landscape and genetic data processing</strong>. It will describe the package functions allowing users to:</p>
+<ul>
+<li>Load genetic data and convert them in/from several formats</li>
+<li>Assess genetic diversity</li>
+<li>Compute distances: genetic distances, geographical distances, cost-distances</li>
+<li>Convert data objects in R to make analyses easier</li>
+</ul>
+<div id="data-used-in-this-tutorial" class="section level2">
+<h2>Data used in this tutorial</h2>
+<p>The package already includes genetic and spatial simulated data sets allowing users to discover its different functionalities. The first data set (<code>data_simul</code>) was simulated with CDPOP <span class="citation">(Landguth and Cushman 2010)</span> on a simulated landscape. It consists of 1500 individuals from 50 populations genotyped at 20 microsatellite loci. Individuals dispersed less when the cost-distance between populations was large. A landscape graph was created with Graphab <span class="citation">(Foltête, Clauzel, and Vuidel 2012)</span> whose nodes were the 50 simulated populations and the links were weighted by cost-distance values between populations. The project created with Graphab was included into the package such that the landscape graphs and the cost-distance matrix can be easily imported into the R environment.</p>
+<p>The second data set (<code>data_ex</code>) was simulated as the first one but included only 10 populations. It is used to generate quick examples.</p>
+</div>
+</div>
+<div id="genetic-data-loading-and-format-conversions" class="section level1">
+<h1>Genetic data loading and format conversions</h1>
+<p>The first type of functions from this package allows users to <strong>process genetic data</strong>. These functions load genetic data in R environment and convert them when necessary.</p>
+<p>In order to make the package user-friendly and compatible with genetic data commonly used in landscape genetics, the functions <code>genepop_to_genind</code>, <code>structure_to_genind</code>, <code>gstud_to_genind</code> and <code>loci_to_genind</code> allow users to convert genetic data from formats used respectively in the <code>gstudio</code> <span class="citation">(Dyer 2009)</span> and <code>pegas</code> <span class="citation">(Paradis 2010)</span> packages in R and in STRUCTURE <span class="citation">(Pritchard, Stephens, and Donnelly 2000)</span> and GENEPOP <span class="citation">(Raymond 1995)</span> software into R objects with the class attribute <code>genind</code> from ADEGENET package <span class="citation">(Jombart 2008)</span>. The <strong>format <code>genind</code></strong> makes possible the use of time-efficient functions from <code>adegenet</code> package (coded in C). This package was developed and is regularly maintained by Thibaut Jombart <a href="https://thibautjombart.netlify.com/">(his website)</a>. The function <code>genind_to_genepop</code> enables to convert <code>genind</code> object into text files in format <code>genepop</code> in order to perform analyses with this commonly used R package and executable software. All these functions work with <strong>microsatellite data (with 2 or 3-digits allele coding)</strong>.</p>
+<p>The package is <strong>compatible with SNPs data</strong> as soon as they have been loaded into a <code>genind</code> object (see package <code>vcfR</code> for example).</p>
+<div id="genepop-to-genind" class="section level2">
+<h2>GENEPOP to genind</h2>
+<p>The GENEPOP software <span class="citation">(Raymond 1995)</span> developed by M. Raymond and F. Rousset (Montpellier, France) can be used as an executable file, with or without graphical user interface, or as an R package. It is frequently used to compute F<sub>ST</sub> values and to test for Hardy-Weinberg equilibrium, linkage disequilibrium or genetic differentiation. Besides, when performing simulations with CDPOP <span class="citation">(Landguth and Cushman 2010)</span>, individual genotypes can be saved as GENEPOP files at the end of the simulation.</p>
+<p>The function <code>genepop_to_genind</code> loads a GENEPOP file (.txt extension) and converts it into a <code>genind</code> object. To use it, the path to the file, the total number and names of the loci and the population names must be indicated.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">data_genind &lt;-<span class="st"> </span><span class="kw">genepop_to_genind</span>(<span class="dt">path =</span> <span class="kw">paste0</span>(<span class="kw">system.file</span>(<span class="st">&#39;extdata&#39;</span>, </a>
+<a class="sourceLine" id="cb1-2" title="2">                                                           <span class="dt">package =</span> <span class="st">&#39;graph4lg&#39;</span>), </a>
+<a class="sourceLine" id="cb1-3" title="3">                                               <span class="st">&quot;/gpop_simul_10_g100_04_20.txt&quot;</span>),</a>
+<a class="sourceLine" id="cb1-4" title="4">                                 <span class="dt">n.loci =</span> <span class="dv">20</span>, <span class="dt">pop_names =</span> <span class="kw">as.character</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>))</a>
+<a class="sourceLine" id="cb1-5" title="5"><span class="co">#&gt; Registered S3 method overwritten by &#39;spdep&#39;:</span></a>
+<a class="sourceLine" id="cb1-6" title="6"><span class="co">#&gt;   method   from</span></a>
+<a class="sourceLine" id="cb1-7" title="7"><span class="co">#&gt;   plot.mst ape</span></a>
+<a class="sourceLine" id="cb1-8" title="8"><span class="co">#&gt; Registered S3 method overwritten by &#39;pegas&#39;:</span></a>
+<a class="sourceLine" id="cb1-9" title="9"><span class="co">#&gt;   method      from</span></a>
+<a class="sourceLine" id="cb1-10" title="10"><span class="co">#&gt;   print.amova ade4</span></a>
+<a class="sourceLine" id="cb1-11" title="11">data_genind</a>
+<a class="sourceLine" id="cb1-12" title="12"><span class="co">#&gt; /// GENIND OBJECT /////////</span></a>
+<a class="sourceLine" id="cb1-13" title="13"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb1-14" title="14"><span class="co">#&gt;  // 200 individuals; 20 loci; 124 alleles; size: 139.8 Kb</span></a>
+<a class="sourceLine" id="cb1-15" title="15"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb1-16" title="16"><span class="co">#&gt;  // Basic content</span></a>
+<a class="sourceLine" id="cb1-17" title="17"><span class="co">#&gt;    @tab:  200 x 124 matrix of allele counts</span></a>
+<a class="sourceLine" id="cb1-18" title="18"><span class="co">#&gt;    @loc.n.all: number of alleles per locus (range: 3-9)</span></a>
+<a class="sourceLine" id="cb1-19" title="19"><span class="co">#&gt;    @loc.fac: locus factor for the 124 columns of @tab</span></a>
+<a class="sourceLine" id="cb1-20" title="20"><span class="co">#&gt;    @all.names: list of allele names for each locus</span></a>
+<a class="sourceLine" id="cb1-21" title="21"><span class="co">#&gt;    @ploidy: ploidy of each individual  (range: 2-2)</span></a>
+<a class="sourceLine" id="cb1-22" title="22"><span class="co">#&gt;    @type:  codom</span></a>
+<a class="sourceLine" id="cb1-23" title="23"><span class="co">#&gt;    @call: adegenet::df2genind(X = as.matrix(x[, attr(x, &quot;locicol&quot;), drop = FALSE]), </span></a>
+<a class="sourceLine" id="cb1-24" title="24"><span class="co">#&gt;     sep = &quot;/&quot;, pop = pop, ploidy = ploidy)</span></a>
+<a class="sourceLine" id="cb1-25" title="25"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb1-26" title="26"><span class="co">#&gt;  // Optional content</span></a>
+<a class="sourceLine" id="cb1-27" title="27"><span class="co">#&gt;    @pop: population of each individual (group size range: 20-20)</span></a></code></pre></div>
+<p>We get a <code>genind</code> object. It contains the genotypes of the 1500 individuals from the 50 populations created during the simulation (similar to the data set <code>data_ex_genind</code>).</p>
+</div>
+<div id="genind-to-genepop" class="section level2">
+<h2>genind to GENEPOP</h2>
+<p>The <code>genind_to_genepop</code> function performs the reverse conversion, i.e. converts a <code>genind</code> object into a GENEPOP file. This file is created and saved in the working directory defined earlier.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">genind_to_genepop</span>(<span class="dt">x =</span> data_genind, </a>
+<a class="sourceLine" id="cb2-2" title="2">                  <span class="dt">output =</span> <span class="st">&quot;data_gpop_test.txt&quot;</span>)</a></code></pre></div>
+<p>This function can for example create a GENEPOP file to test for between population genetic differentiation or to compute fixation indices with GENEPOP software.</p>
+</div>
+<div id="structure-to-genind" class="section level2">
+<h2>STRUCTURE to genind</h2>
+<p>STRUCTURE software <span class="citation">(Pritchard, Stephens, and Donnelly 2000)</span> is frequently used in population genetics and landscape genetics. It enables to create population clusters through a Bayesian approach aiming at minimising the deviation from Hardy-Weinberg equilibrium when gathering populations with one another. The input files have a particular structure. The function <code>structure_to_genind</code> converts this type of file into a <code>genind</code> object.</p>
+<p>To use the function, we need to indicate the path to the file, the names of the loci, the individual ID and the population names in the same order as in the original file.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">loci_names &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;LOCI-&quot;</span>, <span class="kw">as.character</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">20</span>))</a>
+<a class="sourceLine" id="cb3-2" title="2"></a>
+<a class="sourceLine" id="cb3-3" title="3">ind_names &lt;-<span class="st"> </span><span class="kw">as.character</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">200</span>)</a>
+<a class="sourceLine" id="cb3-4" title="4">pop_names &lt;-<span class="st"> </span><span class="kw">as.character</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</a>
+<a class="sourceLine" id="cb3-5" title="5">data_paru &lt;-<span class="st"> </span><span class="kw">structure_to_genind</span>(<span class="dt">path =</span> <span class="kw">paste0</span>(<span class="kw">system.file</span>(<span class="st">&#39;extdata&#39;</span>, </a>
+<a class="sourceLine" id="cb3-6" title="6">                                                           <span class="dt">package =</span> <span class="st">&#39;graph4lg&#39;</span>), </a>
+<a class="sourceLine" id="cb3-7" title="7">                                               <span class="st">&quot;/data_ex_str.txt&quot;</span>),</a>
+<a class="sourceLine" id="cb3-8" title="8">                                 <span class="dt">loci_names =</span> loci_names,</a>
+<a class="sourceLine" id="cb3-9" title="9">                                 <span class="dt">pop_names =</span> pop_names,</a>
+<a class="sourceLine" id="cb3-10" title="10">                                 <span class="dt">ind_names =</span> ind_names)</a>
+<a class="sourceLine" id="cb3-11" title="11">data_paru</a>
+<a class="sourceLine" id="cb3-12" title="12"><span class="co">#&gt; /// GENIND OBJECT /////////</span></a>
+<a class="sourceLine" id="cb3-13" title="13"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb3-14" title="14"><span class="co">#&gt;  // 200 individuals; 20 loci; 124 alleles; size: 139.5 Kb</span></a>
+<a class="sourceLine" id="cb3-15" title="15"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb3-16" title="16"><span class="co">#&gt;  // Basic content</span></a>
+<a class="sourceLine" id="cb3-17" title="17"><span class="co">#&gt;    @tab:  200 x 124 matrix of allele counts</span></a>
+<a class="sourceLine" id="cb3-18" title="18"><span class="co">#&gt;    @loc.n.all: number of alleles per locus (range: 3-9)</span></a>
+<a class="sourceLine" id="cb3-19" title="19"><span class="co">#&gt;    @loc.fac: locus factor for the 124 columns of @tab</span></a>
+<a class="sourceLine" id="cb3-20" title="20"><span class="co">#&gt;    @all.names: list of allele names for each locus</span></a>
+<a class="sourceLine" id="cb3-21" title="21"><span class="co">#&gt;    @ploidy: ploidy of each individual  (range: 2-2)</span></a>
+<a class="sourceLine" id="cb3-22" title="22"><span class="co">#&gt;    @type:  codom</span></a>
+<a class="sourceLine" id="cb3-23" title="23"><span class="co">#&gt;    @call: adegenet::df2genind(X = as.matrix(x[, attr(x, &quot;locicol&quot;), drop = FALSE]), </span></a>
+<a class="sourceLine" id="cb3-24" title="24"><span class="co">#&gt;     sep = &quot;/&quot;, pop = pop, ploidy = ploidy)</span></a>
+<a class="sourceLine" id="cb3-25" title="25"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb3-26" title="26"><span class="co">#&gt;  // Optional content</span></a>
+<a class="sourceLine" id="cb3-27" title="27"><span class="co">#&gt;    @pop: population of each individual (group size range: 20-20)</span></a></code></pre></div>
+</div>
+<div id="gstud-to-genind" class="section level2">
+<h2>gstud to genind</h2>
+<p>Packages <code>gstudio</code> and <code>popgraph</code> developed by R. Dyer <span class="citation">(Dyer 2009)</span> use as input data R <code>data.frames</code> with columns of class <code>locus</code>. These <code>data.frame</code> objects constitute <code>gstud</code> objects. Given these packages are often used to create genetic graphs, we created a function to convert them into the <code>genind</code> format.</p>
+<p>A <code>gstud</code> object generally has the following structure (simulations with 10 populations as an example):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">head</span>(data_ex_gstud)</a></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["ID"],"name":[1],"type":["int"],"align":["right"]},{"label":["POP"],"name":[2],"type":["chr"],"align":["left"]},{"label":["LOCUS-1"],"name":[3],"type":["chr"],"align":["left"]},{"label":["LOCUS-2"],"name":[4],"type":["chr"],"align":["left"]},{"label":["LOCUS-3"],"name":[5],"type":["chr"],"align":["left"]},{"label":["LOCUS-4"],"name":[6],"type":["chr"],"align":["left"]},{"label":["LOCUS-5"],"name":[7],"type":["chr"],"align":["left"]},{"label":["LOCUS-6"],"name":[8],"type":["chr"],"align":["left"]},{"label":["LOCUS-7"],"name":[9],"type":["chr"],"align":["left"]},{"label":["LOCUS-8"],"name":[10],"type":["chr"],"align":["left"]},{"label":["LOCUS-9"],"name":[11],"type":["chr"],"align":["left"]},{"label":["LOCUS-10"],"name":[12],"type":["chr"],"align":["left"]},{"label":["LOCUS-11"],"name":[13],"type":["chr"],"align":["left"]},{"label":["LOCUS-12"],"name":[14],"type":["chr"],"align":["left"]},{"label":["LOCUS-13"],"name":[15],"type":["chr"],"align":["left"]},{"label":["LOCUS-14"],"name":[16],"type":["chr"],"align":["left"]},{"label":["LOCUS-15"],"name":[17],"type":["chr"],"align":["left"]},{"label":["LOCUS-16"],"name":[18],"type":["chr"],"align":["left"]},{"label":["LOCUS-17"],"name":[19],"type":["chr"],"align":["left"]},{"label":["LOCUS-18"],"name":[20],"type":["chr"],"align":["left"]},{"label":["LOCUS-19"],"name":[21],"type":["chr"],"align":["left"]},{"label":["LOCUS-20"],"name":[22],"type":["chr"],"align":["left"]}],"data":[{"1":"1","2":"1","3":"116:130","4":"104:104","5":"123:123","6":"103:103","7":"124:124","8":"106:113","9":"113:117","10":"101:101","11":"102:126","12":"114:114","13":"123:123","14":"104:120","15":"105:105","16":"103:122","17":"106:129","18":"115:115","19":"103:103","20":"122:122","21":"129:129","22":"109:130","_rn_":"23"},{"1":"2","2":"1","3":"116:116","4":"104:104","5":"123:123","6":"103:129","7":"124:124","8":"106:113","9":"113:113","10":"101:101","11":"126:126","12":"114:118","13":"123:123","14":"120:120","15":"104:105","16":"103:103","17":"116:116","18":"102:115","19":"103:103","20":"122:122","21":"109:129","22":"109:130","_rn_":"24"},{"1":"3","2":"1","3":"130:130","4":"104:104","5":"123:123","6":"103:103","7":"124:124","8":"106:113","9":"113:113","10":"101:101","11":"102:126","12":"118:118","13":"109:123","14":"120:120","15":"104:104","16":"103:103","17":"116:129","18":"102:102","19":"103:103","20":"122:122","21":"109:122","22":"109:109","_rn_":"25"},{"1":"4","2":"1","3":"116:116","4":"104:107","5":"123:123","6":"103:103","7":"124:124","8":"106:106","9":"117:117","10":"101:114","11":"102:126","12":"118:118","13":"123:123","14":"104:120","15":"105:105","16":"103:103","17":"116:129","18":"115:115","19":"103:103","20":"122:122","21":"122:129","22":"109:130","_rn_":"26"},{"1":"5","2":"1","3":"116:130","4":"104:107","5":"123:123","6":"103:103","7":"124:124","8":"106:106","9":"113:117","10":"101:114","11":"102:106","12":"114:114","13":"123:123","14":"104:120","15":"105:105","16":"103:122","17":"116:129","18":"102:115","19":"103:103","20":"122:122","21":"129:129","22":"109:130","_rn_":"27"},{"1":"6","2":"1","3":"116:116","4":"104:104","5":"123:123","6":"103:103","7":"124:124","8":"113:113","9":"109:113","10":"101:114","11":"124:126","12":"114:114","13":"123:123","14":"104:104","15":"105:105","16":"103:122","17":"106:106","18":"102:102","19":"103:103","20":"122:122","21":"122:129","22":"117:120","_rn_":"28"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>To convert it with the function <code>gstud_to_genind</code>, we indicate the name of the <code>data.frame</code> and of the columns containing population names and individual names:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">gstud_to_genind</span>(<span class="dt">x =</span> data_ex_gstud, <span class="dt">pop_col =</span> <span class="st">&quot;POP&quot;</span>,</a>
+<a class="sourceLine" id="cb5-2" title="2">                <span class="dt">ind_col =</span> <span class="st">&quot;ID&quot;</span>)</a>
+<a class="sourceLine" id="cb5-3" title="3"><span class="co">#&gt; Individuals in &#39;x&#39; were not ordered, they have</span></a>
+<a class="sourceLine" id="cb5-4" title="4"><span class="co">#&gt;             been ordered by populations and populations ordered in alphabetic</span></a>
+<a class="sourceLine" id="cb5-5" title="5"><span class="co">#&gt;             order for the conversion.</span></a>
+<a class="sourceLine" id="cb5-6" title="6"><span class="co">#&gt; /// GENIND OBJECT /////////</span></a>
+<a class="sourceLine" id="cb5-7" title="7"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-8" title="8"><span class="co">#&gt;  // 200 individuals; 20 loci; 124 alleles; size: 139.8 Kb</span></a>
+<a class="sourceLine" id="cb5-9" title="9"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-10" title="10"><span class="co">#&gt;  // Basic content</span></a>
+<a class="sourceLine" id="cb5-11" title="11"><span class="co">#&gt;    @tab:  200 x 124 matrix of allele counts</span></a>
+<a class="sourceLine" id="cb5-12" title="12"><span class="co">#&gt;    @loc.n.all: number of alleles per locus (range: 3-9)</span></a>
+<a class="sourceLine" id="cb5-13" title="13"><span class="co">#&gt;    @loc.fac: locus factor for the 124 columns of @tab</span></a>
+<a class="sourceLine" id="cb5-14" title="14"><span class="co">#&gt;    @all.names: list of allele names for each locus</span></a>
+<a class="sourceLine" id="cb5-15" title="15"><span class="co">#&gt;    @ploidy: ploidy of each individual  (range: 2-2)</span></a>
+<a class="sourceLine" id="cb5-16" title="16"><span class="co">#&gt;    @type:  codom</span></a>
+<a class="sourceLine" id="cb5-17" title="17"><span class="co">#&gt;    @call: adegenet::df2genind(X = as.matrix(x[, attr(x, &quot;locicol&quot;), drop = FALSE]), </span></a>
+<a class="sourceLine" id="cb5-18" title="18"><span class="co">#&gt;     sep = &quot;/&quot;, pop = pop, ploidy = ploidy)</span></a>
+<a class="sourceLine" id="cb5-19" title="19"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-20" title="20"><span class="co">#&gt;  // Optional content</span></a>
+<a class="sourceLine" id="cb5-21" title="21"><span class="co">#&gt;    @pop: population of each individual (group size range: 20-20)</span></a></code></pre></div>
+</div>
+</div>
+<div id="genetic-diversity-assessment" class="section level1">
+<h1>Genetic diversity assessment</h1>
+<p>Once a genetic dataset has been loaded in the R environment, the function <code>pop_gen_index</code> computes some <strong>genetic diversity indices at the population level</strong>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">gen_div &lt;-<span class="st"> </span><span class="kw">pop_gen_index</span>(data_ex_genind)</a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="kw">head</span>(gen_div)</a></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["ID"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Nb_ind"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["A"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Ho"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["He"],"name":[5],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"20","3":"2.40","4":"0.4000","5":"0.3833750","_rn_":"1"},{"1":"10","2":"20","3":"2.85","4":"0.4850","5":"0.4636250","_rn_":"10"},{"1":"2","2":"20","3":"2.90","4":"0.4250","5":"0.4434375","_rn_":"2"},{"1":"3","2":"20","3":"2.90","4":"0.4700","5":"0.4090625","_rn_":"3"},{"1":"4","2":"20","3":"2.95","4":"0.4675","5":"0.4261250","_rn_":"4"},{"1":"5","2":"20","3":"3.00","4":"0.3925","5":"0.4415625","_rn_":"5"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>By default, it computes all the available indices, i.e. the number of individuals (“Nb_ind”), the total allelic richness (“A”), the expected heterozygosity (“He”) and the observed heterozygosity (“Ho”).</p>
+</div>
+<div id="distance-calculations" class="section level1">
+<h1>Distance calculations</h1>
+<p>In landscape genetics, apart from local population or landscape properties at the sampling site level, particular attention is given to <strong>between population/habitat patch distances</strong>. The package includes three functions to <strong>compute both genetic and landscape distances</strong>.</p>
+<div id="genetic-distances" class="section level2">
+<h2>Genetic distances</h2>
+<p>From a <code>genind</code> object, the function <code>mat_gen_dist</code> calculates several types of <strong>between population genetic distances</strong>:</p>
+<ul>
+<li><p>F<sub>ST</sub> <span class="citation">(Weir and Cockerham 1984)</span> or linearised F<sub>ST</sub> <span class="citation">(Rousset 1997)</span> (options ‘<code>dist=FST</code>’ and ‘<code>dist=FST_lin</code>’).</p></li>
+<li><p>G’<sub>ST</sub> <span class="citation">(Hedrick 2005)</span> (option ‘<code>dist=GST</code>’).</p></li>
+<li><p>D<sub>Jost</sub> <span class="citation">(Jost 2008)</span> (option ‘<code>dist=D</code>’).</p></li>
+<li><p>D<sub>PS</sub> (1 - proportion of shared alleles) <span class="citation">(Bowcock et al. 1994, @murphy_graph_2015)</span> (option ‘<code>dist=DPS</code>’).</p></li>
+<li><p>Euclidean genetic distance <span class="citation">(Excoffier, Smouse, and Quattro 1992)</span> (option ‘<code>dist=basic</code>’).</p></li>
+<li><p>Euclidean genetic distance with a weighting depending on allelic frequencies giving more weight to rare alleles <span class="citation">(Fortuna et al. 2009)</span> (option ‘<code>dist=weight</code>’).</p></li>
+<li><p>Euclidean genetic distance computed after a PCA of the matrix of allelic frequencies by population. The axes considered to compute the Euclidean distance are the non-collinear principal components (total number of alleles - number of loci) <span class="citation">(Paschou et al. 2014, @shirk2017comparison)</span> (option ‘<code>dist=PCA</code>’).</p></li>
+<li><p>Euclidean genetic distance computed in the same way as with the function <code>popgraph</code> from <code>popgraph</code> package, i.e. after a PCA and two SVD, among other computation steps (option ‘<code>dist=PG</code>’). This distance differs from the conditional genetic distance (cGD) computed from a population graph by summing genetic distances along shortest paths.</p></li>
+</ul>
+<p>To do these calculations with the function <code>mat_gen_dist</code>, we just have to indicate the name of the <code>genind</code> object which includes the genetic data of the individuals as well as the populations to which each of them belongs. The other argument of the function is the type of genetic distance to compute. Here are two examples:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">mat_dps &lt;-<span class="st"> </span><span class="kw">mat_gen_dist</span>(<span class="dt">x =</span> data_genind, <span class="dt">dist =</span> <span class="st">&quot;DPS&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1">mat_dps[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>]</a>
+<a class="sourceLine" id="cb8-2" title="2"><span class="co">#&gt;            1        10        11        12        13</span></a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="co">#&gt; 1  0.0000000 0.7883333 0.5900000 0.6816667 0.8733333</span></a>
+<a class="sourceLine" id="cb8-4" title="4"><span class="co">#&gt; 10 0.7883333 0.0000000 0.5741667 0.5450000 0.8816667</span></a>
+<a class="sourceLine" id="cb8-5" title="5"><span class="co">#&gt; 11 0.5900000 0.5741667 0.0000000 0.3750000 0.8658333</span></a>
+<a class="sourceLine" id="cb8-6" title="6"><span class="co">#&gt; 12 0.6816667 0.5450000 0.3750000 0.0000000 0.8633333</span></a>
+<a class="sourceLine" id="cb8-7" title="7"><span class="co">#&gt; 13 0.8733333 0.8816667 0.8658333 0.8633333 0.0000000</span></a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">mat_pg &lt;-<span class="st"> </span><span class="kw">mat_gen_dist</span>(<span class="dt">x =</span> data_genind, <span class="dt">dist =</span> <span class="st">&quot;PG&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1">mat_pg[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>]</a>
+<a class="sourceLine" id="cb10-2" title="2"><span class="co">#&gt;           1       10       11       12       13</span></a>
+<a class="sourceLine" id="cb10-3" title="3"><span class="co">#&gt; 1   0.00000 29.93508 21.67789 25.40865 29.17504</span></a>
+<a class="sourceLine" id="cb10-4" title="4"><span class="co">#&gt; 10 29.93508  0.00000 19.15163 20.32432 29.99936</span></a>
+<a class="sourceLine" id="cb10-5" title="5"><span class="co">#&gt; 11 21.67789 19.15163  0.00000 13.50181 24.69579</span></a>
+<a class="sourceLine" id="cb10-6" title="6"><span class="co">#&gt; 12 25.40865 20.32432 13.50181  0.00000 25.18634</span></a>
+<a class="sourceLine" id="cb10-7" title="7"><span class="co">#&gt; 13 29.17504 29.99936 24.69579 25.18634  0.00000</span></a></code></pre></div>
+</div>
+<div id="geographical-distances" class="section level2">
+<h2>Geographical distances</h2>
+<p>The package also calculates <strong>Euclidean geographical distances</strong> between populations with the function <code>mat_geo_dist</code>. It takes as arguments:</p>
+<ul>
+<li><code>data</code>: A <code>data.frame</code> with 3 columns corresponding to point ID, longitude (x) and latitude (y) whose column names are specified in other arguments below. It can also be a <code>SpatialPointsDataFrame</code> created in R or by importing a shapefile layer.</li>
+<li><code>ID</code>: population or point ID</li>
+<li><code>x</code>: population or point longitude</li>
+<li><code>y</code>: population or point latitude</li>
+<li><code>crds_type</code>: “proj” or “polar”. Indicates whether coordinates are from a projected (“proj”) or a polar (“polar”) coordinate reference system.</li>
+<li><code>gc_formula</code>: if coordinates are polar, then it specifies the formula to use. By default, the Vicenty formula is used.</li>
+</ul>
+<p>When geographical coordinates are given in a <strong>projected coordinate reference system (metric)</strong>, Pythagoras’s theorem is used to compute the distances. Conversely, when they are given in a <strong>polar CRS (degrees)</strong>, Great Circle distances are computed. A warning message is displayed in every case.</p>
+<p>Example with the 50 point projected coordinates included in the <code>pts_pop_simul</code> data set:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">head</span>(pts_pop_simul)</a></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["ID"],"name":[1],"type":["chr"],"align":["left"]},{"label":["x"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["y"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"25650","3":"54150","_rn_":"0"},{"1":"2","2":"22550","3":"53650","_rn_":"1"},{"1":"3","2":"7250","3":"51750","_rn_":"2"},{"1":"4","2":"32350","3":"50550","_rn_":"3"},{"1":"5","2":"27350","3":"49650","_rn_":"4"},{"1":"6","2":"15950","3":"49550","_rn_":"5"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1">mat_geo &lt;-<span class="st"> </span><span class="kw">mat_geo_dist</span>(<span class="dt">data =</span> pts_pop_simul, </a>
+<a class="sourceLine" id="cb12-2" title="2">                        <span class="dt">ID =</span> <span class="st">&quot;ID&quot;</span>, <span class="dt">x =</span> <span class="st">&quot;x&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;y&quot;</span>,</a>
+<a class="sourceLine" id="cb12-3" title="3">                        <span class="dt">crds_type =</span> <span class="st">&quot;proj&quot;</span>)</a>
+<a class="sourceLine" id="cb12-4" title="4"><span class="co">#&gt; Coordinates were treated as projected coordinates. Check whether</span></a>
+<a class="sourceLine" id="cb12-5" title="5"><span class="co">#&gt;               it is the case.</span></a></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1">mat_geo[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>]</a>
+<a class="sourceLine" id="cb13-2" title="2"><span class="co">#&gt;           1         2        3         4         5</span></a>
+<a class="sourceLine" id="cb13-3" title="3"><span class="co">#&gt; 1     0.000  3140.064 18555.86  7605.919  4810.405</span></a>
+<a class="sourceLine" id="cb13-4" title="4"><span class="co">#&gt; 2  3140.064     0.000 15417.52 10278.619  6248.200</span></a>
+<a class="sourceLine" id="cb13-5" title="5"><span class="co">#&gt; 3 18555.862 15417.522     0.00 25128.669 20209.404</span></a>
+<a class="sourceLine" id="cb13-6" title="6"><span class="co">#&gt; 4  7605.919 10278.619 25128.67     0.000  5080.354</span></a>
+<a class="sourceLine" id="cb13-7" title="7"><span class="co">#&gt; 5  4810.405  6248.200 20209.40  5080.354     0.000</span></a></code></pre></div>
+<p>Examples with 4 city <strong>polar coordinates</strong>:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">city_us &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">name =</span> <span class="kw">c</span>(<span class="st">&quot;New York City&quot;</span>, <span class="st">&quot;Chicago&quot;</span>, </a>
+<a class="sourceLine" id="cb14-2" title="2">                               <span class="st">&quot;Los Angeles&quot;</span>, <span class="st">&quot;Atlanta&quot;</span>),</a>
+<a class="sourceLine" id="cb14-3" title="3">                   <span class="dt">lat  =</span> <span class="kw">c</span>(<span class="fl">40.75170</span>,  <span class="fl">41.87440</span>,</a>
+<a class="sourceLine" id="cb14-4" title="4">                            <span class="fl">34.05420</span>,  <span class="fl">33.75280</span>),</a>
+<a class="sourceLine" id="cb14-5" title="5">                   <span class="dt">lon  =</span> <span class="kw">c</span>(<span class="op">-</span><span class="fl">73.99420</span>, <span class="fl">-87.63940</span>,</a>
+<a class="sourceLine" id="cb14-6" title="6">                            <span class="fl">-118.24100</span>, <span class="fl">-84.39360</span>))</a>
+<a class="sourceLine" id="cb14-7" title="7"></a>
+<a class="sourceLine" id="cb14-8" title="8">mat_geo_us &lt;-<span class="st"> </span><span class="kw">mat_geo_dist</span>(<span class="dt">data =</span> city_us,</a>
+<a class="sourceLine" id="cb14-9" title="9">                           <span class="dt">ID =</span> <span class="st">&quot;name&quot;</span>, <span class="dt">x =</span> <span class="st">&quot;lon&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;lat&quot;</span>,</a>
+<a class="sourceLine" id="cb14-10" title="10">                           <span class="dt">crds_type =</span> <span class="st">&quot;polar&quot;</span>)</a>
+<a class="sourceLine" id="cb14-11" title="11"><span class="co">#&gt; Coordinates were treated as polar coordinates. Check whether</span></a>
+<a class="sourceLine" id="cb14-12" title="12"><span class="co">#&gt;               it is the case.</span></a>
+<a class="sourceLine" id="cb14-13" title="13"></a>
+<a class="sourceLine" id="cb14-14" title="14"><span class="kw">head</span>(mat_geo_us)</a>
+<a class="sourceLine" id="cb14-15" title="15"><span class="co">#&gt;                  Atlanta    Chicago Los Angeles New York City</span></a>
+<a class="sourceLine" id="cb14-16" title="16"><span class="co">#&gt; Atlanta              0.0   367050.9    16225865       1168203</span></a>
+<a class="sourceLine" id="cb14-17" title="17"><span class="co">#&gt; Chicago         367050.9        0.0    16590655       1523685</span></a>
+<a class="sourceLine" id="cb14-18" title="18"><span class="co">#&gt; Los Angeles   16225865.1 16590655.5           0      15072934</span></a>
+<a class="sourceLine" id="cb14-19" title="19"><span class="co">#&gt; New York City  1168203.4  1523684.7    15072934             0</span></a></code></pre></div>
+</div>
+<div id="cost-distances" class="section level2">
+<h2>Cost-distances</h2>
+<p>Because straight line Euclidean distances cannot accurately reflect how species move in landscapes, methods have been developed to better represent how they move by incorporating information about the resistance of landscape features to their movements. Among them, the computation of <strong>least-cost paths</strong> and of their <strong>cumulated cost-distances along these paths</strong> is a very popular approach.</p>
+<p>The function <code>mat_cost_dist</code> makes possible the computation of <strong>cost-distances between a set of points on a raster with discrete cell values</strong> corresponding to land use types. Each land use type is given a cost reflecting its resistance to movement. A high value means that the cell is difficult to cross for an individual.</p>
+<p>The <code>raster</code> input can be either:</p>
+<ul>
+<li>the path (<code>character string</code>) to a raster file in format .tif or .asc,</li>
+<li>a <code>RasterLayer</code> object already loaded in R environment.</li>
+</ul>
+<p>The point (<code>pts</code>) input can be either:</p>
+<ul>
+<li>the path (<code>character string</code>) to a .csv file,</li>
+<li>a <code>data.frame</code> already loaded in R environment</li>
+<li>a <code>SpatialPointsDataFrame</code> created in R or by importing a shapefile layer.</li>
+</ul>
+<p>In all cases, this object must have three data columns indicating the point ID, x (longitude) and y (latitude) in a projected coordinate reference system.</p>
+<p>To do the computation, we need to create a <code>data.frame</code> with two columns (<code>code</code> and <code>cost</code>) specifying the cost associated with every raster cell value.</p>
+<p>By default, the computation is performed with <code>costDistance</code> function from <code>gdistance</code> package (<code>method = &quot;gdistance&quot;</code>). For example :</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1">x &lt;-<span class="st"> </span>raster<span class="op">::</span><span class="kw">raster</span>(<span class="dt">ncol=</span><span class="dv">10</span>, <span class="dt">nrow=</span><span class="dv">10</span>, <span class="dt">xmn=</span><span class="dv">0</span>, <span class="dt">xmx=</span><span class="dv">100</span>, <span class="dt">ymn=</span><span class="dv">0</span>, <span class="dt">ymx=</span><span class="dv">100</span>)</a>
+<a class="sourceLine" id="cb15-2" title="2">raster<span class="op">::</span><span class="kw">values</span>(x) &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>), <span class="dt">size =</span> <span class="dv">100</span>, <span class="dt">replace =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb15-3" title="3">pts &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">ID =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>,</a>
+<a class="sourceLine" id="cb15-4" title="4">                  <span class="dt">x =</span> <span class="kw">c</span>(<span class="dv">10</span>, <span class="dv">90</span>, <span class="dv">10</span>, <span class="dv">90</span>),</a>
+<a class="sourceLine" id="cb15-5" title="5">                  <span class="dt">y =</span> <span class="kw">c</span>(<span class="dv">90</span>, <span class="dv">10</span>, <span class="dv">90</span>, <span class="dv">10</span>))</a>
+<a class="sourceLine" id="cb15-6" title="6">cost &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">code =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>,</a>
+<a class="sourceLine" id="cb15-7" title="7">                   <span class="dt">cost =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">100</span>, <span class="dv">1000</span>))</a>
+<a class="sourceLine" id="cb15-8" title="8">mat_cd &lt;-<span class="st"> </span><span class="kw">mat_cost_dist</span>(<span class="dt">raster =</span> x,</a>
+<a class="sourceLine" id="cb15-9" title="9">              <span class="dt">pts =</span> pts, <span class="dt">cost =</span> cost,</a>
+<a class="sourceLine" id="cb15-10" title="10">              <span class="dt">method =</span> <span class="st">&quot;gdistance&quot;</span>)</a>
+<a class="sourceLine" id="cb15-11" title="11"><span class="kw">head</span>(mat_cd)</a>
+<a class="sourceLine" id="cb15-12" title="12"><span class="co">#&gt;          1        2        3        4</span></a>
+<a class="sourceLine" id="cb15-13" title="13"><span class="co">#&gt; 1  0.00000 77.86144  0.00000 77.86144</span></a>
+<a class="sourceLine" id="cb15-14" title="14"><span class="co">#&gt; 2 77.86144  0.00000 77.86144  0.00000</span></a>
+<a class="sourceLine" id="cb15-15" title="15"><span class="co">#&gt; 3  0.00000 77.86144  0.00000 77.86144</span></a>
+<a class="sourceLine" id="cb15-16" title="16"><span class="co">#&gt; 4 77.86144  0.00000 77.86144  0.00000</span></a></code></pre></div>
+<p><code>gdistance</code> cannot perform the computation anymore when the raster size and the number of points increase. Using another coding language than R is a way to overcome this limitation. That is why the function <code>mat_cost_dist</code> includes <strong>another method for computing cost distances</strong>. It relies upon the .jar file <code>costdist-0.3.jar</code> (Java language), developed by Gilles Vuidel (UMR TheMA, Besancon, France). It is automatically downloaded by the user at the first use of the function <code>mat_cost_dist</code> with the argument <code>method = &quot;java&quot;</code>, provided Java is installed in the user’s machine. This program makes possible the <strong>parallelisation of the computation</strong>. The argument <code>parallel.java</code> takes values between 1 and the number of cores in the user’s machine - 1, thereby setting the number of cores used for the computation.</p>
+<p>For example, when using <code>method=&quot;java&quot;</code>, the command should be:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="kw">mat_cost_dist</span>(<span class="dt">raster =</span> x,</a>
+<a class="sourceLine" id="cb16-2" title="2">              <span class="dt">pts =</span> pts, <span class="dt">cost =</span> cost,</a>
+<a class="sourceLine" id="cb16-3" title="3">              <span class="dt">method =</span> <span class="st">&quot;java&quot;</span>,</a>
+<a class="sourceLine" id="cb16-4" title="4">              <span class="dt">parallel.java =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p>When <code>method=&quot;java&quot;</code>, least cost paths progress in 8 directions from one cell, whereas it can be controlled when <code>method = &quot;gdistance&quot;</code> with the argument <code>direction=4</code> (or 8 or 16).</p>
+<p><strong>When choosing which method?</strong> Using <code>method=&quot;java&quot;</code> becomes more and more interesting as the raster size and the number of points increase. In the previous example (raster: 10 <span class="math inline">\(\times\)</span> 10 cells, 4 points), using <code>method=&quot;gdistance&quot;</code> is the fastest option (0.67 s. vs 2.56 s.). With a raster of 100 <span class="math inline">\(\times\)</span> 100 cells and 4 points, both methods are equivalent (2 s.). With a raster of 1000 <span class="math inline">\(\times\)</span> 1000 cells and 4 points, <code>method=&quot;java&quot;</code> is by far the fastest (120 s. vs 8 s.).</p>
+<p>Besides, <strong>depending on the input data types</strong>, computation times can vary:</p>
+<ul>
+<li>When using <code>method=&quot;java&quot;</code>, the best option is to provide a .asc raster file and a .csv point file.</li>
+<li>When using <code>method=&quot;gdistance&quot;</code>, the best option is to provide a <code>RasterLayer</code> object in R and a <code>SpatialPointsDataFrame</code> object in R.</li>
+</ul>
+</div>
+</div>
+<div id="processing-tools" class="section level1">
+<h1>Processing tools</h1>
+<p>The functions presented in the last sections create objects in R, such as <code>data.frame</code> and <code>matrix</code>. The package includes functions to process these objects, ordering them, comparing them and converting them.</p>
+<div id="reorder-a-matrix" class="section level2">
+<h2>Reorder a matrix</h2>
+<p>In landscape genetics, when comparing two matrices of distances between the same sets of elements (e.g. doing a Mantel test to assess isolation by distance patterns), the two matrices must be ordered the same way. The function <code>reorder_mat</code> reorders a symmetric matrix according to a specified order of its row/column names.</p>
+<p>For example, when computing a geographical distance from a <code>data.frame</code> in which the <code>ID</code> column contains integer values, the resulting distance matrix is ordered in the increasing order of these ID (1, 2, 3, …., 10). If the same IDs are character strings, the resulting distance matrix will be ordered in alphabetical order (“1”, “10”, “2”, “3”, …, “9”). In the following example, we illustrate how to reorder a matrix in such a case.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1">mat_g1 &lt;-<span class="st"> </span><span class="kw">mat_geo_dist</span>(pts_pop_ex, </a>
+<a class="sourceLine" id="cb17-2" title="2">                       <span class="dt">ID =</span> <span class="st">&quot;ID&quot;</span>, <span class="dt">x =</span> <span class="st">&quot;x&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;y&quot;</span>, </a>
+<a class="sourceLine" id="cb17-3" title="3">                       <span class="dt">crds_type =</span> <span class="st">&quot;proj&quot;</span>)</a>
+<a class="sourceLine" id="cb17-4" title="4"><span class="co">#&gt; Coordinates were treated as projected coordinates. Check whether</span></a>
+<a class="sourceLine" id="cb17-5" title="5"><span class="co">#&gt;               it is the case.</span></a>
+<a class="sourceLine" id="cb17-6" title="6"><span class="kw">head</span>(mat_g1)</a>
+<a class="sourceLine" id="cb17-7" title="7"><span class="co">#&gt;          1         2         3        4         5        6        7         8</span></a>
+<a class="sourceLine" id="cb17-8" title="8"><span class="co">#&gt; 1     0.00 30050.125 21967.248 41694.12 26916.352 19313.21 37283.91 29098.797</span></a>
+<a class="sourceLine" id="cb17-9" title="9"><span class="co">#&gt; 2 30050.12     0.000  8360.024 11800.42  6529.931 23825.41 19804.04 25766.063</span></a>
+<a class="sourceLine" id="cb17-10" title="10"><span class="co">#&gt; 3 21967.25  8360.024     0.000 19746.39  5728.001 16843.99 20392.40 21332.135</span></a>
+<a class="sourceLine" id="cb17-11" title="11"><span class="co">#&gt; 4 41694.12 11800.424 19746.392     0.00 15582.362 32572.99 20145.72 31270.753</span></a>
+<a class="sourceLine" id="cb17-12" title="12"><span class="co">#&gt; 5 26916.35  6529.931  5728.001 15582.36     0.000 17629.80 15280.05 19293.781</span></a>
+<a class="sourceLine" id="cb17-13" title="13"><span class="co">#&gt; 6 19313.21 23825.407 16843.990 32572.99 17629.804     0.00 20333.47  9790.812</span></a>
+<a class="sourceLine" id="cb17-14" title="14"><span class="co">#&gt;          9       10</span></a>
+<a class="sourceLine" id="cb17-15" title="15"><span class="co">#&gt; 1 33737.96 29230.81</span></a>
+<a class="sourceLine" id="cb17-16" title="16"><span class="co">#&gt; 2 24485.91 30425.15</span></a>
+<a class="sourceLine" id="cb17-17" title="17"><span class="co">#&gt; 3 22000.23 25242.03</span></a>
+<a class="sourceLine" id="cb17-18" title="18"><span class="co">#&gt; 4 27789.39 36391.76</span></a>
+<a class="sourceLine" id="cb17-19" title="19"><span class="co">#&gt; 5 18483.51 23900.84</span></a>
+<a class="sourceLine" id="cb17-20" title="20"><span class="co">#&gt; 6 14827.34 10647.07</span></a>
+<a class="sourceLine" id="cb17-21" title="21"><span class="kw">row.names</span>(mat_g1)</a>
+<a class="sourceLine" id="cb17-22" title="22"><span class="co">#&gt;  [1] &quot;1&quot;  &quot;2&quot;  &quot;3&quot;  &quot;4&quot;  &quot;5&quot;  &quot;6&quot;  &quot;7&quot;  &quot;8&quot;  &quot;9&quot;  &quot;10&quot;</span></a>
+<a class="sourceLine" id="cb17-23" title="23"></a>
+<a class="sourceLine" id="cb17-24" title="24"><span class="co"># Reorder mat_g1</span></a>
+<a class="sourceLine" id="cb17-25" title="25">mat_g2 &lt;-<span class="st"> </span><span class="kw">reorder_mat</span>(mat_g1, </a>
+<a class="sourceLine" id="cb17-26" title="26">                      <span class="dt">order =</span> <span class="kw">as.character</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)[<span class="kw">order</span>(<span class="kw">as.character</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>))])</a>
+<a class="sourceLine" id="cb17-27" title="27"><span class="kw">head</span>(mat_g2)</a>
+<a class="sourceLine" id="cb17-28" title="28"><span class="co">#&gt;           1       10         2         3        4         5        6        7</span></a>
+<a class="sourceLine" id="cb17-29" title="29"><span class="co">#&gt; 1      0.00 29230.81 30050.125 21967.248 41694.12 26916.352 19313.21 37283.91</span></a>
+<a class="sourceLine" id="cb17-30" title="30"><span class="co">#&gt; 10 29230.81     0.00 30425.154 25242.028 36391.76 23900.837 10647.07 18775.78</span></a>
+<a class="sourceLine" id="cb17-31" title="31"><span class="co">#&gt; 2  30050.12 30425.15     0.000  8360.024 11800.42  6529.931 23825.41 19804.04</span></a>
+<a class="sourceLine" id="cb17-32" title="32"><span class="co">#&gt; 3  21967.25 25242.03  8360.024     0.000 19746.39  5728.001 16843.99 20392.40</span></a>
+<a class="sourceLine" id="cb17-33" title="33"><span class="co">#&gt; 4  41694.12 36391.76 11800.424 19746.392     0.00 15582.362 32572.99 20145.72</span></a>
+<a class="sourceLine" id="cb17-34" title="34"><span class="co">#&gt; 5  26916.35 23900.84  6529.931  5728.001 15582.36     0.000 17629.80 15280.05</span></a>
+<a class="sourceLine" id="cb17-35" title="35"><span class="co">#&gt;            8        9</span></a>
+<a class="sourceLine" id="cb17-36" title="36"><span class="co">#&gt; 1  29098.797 33737.96</span></a>
+<a class="sourceLine" id="cb17-37" title="37"><span class="co">#&gt; 10  5147.815 10348.43</span></a>
+<a class="sourceLine" id="cb17-38" title="38"><span class="co">#&gt; 2  25766.063 24485.91</span></a>
+<a class="sourceLine" id="cb17-39" title="39"><span class="co">#&gt; 3  21332.135 22000.23</span></a>
+<a class="sourceLine" id="cb17-40" title="40"><span class="co">#&gt; 4  31270.753 27789.39</span></a>
+<a class="sourceLine" id="cb17-41" title="41"><span class="co">#&gt; 5  19293.781 18483.51</span></a>
+<a class="sourceLine" id="cb17-42" title="42"><span class="kw">row.names</span>(mat_g2)</a>
+<a class="sourceLine" id="cb17-43" title="43"><span class="co">#&gt;  [1] &quot;1&quot;  &quot;10&quot; &quot;2&quot;  &quot;3&quot;  &quot;4&quot;  &quot;5&quot;  &quot;6&quot;  &quot;7&quot;  &quot;8&quot;  &quot;9&quot;</span></a></code></pre></div>
+</div>
+<div id="convert-euclidean-distances-into-cost-distances" class="section level2">
+<h2>Convert Euclidean distances into cost distances</h2>
+<p>Cost-distances are expressed in cost units arbitrarily defined based on the cost values assigned to every land cover type when creating resistance surfaces. However, species dispersal distances are usually known as distances expressed in metric units. When we know that the probability that a species covers 10 km is 5 %, we can ask what is the equivalent of this distance in cost distance units according to the assumed cost value scenario. It can be useful in order to prune a landscape graph with a given distance threshold or simply to get an idea of the order of magnitude of cost-distance values.</p>
+<p>To that purpose, a <strong>regression</strong> of the <strong>between population cost-distance</strong> values against the corresponding <strong>geographical distances</strong> can be performed. It estimates the relationship between both types of distance. Then, the resulting parameter estimates enable to convert a geographical distance into its cost-distance equivalent according to the cost scenario.</p>
+<p>The function <code>convert_cd</code> performs the linear regression or log-log linear regression between the geographical distance matrix and the cost-distance matrix, in the same way as <span class="citation">Tournant et al. (2013)</span> and as performed by Graphab software.</p>
+<p>Below, we estimate the relationship between geographical distance and cost-distance between the populations used to perform the gene-flow simulation. We convert 10 km into cost-distance units. The function also plots the relationship between these distances.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1">mat_ld &lt;-<span class="st"> </span><span class="kw">reorder_mat</span>(mat_ld, <span class="dt">order =</span> <span class="kw">row.names</span>(mat_geo))</a>
+<a class="sourceLine" id="cb18-2" title="2"></a>
+<a class="sourceLine" id="cb18-3" title="3">convert_res &lt;-<span class="st"> </span><span class="kw">convert_cd</span>(<span class="dt">mat_euc =</span> mat_geo, <span class="dt">mat_ld =</span> mat_ld, </a>
+<a class="sourceLine" id="cb18-4" title="4">                          <span class="dt">to_convert =</span> <span class="dv">10000</span>, <span class="dt">fig =</span> <span class="ot">TRUE</span>, </a>
+<a class="sourceLine" id="cb18-5" title="5">                          <span class="dt">method =</span> <span class="st">&quot;log-log&quot;</span>, <span class="dt">pts_col =</span> <span class="st">&quot;grey&quot;</span>)</a>
+<a class="sourceLine" id="cb18-6" title="6">convert_res</a>
+<a class="sourceLine" id="cb18-7" title="7"><span class="co">#&gt; $`Converted values`</span></a>
+<a class="sourceLine" id="cb18-8" title="8"><span class="co">#&gt;    10000 </span></a>
+<a class="sourceLine" id="cb18-9" title="9"><span class="co">#&gt; 1605.543 </span></a>
+<a class="sourceLine" id="cb18-10" title="10"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb18-11" title="11"><span class="co">#&gt; $`Model parameters`</span></a>
+<a class="sourceLine" id="cb18-12" title="12"><span class="co">#&gt; Intercept     Slope </span></a>
+<a class="sourceLine" id="cb18-13" title="13"><span class="co">#&gt; -2.251216  1.045828 </span></a>
+<a class="sourceLine" id="cb18-14" title="14"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb18-15" title="15"><span class="co">#&gt; $`Model multiple R-squared`</span></a>
+<a class="sourceLine" id="cb18-16" title="16"><span class="co">#&gt; Multiple R-squared </span></a>
+<a class="sourceLine" id="cb18-17" title="17"><span class="co">#&gt;          0.6870757 </span></a>
+<a class="sourceLine" id="cb18-18" title="18"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb18-19" title="19"><span class="co">#&gt; $Plot</span></a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>In this case, we can see that 10 km are equivalent to 1.606 cost-distance units. The log-log linear model estimates the relationship between geographical distance (GD) and cost-distance (CD) such that: <span class="math inline">\(log(CD)=-2.2512+1.0458 \times log(GD)\)</span>. The determination coefficient <span class="math inline">\(R^2\)</span> associated to this linear model is 0.69.</p>
+<p>A figure is returned as the fourth element of <code>convert_res</code>. The black dot represented on this figure refers to the 10 km value on the regression line characterising the relationship between cost-distance and geographical distance.</p>
+</div>
+<div id="from-pairwise-matrix-to-data-frame" class="section level2">
+<h2>From pairwise matrix to data frame</h2>
+<p>Distance values can be stored in two main ways. First, they can be stored in pairwise distance matrices. The distance between point <span class="math inline">\(i\)</span> and point <span class="math inline">\(j\)</span> is the value at the <span class="math inline">\(i_{th}\)</span> row and the <span class="math inline">\(j_{th}\)</span> column, and also at the <span class="math inline">\(j_{th}\)</span> row and the <span class="math inline">\(i_{th}\)</span> column. Such a matrix is the required input of analyses such as Mantel tests and can be used to create graphs when considered as an adjacency matrix.</p>
+<p>However, it is quite a <em>heavy</em> object and these values can be stored in smaller objects called edge lists, which are basically tables with three columns: from, to, distance.</p>
+<p>The function <code>pw_mat_to_df</code> converts a pairwise <code>matrix</code> into an edge list stored in a <code>data.frame</code> object.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1">df_dist &lt;-<span class="st"> </span><span class="kw">pw_mat_to_df</span>(<span class="dt">pw_mat =</span> mat_geo)</a>
+<a class="sourceLine" id="cb19-2" title="2"><span class="kw">head</span>(df_dist)</a></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["id_1"],"name":[1],"type":["chr"],"align":["left"]},{"label":["id_2"],"name":[2],"type":["chr"],"align":["left"]},{"label":["id_link"],"name":[3],"type":["chr"],"align":["left"]},{"label":["value"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"2","3":"1_2","4":"3140.064","_rn_":"1_2"},{"1":"1","2":"3","3":"1_3","4":"18555.862","_rn_":"1_3"},{"1":"2","2":"3","3":"2_3","4":"15417.522","_rn_":"2_3"},{"1":"1","2":"4","3":"1_4","4":"7605.919","_rn_":"1_4"},{"1":"2","2":"4","3":"2_4","4":"10278.619","_rn_":"2_4"},{"1":"3","2":"4","3":"3_4","4":"25128.669","_rn_":"3_4"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>The resulting object <code>df_dist</code> is a <code>data.frame</code> with 4 columns: <code>id_1</code>, <code>id_2</code>, <code>id_link</code> and <code>value</code>.</p>
+</div>
+<div id="from-data-frame-to-pairwise-matrix" class="section level2">
+<h2>From data frame to pairwise matrix</h2>
+<p>Conversely, the function <code>df_to_pw_mat</code> converts an edge list stored in a <code>data.frame</code> object into a pairwise <code>matrix</code>.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1">mat_dist &lt;-<span class="st"> </span><span class="kw">df_to_pw_mat</span>(<span class="dt">data =</span> df_dist, </a>
+<a class="sourceLine" id="cb20-2" title="2">                         <span class="dt">from =</span> <span class="st">&quot;id_1&quot;</span>, <span class="dt">to =</span> <span class="st">&quot;id_2&quot;</span>, <span class="dt">value =</span> <span class="st">&quot;value&quot;</span>)</a>
+<a class="sourceLine" id="cb20-3" title="3">mat_dist[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>]</a>
+<a class="sourceLine" id="cb20-4" title="4"><span class="co">#&gt;           1         2        3         4         5</span></a>
+<a class="sourceLine" id="cb20-5" title="5"><span class="co">#&gt; 1     0.000  3140.064 18555.86  7605.919  4810.405</span></a>
+<a class="sourceLine" id="cb20-6" title="6"><span class="co">#&gt; 2  3140.064     0.000 15417.52 10278.619  6248.200</span></a>
+<a class="sourceLine" id="cb20-7" title="7"><span class="co">#&gt; 3 18555.862 15417.522     0.00 25128.669 20209.404</span></a>
+<a class="sourceLine" id="cb20-8" title="8"><span class="co">#&gt; 4  7605.919 10278.619 25128.67     0.000  5080.354</span></a>
+<a class="sourceLine" id="cb20-9" title="9"><span class="co">#&gt; 5  4810.405  6248.200 20209.40  5080.354     0.000</span></a></code></pre></div>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>In the next tutorial, we present <strong>how to construct and analyse genetic graphs with <code>graph4lg</code>.</strong></p>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-bowcock1994high">
+<p>Bowcock, Anne M, A Ruiz-Linares, James Tomfohrde, Eric Minch, Judith R Kidd, and L Luca Cavalli-Sforza. 1994. “High Resolution of Human Evolutionary Trees with Polymorphic Microsatellites.” <em>Nature</em> 368 (6470): 455–57.</p>
+</div>
+<div id="ref-dyer2009geneticstudio">
+<p>Dyer, Rodney J. 2009. “GeneticStudio: A Suite of Programs for Spatial Analysis of Genetic-Marker Data.” <em>Molecular Ecology Resources</em> 9 (1): 110–13.</p>
+</div>
+<div id="ref-excoffier1992analysis">
+<p>Excoffier, Laurent, Peter E Smouse, and Joseph M Quattro. 1992. “Analysis of Molecular Variance Inferred from Metric Distances Among Dna Haplotypes: Application to Human Mitochondrial Dna Restriction Data.” <em>Genetics</em> 131 (2): 479–91.</p>
+</div>
+<div id="ref-foltete2012software">
+<p>Foltête, Jean-Christophe, Céline Clauzel, and Gilles Vuidel. 2012. “A Software Tool Dedicated to the Modelling of Landscape Networks.” <em>Environmental Modelling &amp; Software</em> 38: 316–27.</p>
+</div>
+<div id="ref-fortuna2009networks">
+<p>Fortuna, Miguel A, Rafael G Albaladejo, Laura Fernández, Abelardo Aparicio, and Jordi Bascompte. 2009. “Networks of Spatial Genetic Variation Across Species.” <em>Proceedings of the National Academy of Sciences</em> 106 (45): 19044–9.</p>
+</div>
+<div id="ref-hedrick2005standardized">
+<p>Hedrick, Philip W. 2005. “A Standardized Genetic Differentiation Measure.” <em>Evolution</em> 59 (8): 1633–8.</p>
+</div>
+<div id="ref-jombart2008adegenet">
+<p>Jombart, Thibaut. 2008. “Adegenet: A R Package for the Multivariate Analysis of Genetic Markers.” <em>Bioinformatics</em> 24 (11): 1403–5.</p>
+</div>
+<div id="ref-jost2008gst">
+<p>Jost, Lou. 2008. “GST and Its Relatives Do Not Measure Differentiation.” <em>Molecular Ecology</em> 17 (18): 4015–26.</p>
+</div>
+<div id="ref-landguth2010cdpop">
+<p>Landguth, Erin L, and SA Cushman. 2010. “CDPOP: A Spatially Explicit Cost Distance Population Genetics Program.” <em>Molecular Ecology Resources</em> 10 (1): 156–61.</p>
+</div>
+<div id="ref-murphy_graph_2015">
+<p>Murphy, Melanie, Rodney Dyer, and Samuel A. Cushman. 2015. “Graph Theory and Network Models in Landscape Genetics.” In <em>Landscape Genetics: Concepts, Methods, Applications</em>, edited by Niko Balkenhol, Samuel Cushman, Andrew Storfer, and Lisette Waits, 1st ed., 165–80. John Wiley &amp; Sons.</p>
+</div>
+<div id="ref-paradis2010pegas">
+<p>Paradis, Emmanuel. 2010. “Pegas: An R Package for Population Genetics with an Integrated–Modular Approach.” <em>Bioinformatics</em> 26 (3): 419–20.</p>
+</div>
+<div id="ref-paschou2014maritime">
+<p>Paschou, Peristera, Petros Drineas, Evangelia Yannaki, Anna Razou, Katerina Kanaki, Fotis Tsetsos, Shanmukha Sampath Padmanabhuni, et al. 2014. “Maritime Route of Colonization of Europe.” <em>Proceedings of the National Academy of Sciences</em>.</p>
+</div>
+<div id="ref-pritchard2000inference">
+<p>Pritchard, Jonathan K, Matthew Stephens, and Peter Donnelly. 2000. “Inference of Population Structure Using Multilocus Genotype Data.” <em>Genetics</em> 155 (2): 945–59.</p>
+</div>
+<div id="ref-raymond1995genepop">
+<p>Raymond, Michel. 1995. “GENEPOP: Population Genetics Software for Exact Tests and Ecumenism. Vers. 1.2.” <em>Journal of Heredity</em> 86: 248–49.</p>
+</div>
+<div id="ref-rousset1997genetic">
+<p>Rousset, François. 1997. “Genetic Differentiation and Estimation of Gene Flow from F-Statistics Under Isolation by Distance.” <em>Genetics</em> 145 (4): 1219–28.</p>
+</div>
+<div id="ref-shirk2017comparison">
+<p>Shirk, AJ, EL Landguth, and SA Cushman. 2017. “A Comparison of Indiviudal-Based Genetic Distance Metrics for Landscape Genetics.” <em>Molecular Ecology</em> 17 (6).</p>
+</div>
+<div id="ref-tournant2013evaluating">
+<p>Tournant, Pierline, Eve Afonso, Sébastien Roué, Patrick Giraudoux, and Jean-Christophe Foltête. 2013. “Evaluating the Effect of Habitat Connectivity on the Distribution of Lesser Horseshoe Bat Maternity Roosts Using Landscape Graphs.” <em>Biological Conservation</em> 164: 39–49.</p>
+</div>
+<div id="ref-weir1984estimating">
+<p>Weir, Bruce S, and C Clark Cockerham. 1984. “Estimating F-Statistics for the Analysis of Population Structure.” <em>Evolution</em> 38 (6): 1358–70.</p>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

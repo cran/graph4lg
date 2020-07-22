@@ -1,0 +1,436 @@
+---
+title: "3 - Landscape graph construction and analysis with Graphab and `graph4lg`"
+author: "UMR ThéMA - UBFC-CNRS, UMR Biogéosciences - UBFC-CNRS, ARP-Astrance"
+date: "Paul SAVARY"
+output:
+  html_vignette:
+    df_print: paged
+    toc: true
+    toc_depth: 2
+    fig_width: 6
+    fig_height: 6
+bibliography: biblio_vignette.bib
+vignette: >
+  %\VignetteIndexEntry{3 - Landscape graph construction and analysis with Graphab and `graph4lg`}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+collapse = TRUE,
+comment = "#>"
+)
+
+library(graph4lg)
+library(igraph)
+library(ggplot2)
+
+```
+
+# Introduction
+
+The rationale of `graph4lg` package in R is to make easier the construction and analysis of genetic and landscape graphs in landscape genetic studies (hence the name `graph4lg`, meaning Graphs for Landscape Genetics). This package provides users with tools for:
+
+* Landscape and genetic data processing
+* Genetic graph construction and analysis
+* Landscape graph construction and analysis
+* Landscape and genetic graph comparisons
+
+
+Each one of the included tutorials focuses on one of these points. This third tutorial will focus on **landscape graph construction and analysis**. It will describe the package functions allowing users to:
+
+* Create a landscape graph
+* Analyse the landscape graph
+* Import the landscape graph to perform landscape genetic analyses
+
+
+
+
+
+**NOTA BENE**: The package `graph4lg` integrates functions making possible the construction and analysis of landscape graphs but most of them are only **wrappers that launch computations with Graphab software**. 
+
+## What is Graphab?
+
+**Graphab** is an open source software tool dedicated to the **modelling of landscape networks** [@foltete2012software]. It was developed in ThéMA laboratory (Besançon, France) to make possible the **creation of landscape graphs** and to integrate a complete set of **connectivity analysis** functions in a single application.  
+
+Integrating Graphab functionalities into `graph4lg` aims at facilitating the import of Graphab output into R for subsequent analyses, including the comparison of genetic graphs and landscape graphs. All the functions calling Graphab software are described in `graph4lg` help files. However, users are invited to read the **complete documentation manuals** as well as other resources on [**Graphab project website**](https://sourcesup.renater.fr/www/graphab/en/home.html). Some computations are not possible when using `graph4lg` but are possible when using directly Graphab software which can be downloaded for free on the same website. @foltete2012software paper also provides users with a synthetic description of the tool. 
+
+The function `get_graphab` from `graph4lg` package **downloads automatically Graphab** in the user's machine, provided Java is installed on the machine. If it has already been downloaded, a message is displayed. Once Graphab has been downloaded in a machine, it is not necessary to download it again.
+
+```{r, eval = FALSE}
+get_graphab()
+```
+
+In the table below, we present **all the functions from `grapha4lg` calling Graphab software**:
+
+| Function | Description                                        |
+| ---- | -------------------------------------------------- |
+| `get_graphab` | Check if Graphab software (`graphab-2.4.jar`) is in the user's machine  and downloads it if necessary, provided Java is installed. |
+| `graphab_project` | Creates a Graphab project from a raster file (.tif) |
+| `graphab_link` | Creates a set of links (Euclidean or least cost paths, planar or complete) |
+| `graphab_graph` | Creates a graph from a set of links |
+| `graphab_metric` | Computes graph-theoretic metrics from a graph |
+| `graphab_modul` | Partition the graph into modules |
+| `graphab_pointset` | Imports a set of points in the project and relates them to habitat patches and corresponding metrics |
+| `get_graphab_metric` | Imports a table with the metrics computed and the patch properties |
+| `get_graphab_linkset` | Imports a table with the link properties for a given link set |
+| `graphab_to_igraph` | Imports a graph created with Graphab as an `igraph` graph object with node and link attributes |
+
+
+
+## Data used in this tutorial
+
+Here, we do not rely on genetic data sets and will only use Graphab projects already created for the vignettes.
+
+```{r, echo = FALSE, eval = TRUE}
+load(file = paste0(system.file('extdata', package = 'graph4lg'), 
+                               "/", "res_g.RDa"))
+
+```
+
+
+# Landscape graph construction 
+
+## Project creation
+
+When using Graphab, input data consists of an **8-bit raster file (.tif)** with discrete cell values. One (or several) of these values will correspond to habitat cells on the raster. Contiguous habitat cells will form habitat patches (8-neighbourhood criterion), as soon as they exceed the minimum patch area when specified
+
+
+This is the first step of habitat network modelling with Graphab. At this stage, a **project is created**. This project is given a name (`proj_name`), which will be the name of a directory containing geographical information layers relative to the project as well as a .xml file ("proj_name.xml"), which is the main project file.
+
+The function `graphab_project` creates the project directory called `proj_name` either in the current working directory (default) or in the directory whose path is given as a `proj_path` argument. The function takes as arguments:
+
+* `proj_name`: Name of the project (project and .xml file directory)
+* `raster`: Path to the raster file on which habitat patches are identified
+* `habitat`: Cell value(s) corresponding to habitat patches (possibly a vector with several values (e.g. `c(1,2`))
+* `minarea` (optional): Minimum habitat patch size in hectares
+* `nodata` (optional): Cell value corresponding to no data values, thereafter ignored
+* `alloc_ram` (optional): Integer or numeric value indicating RAM gigabytes allocated to the java process. Increasing this value can speed up the computations. Too large values may not be compatible with user's machine settings
+* `proj_path`(optional): Path to the directory that contains the project directory. It should be used when the project directory is not in the current working directory. Default is `NULL`. When `'proj_path = NULL'`, the project directory is equal to `getwd()`.
+
+The two latter arguments are included in almost every function calling Graphab.
+
+As an example, we will create a landscape graph from a simulated landscape raster with 5 land use categories (see map below).
+
+```{r}
+load(file = paste0(system.file('extdata', package = 'graph4lg'), 
+                               "/", "rast_simul50.RDa"))
+
+r.spdf <- as(rast, "SpatialPixelsDataFrame")
+r.df <- as.data.frame(r.spdf)
+
+r.df$layer <- as.factor(r.df$rast_simul50)
+
+g <- ggplot(r.df, aes(x=x, y=y)) + geom_tile(aes(fill = layer)) + coord_equal()+
+  theme_bw()+
+  #scale_fill_brewer(palette="Dark2")+
+  scale_fill_manual(values = c("#396D35", "#FB9013", "#EDC951", "#80C342", "black", "#396D35"),
+                    labels = c("0 - Forest", "1 - Shrublands", "2 - Crops", 
+                               "3 - Grasslands","4 - Artificial areas", "5 - Forest"),
+                    name = "Land use type")+
+  labs(x="Longitude",y="Latitude")
+g
+```
+
+Habitat patches will correspond to contiguous patches of raster cells equal to 0 or 5, as soon as they are larger than 200 hectares. They correspond to forests.
+
+```{r, eval = FALSE}
+proj_name <- "graphab_example"
+
+graphab_project(proj_name = proj_name,
+                raster = "rast_simul50.tif",
+                habitat = c(0, 5),
+                minarea = 200)
+```
+
+
+## Link set creation
+
+The project has been created and we will now **create a link set between the habitat patches**. We will consider **least cost paths** between habitat patches on the raster. To that purpose, we need to create a `data.frame` specifying the **cost values associated with every raster cell value**. In the following example, these values are:
+
+| Code | Description              | Cost value  |
+| ---- | ------------------------ | ----------- |
+| 0 | Forests (habitat) | 1 |
+| 1 | Shrublands | 5 |
+| 2 | Crops | 60 |
+| 3 | Grasslands | 40 |
+| 4 | Artificial areas | 1000 |
+| 5 | Forest (habitat) | 1 |
+
+They are stored into the `cost` object (`data.frame`):
+```{r}
+cost <- data.frame(code = 0:5,
+                   cost = c(1, 5, 60, 40, 1000, 1))
+
+cost
+```
+
+The link set is created with `graphab_link` function with the following arguments:
+
+* `proj_name`: Name of the project
+* `distance`: Type of distance computed. By default, `distance="cost"`, meaning that **cost distances** are computed between patches according the cost values specified in `cost` data.frame. Alternatively, `distance="euclid"`, meaning that straight line **Euclidean distances** are computed.
+* `name`: A character string indicating the name of link set 
+* `cost`: A `data.frame` with the cost values (`cost` in our example)
+* `topo`: A character string indicating the **topology** of the created link set. It can be **planar** (`topo='planar'` (default)). It speeds up the computation but will prevent from creating complete graphs with `graphab_graph`, or it can be **complete** (`topo='complete'`).
+
+See more details in the help file (`?graphab_link`).
+
+In our example, we create a planar link set in cost-distances:
+```{r, eval=FALSE}
+
+graphab_link(proj_name = proj_name,
+             distance = "cost",
+             cost = cost,
+             name = "lkst1",
+             topo = "planar")
+```
+
+**NOTA BENE**: Several link sets can be created in the same project.
+
+## Graph construction
+
+We can now **create a landscape graph** with `graphab_graph`. This function takes as arguments:
+
+* `proj_name`: Name of the project
+* `linkset`: Name of the link set used to create the graph
+* `name`: A character string indicating the name of the graph created, if only one is created 
+* `thr`: An integer or numeric value indicating the **maximum distance associated with the links of the created graph**. It allows users to create a **pruned graph** based on a distance threshold. Note that when the link set used has a planar topology, the graph is necessarily a pruned graph (not complete) and adding this threshold parameter can remove other links. When the link set has been created with cost-distances, the parameter is expressed in cost-distance units whereas when the link set is based upon Euclidean distances, the parameter is expressed in meters.
+* `cost_conv`: Logical (`TRUE` or `FALSE`) indicating whether numeric `thr` values are **converted from cost-distance into Euclidean distance** using a log-log linear regression. See also `convert_cd` function presented in the first tutorial.
+
+`proj_name` is **the only mandatory argument**. Without any other argument, a non-thresholded graph is created for every link set present in the project. Names are created automatically.
+
+In our example, we can create a planar graph with the following command:
+
+```{r, eval=FALSE}
+graphab_graph(proj_name = proj_name,
+              linkset = "lkst1",
+              name = "graph")
+```
+
+
+# Landscape graph analysis
+
+Once the graph has been created, it can be analysed by **computing graph-theoretic connectivity metrics** or by **partitioning its nodes**.
+
+
+## Metric calculation
+
+Many **connectivity metrics** can be computed from a landscape graph (see @baranyi2011contribution and @rayfield2011connectivity among other reviews on the subject). Graphab software includes a large range of connectivity metrics and its manual provides users with a **comprehensive description of every one of them** (see [Graphab 2.4 manual](https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf)).
+
+The function `graphab_metric` computes these metrics. It takes as arguments:
+
+* `proj_name`: Name of the project
+* `graph`: Name of the graph on which the metric is computed
+* `metric`: Name of the metric among:
+
+    + Probability of Connectivity (`"PC"`), 
+    + Integral Index of Connectivity (`"IIC"`), 
+    + Flux (`"F"`), 
+    + Interaction Flux (`"IF"`), 
+    + Degree (`"Dg"`), 
+    + Clustering Coefficient (`"CCe"`), 
+    + Current Flow (`"CF"`) 
+    + delta Probability of Connectivity (`"dPC"`). 
+
+* `dist`: A numeric or integer value specifying the distance at which dispersal probability is equal to `prob`. This argument is mandatory for weighted metrics (PC, F, IF, BC, dPC, CCe, CF) but not used for others. It is used to set $\alpha$ for computing dispersal probabilities associated with all inter-patch distances such that dispersal probability between patches $i$ and $j$ is $p_{ij}= e^{-\alpha d_{ij}}$.
+* `prob`: A numeric or integer value specifying the dispersal probability at distance `dist`. By default, `code=0.05`. It is used to set $\alpha$ (see argument `dist` above).
+* `beta`: A numeric or integer value between 0 and 1 specifying the exponent associated with patch areas in the computation of metrics weighted by patch area. By default, `beta=1`. When `beta=0`, patch areas do not have any influence in the computation.
+* `cost_conv`:  Logical (`TRUE` or `FALSE`) indicating whether numeric `dist` values are converted from cost-distance into Euclidean distance using a log-log linear regression.
+* `return_val`: Logical (default = `TRUE`) indicating whether metric values are returned in R (`TRUE`) or only stored in the patch attribute layer (`FALSE`)
+
+Metrics fall into different categories. PC and IIC are **global metrics** and take only one value for the entire graph, which is returned in R environment when `return_val=TRUE`.
+
+The other metrics are computed at the **node level**. When `return_val=TRUE`, a `data.frame` is returned in R environment specifying the value of the metric for every graph node.
+
+The description of every metric is beyond the scope of this tutorial. We again invite users to read the help file (`?graphab_metric`) as well as the [Graphab 2.4 user manual](https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf).
+
+
+We will compute metrics on the graph `"graph"` in our example. First, we will compute the probability of connectivity at the global level. We set the `dist` and `prob` parameter such that: $p(10km)=e^{-\alpha \times d_{ij}}=0.05$. We convert 10 km in cost-distance units for the computation.
+
+```{r, eval=FALSE}
+# Global metric: PC
+graphab_metric(proj_name = proj_name,
+               graph = "graph",
+               metric = "PC",
+               dist = 10000,
+               prob = 0.05,
+               beta = 1,
+               cost_conv = TRUE)
+```
+
+```{r, echo = FALSE}
+res_g[["PC"]]
+```
+
+We obtain the value in an object of class `list`.
+
+Now, using the same parameters, we compute the local metric Flux.
+
+```{r, eval=FALSE}
+f <- graphab_metric(proj_name = proj_name,
+               graph = "graph",
+               metric = "F",
+               dist = 10000,
+               prob = 0.05,
+               beta = 1,
+               cost_conv = FALSE)
+```
+```{r, echo = FALSE}
+res_g[["F"]][1]
+head(res_g[["F"]][[2]])
+```
+
+Every time a local metric is computed, it can be returned in R environment (here stored in `f`) but is also stored in the habitat patch attribute table, such that at the end this table contains every metric computed. We will see later that it can be very useful.
+
+## Graph partitioning
+
+Another way to analyse landscape graph connectivity and topology is to make a **partitioning**. The principle is the same as that of **modularity analyses** of genetic graphs described in the second tutorial. 
+
+`graphab_modul` function carries out such an analysis, but before we perform some modifications in the current code, we recommend doing this analysis directly in Graphab software.
+
+For the moment, it only creates a shapefile polygon layer with the Voronoi polygons corresponding to the groups of patches forming modules.
+
+It takes as arguments:
+
+* `proj_name`: Name of the project
+* `graph`: Name of the graph on which the partition is performed
+* `dist`: A numeric or integer value specifying the distance at which dispersal probability is equal to `prob`. This argument is used to weight the links when modularity is computed.
+* `prob`: A numeric or integer value specifying the dispersal probability at distance `dist`. By default, `code=0.05`. It is used to set $\alpha$ (see argument `dist` above).
+* `beta`: A numeric or integer value between 0 and 1 specifying the exponent associated with patch areas in the computation of the modularity. By default, `beta=1`. When `beta=0`, patch areas do not have any influence in the computation.
+* `nb`: Optional argument indicating the number of modules to create. By default, the number of modules maximising the modularity index is used.
+
+
+For example:
+```{r, eval=FALSE}
+graphab_modul(proj_name = proj_name,
+              graph = "graph",
+              dist = 10000,
+              prob = 0.05,
+              beta = 1)
+```
+
+**NOTA BENE**: All these analyses can be performed for several graphs created in the same project, provided their name is correctly indicated in the function arguments.
+
+# Using landscape graphs in landscape genetic analyses
+
+Landscape graphs have been created and analysed by computing connectivity metrics and/or by partitioning them. The output of these analyses can be used in landscape genetic analyses, e.g. to assess the relationship between genetic variables measured in populations inhabiting the study landscape and the connectivity of its habitat patches. To do that, two approaches are here presented:
+
+* 1 - Import external point data in Graphab project to link every point to the nearest habitat patch
+* 2 - Import Graphab output in R environment to use it in subsequent (statistical) analyses
+
+## Point set import
+
+Imagine that we have sampled several populations in the forests of the study landscape. We want to know in which landscape graph node lives every population, to get the corresponding connectivity metrics and compare them with the genetic response.
+
+To do that, the function `graphab_pointset` imports a set of points into the Graphab project. It takes as arguments:
+
+* `proj_name`: Name of the project
+* `linkset`: Name of the link set used to compute the distance from each point to the nearest patch (in cost-distance or Euclidean distance units depending on the way the link set was created)
+* `pointset`: it can be either:
+
+    + A character string indicating the path (absolute or relative) to a shapefile point layer
+    + A character string indicating the path to a .csv file with three columns: ID, x and y, respectively indicating the point ID, longitude and latitude
+    + A `data.frame` with three columns: ID, x and y, respectively indicating the point ID, longitude and latitude.
+    + A `SpatialPointsDataFrame`
+
+
+Point coordinates must be in the same coordinate reference system as the habitat patches (and initial raster layer). The function returns a `data.frame` with the properties of the nearest patch to every point in the point set, as well as the distance from each point to the nearest patch.
+
+For example, we can add the point `data.frame` `pts_pop_simul` to the project with the following command.
+
+
+```{r}
+# Point data frame
+head(pts_pop_simul)
+```
+
+```{r, eval=FALSE}
+graphab_pointset(proj_name = proj_name,
+                 linkset = "lkst1",
+                 pointset = pts_pop_simul)
+```
+```{r, echo = FALSE}
+head(res_g[["PTSG"]])
+```
+
+
+Note that when `pointset` is not the path to a shapefile point layer, such a layer will be created in the temp files of the user's machine. It is therefore preferable to give the path to a shapefile layer as a `pointset` argument.
+
+
+
+## Graph link and node properties
+
+Users can also import in R environment the link set properties in a `data.frame` with an edge list format with the function `get_graphab_linkset` which takes as arguments the project name and the link set name.
+
+```{r, eval=FALSE}
+get_graphab_linkset(proj_name = proj_name,
+                    linkset = "lkst1")
+```
+```{r, echo = FALSE}
+head(res_g[["LK"]])
+```
+
+Similarly, users can import the table in which are stored all the metrics computed in the project as well as the node properties (including their areas). The function `get_graphab_metric` takes as argument the project name. 
+
+
+```{r, eval=FALSE}
+get_graphab_metric(proj_name = proj_name)
+```
+```{r, echo = FALSE}
+head(res_g[["MET"]])
+```
+
+
+## Landscape graph import
+
+Finally, users can also create a graph from a Graphab link set and convert it into a graph object of class `igraph`. The imported graph has weighted links. Nodes attributes present in the Graphab project are included, including connectivity metrics when computed. A figure can be displayed automatically representing the graph on a map. The graph is given the topology of the selected link set.
+
+The function `graphab_to_igraph` takes as arguments:
+
+* `proj_name`: Name of the project
+* `linkset`: Name of the link set used to compute the distance from each point to the nearest patch (in cost-distance or Euclidean distance units depending on the way the link set was created)
+* `nodes`: A character string indicating whether the nodes of the created graph are given all the attributes (`nodes="patches"`, default) or metrics computed in Graphab or only those specific to a given graph previously created (`nodes="graph name"`). 
+* `weight`: A character string (`weight="euclid"` or `weight="cost"`) indicating whether to weight the links with Euclidean distance or cost-distance (default) values.
+* `fig`: Logical (`TRUE` or `FALSE`) indicating whether to plot a figure of the resulting spatial graph with `plot_graph_lg`.
+* `crds`: Logical (`TRUE` or `FALSE`) indicating whether to create an object of class `data.frame` with the node centroid spatial coordinates. 
+
+```{r, eval=FALSE}
+land_graph <- graphab_to_igraph(proj_name = proj_name,
+                                linkset = "lkst1",
+                                nodes = "patches",
+                                weight = "cost",
+                                fig = TRUE,
+                                crds = TRUE)
+
+crds_patches <- land_graph[[2]]
+land_graph <- land_graph[[1]]
+```
+
+```{r, echo = FALSE}
+crds_patches <- res_g[["CRDS"]]
+land_graph <- res_g[["LGRAPH"]]
+```
+
+
+The function returns a list of two objects: 
+
+* The graph in itself (`land_graph[[1]]`)
+* The patch centroid coordinates (`land_graph[[2]]`)
+
+
+This graph can be plotted on a map with `plot_graph_lg` with node sizes proportional to habitat patch area and link width inversely proportional to cost-distances:
+
+
+```{r}
+plot_graph_lg(land_graph,
+              crds = crds_patches,
+              mode = "spatial",
+              node_size = "Area")
+```
+
+# Conclusion
+
+We have seen in this third tutorial how to construct, analyse and import landscape graphs with Graphab and `graph4lg`. In the next and last tutorial, we will see **how to compare genetic graphs and landscape graphs**.
+
+# References

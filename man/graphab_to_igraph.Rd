@@ -2,48 +2,48 @@
 % Please edit documentation in R/graphab_to_igraph.R
 \name{graphab_to_igraph}
 \alias{graphab_to_igraph}
-\title{Import landscape graphs from GRAPHAB software}
+\title{Create landscape graphs from Graphab link set}
 \usage{
 graphab_to_igraph(
-  dir_path,
+  proj_name,
+  linkset,
   nodes = "patches",
-  links,
   weight = "cost",
+  proj_path = NULL,
   fig = FALSE,
   crds = FALSE
 )
 }
 \arguments{
-\item{dir_path}{A character string indicating the path of the GRAPHAB project
-directory. This directory normally contains several spatial layer files
-in format .shp:
-\itemize{
-\item{the spatial layer of the habitat patches corresponding to the
-nodes of the graph (usually named 'patches.shp').}
-\item{(alternatively) an exported spatial layer of
-the nodes (faster option).}
-\item{the link spatial layer file used to import the graph.}
+\item{proj_name}{A character string indicating the project name. It is also
+the name of the directory in which proj_name.xml file is found. By default,
+'proj_name' is searched into the current working directory}
+
+\item{linkset}{A character string indicating the name of the linkset used to
+create the graph links. The linkset must have been created previously (see
+the function \code{\link{graphab_link}}). It can be complete or planar. The
+graph is given the topology of the selected link set.}
+
+\item{nodes}{A character string indicating whether the nodes of the created
+graph are given all the attributes or metrics computed in Graphab or only
+those specific to a given graph previously created with
+\code{\link{graphab_graph}}
+It can be:\itemize{
+\item{\code{nodes = "patches"}(default): all the attributes and metrics of
+the habitat patches are included as node attributes in \code{igraph} object.}
+\item{\code{nodes = "graph_name"}(default): only the metrics of
+the habitat patches computed from the graph 'graph_name' created with
+\code{\link{graphab_graph}} are included as node attributes in
+\code{igraph} object, along with some basic patch attributes.}
 }}
 
-\item{nodes}{A character string indicating the names of the node spatial
-layer in format .shp (without extension, ex.: "nodes"
-refers to "nodes.shp" layer).
-This layer has been created with GRAPHAB and has therefore coordinates
-in a projected coordinates reference system.
-Default: nodes = "patches", referring to the spatial polygon layer of the
-habitat patches.}
+\item{weight}{A character string ("euclid" or "cost") indicating
+whether to weight the links with Euclidean distance or
+cost-distance (default) values.}
 
-\item{links}{A character string indicating the name of the link spatial layer
-in format .shp (without extension, ex.: "link_graph" refers to
-"link_graph.shp" layer).
-This layer has been created with GRAPHAB and has therefore coordinates
-in a projected coordinates reference system. It includes in the attribute
-tables between patches Euclidean as well as cost-distance. These
-distances are used to weight the link.}
-
-\item{weight}{A character string ("euc" or "cost") indicating
-whether to weight
-the links with Euclidean distance or cost-distance (default) values.}
+\item{proj_path}{(optional) A character string indicating the path to the
+directory that contains the project directory ('proj_name'). By default,
+'proj_name' is searched into the current working directory}
 
 \item{fig}{Logical (default = FALSE) indicating whether to plot a figure of
 the resulting spatial graph. The figure is plotted using function
@@ -51,7 +51,7 @@ the resulting spatial graph. The figure is plotted using function
 nodes and links.}
 
 \item{crds}{Logical (default = FALSE) indicating whether to create an object
-of class \code{data.frame} with the nodes spatial coordinates. Such a
+of class \code{data.frame} with the node centroid spatial coordinates. Such a
 \code{data.frame} has 3 columns: 'ID', 'x', 'y'.}
 }
 \value{
@@ -60,23 +60,28 @@ list of objects: a graph object of class \code{igraph} and a
 \code{data.frame} with the nodes spatial coordinates (if crds = TRUE).
 }
 \description{
-The function imports a landscape graph created with GRAPHAB
-software and converts it into a graph object of class \code{igraph}.
+The function creates a landscape graph from a link set created
+with Graphab software or different functions of this package and converts
+it into a graph object of class \code{igraph}.
 The graph has weighted links and is undirected.
-Nodes have spatial coordinates. Other nodes attributes can be included.
-It takes shapefiles layers created with GRAPHAB as input.
-}
-\details{
-Nodes attributes can be added to the graph using the
-function \code{add_nodes_attr}.
+Nodes attributes present in the Graphab project are included, including
+connectivity metrics when computed
 }
 \examples{
-path <- system.file('extdata',package='graph4lg')
-links <- "liens_simul_10"
-graph <- graphab_to_igraph(dir_path = path,
-                           nodes = "patches_10",
+\dontrun{
+proj_path <- system.file('extdata',package='graph4lg')
+proj_name <- "grphb_ex"
+linkset <- "lkst1"
+nodes <- "graph"
+graph <- graphab_to_igraph(proj_name = proj_name,
+                           linkset = "lkst1",
+                           nodes = "graph",
                            links = links,
+                           weights = "cost",
+                           proj_path = proj_path,
+                           crds = FALSE,
                            fig = FALSE)
+                           }
 }
 \references{
 \insertRef{foltete2012software}{graph4lg}
