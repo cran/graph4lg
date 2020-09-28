@@ -27,7 +27,7 @@ from a GENEPOP file.
 The formula used is that of Jost (2008)
 This functions uses directly the function \code{diffCalc}
 from \pkg{diveRsity}.
-See \url{http://genepop.curtin.edu.au/help_input.html} for details on the
+See \url{https://genepop.curtin.edu.au:443/help_input.html} for details on the
 GENEPOP file format and see Raymond (1995) for detail about GENEPOP software.
 }
 \section{Warnings}{

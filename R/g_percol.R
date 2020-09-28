@@ -167,16 +167,15 @@ g_percol <- function(x, val_step = 20){
                                    diag = FALSE)
   comp1 <- igraph::components(g_end)$no[1]
 
-  if(sum(comp1, comp2) == 3){
-
-    message(paste("Number of conserved links :",
-                  length(igraph::E(g_end))), sep = "")
-    message(paste("Maximum weight of the conserved links :",
-                  max(igraph::E(g_end)$weight)), sep = "")
-
-  } else {
-    stop("Error: there are probably equal link weights.")
+  if(sum(comp1, comp2) > 3){
+    message("There are probably equal link weights.")
   }
+
+  message(paste("Number of conserved links :",
+                length(igraph::E(g_end))), sep = "")
+  message(paste("Maximum weight of the conserved links :",
+                max(igraph::E(g_end)$weight)), sep = "")
+
   return(g_end)
 
 }

@@ -50,6 +50,10 @@
 #' By default, \code{direction=8}.
 #' @param parallel.java An integer indicating how many computer cores are used
 #' to run the .jar file. By default, \code{parallel.java=1}.
+#' @param alloc_ram (optional, default = NULL) Integer or numeric value
+#' indicating RAM gigabytes allocated to the java process when used. Increasing
+#' this value can speed up the computations. Too large values may not be
+#' compatible with your machine settings.
 #' @param return A character string indicating whether the returned object is a
 #' \code{data.frame} (\code{return="df"}) or a pairwise
 #' \code{matrix} (\code{return="mat"}).
@@ -86,7 +90,8 @@ mat_cost_dist <- function(raster,
                           method = "gdistance",
                           return = "mat",
                           direction = 8,
-                          parallel.java = 1){
+                          parallel.java = 1,
+                          alloc_ram = NULL){
 
 
   # Check raster argument
@@ -372,8 +377,20 @@ mat_cost_dist <- function(raster,
 
     # Run java code
 
-    cmd <- c("-jar", paste0(data_dir, "/graph4lg_jar/costdist-0.3.jar"),
+    cmd <- c("-Djava.awt.headless=true", "-jar",
+             paste0(data_dir, "/graph4lg_jar/costdist-0.3.jar"),
              parallel.java, file_pts, file_rast, file_res, vec_cost)
+
+
+    if(!is.null(alloc_ram)){
+      if(inherits(alloc_ram, c("integer", "numeric"))){
+        cmd <- c(paste0("-Xmx", alloc_ram, "g"), cmd)
+      } else {
+        stop("'alloc_ram' must be a numeric or an integer")
+      }
+    }
+
+
     system2(java.path, args = cmd)
 
     ###########################################################################################

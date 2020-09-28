@@ -1,3 +1,14 @@
+# graph4lg 1.0.1
+
+-- Minor changes: 
+- RdMacros packages in Imports instead of Suggests
+- RAM allocated to computation when using mat_cost_dist is adjustable. And
+ java interface launching is blocked when running this function.
+ 
+-- Bug fixes:
+- Order of commands changed in graphab_metric
+- Bug due to st_write() fixed
+
 # graph4lg 1.0.0
 
 -- Major changes: 

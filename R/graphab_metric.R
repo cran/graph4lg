@@ -268,6 +268,11 @@ graphab_metric <- function(proj_name, # character
 
   }
 
+  if(metric == "dPC"){
+    cmd[8] <- "--delta"
+    cmd[13] <- "obj=patch"
+  }
+
   if(!is.null(alloc_ram)){
     if(inherits(alloc_ram, c("integer", "numeric"))){
       cmd <- c(paste0("-Xmx", alloc_ram, "g"), cmd)
@@ -276,19 +281,9 @@ graphab_metric <- function(proj_name, # character
     }
   }
 
-  if(metric == "dPC"){
-    cmd[8] <- "--delta"
-    cmd[13] <- "obj=patch"
-  }
-
   #########################################
   # Run the command line
   rs <- system2(java.path, args = cmd, stdout = TRUE)
-
-  #########################################
-  if(chg == 1){
-    setwd(dir = wd1)
-  }
 
   if(length(rs) == 1){
     if(rs == 1){
@@ -375,4 +370,10 @@ graphab_metric <- function(proj_name, # character
     }
     return(res)
   }
+
+  #########################################
+  if(chg == 1){
+    setwd(dir = wd1)
+  }
+
 }

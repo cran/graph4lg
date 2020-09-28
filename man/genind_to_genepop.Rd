@@ -76,7 +76,7 @@ df_genepop <- suppressWarnings(genind_to_genepop(x,
 }
 \seealso{
 For more details about GENEPOP file formatting :
-\url{http://genepop.curtin.edu.au/help_input.html#Input}.
+\url{https://genepop.curtin.edu.au:443/help_input.html}.
 For the opposite conversion, see \code{\link{genepop_to_genind}}.
 The output file can be used to compute pairwise FST matrix
 with \code{\link{mat_pw_fst}}

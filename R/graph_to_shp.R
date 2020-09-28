@@ -180,12 +180,25 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
     # Create a spatial lines data.frame
     link_lay <- suppressWarnings(sp::SpatialLinesDataFrame(lines_sp, edge_att))
 
-    # Export the shapefile layer
-    sf::st_write(obj = sf::st_as_sf(link_lay),
-                 dsn = dir_path,
-                 layer = paste0("link_", layer),
-                 driver = "ESRI Shapefile")
 
+    if(paste0("link_", layer, ".shp") %in% list.files(dir_path)){
+
+      message(paste0("A layer named ", paste0("link_", layer, ".shp"),
+                     " already exists in the directory ", dir_path,
+                     ". Please remove it or use another name"))
+
+    } else {
+
+      # Export the shapefile layer
+      sf::st_write(obj = sf::st_as_sf(link_lay),
+                   dsn = dir_path,
+                   layer = paste0("link_", layer),
+                   driver = "ESRI Shapefile",
+                   delete_layer = TRUE)
+
+      message(paste0("Layer link_", layer, ".shp was saved in the ",
+                     "following directory: ", dir_path))
+    }
   }
 
   # If 'mode = 'node'' or 'mode = 'both'', then export the nodes
@@ -235,14 +248,29 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
                             crds)
     }
 
-    # Export the shapefile layer
-    sf::st_write(obj = node_lay,
-                 dsn = dir_path,
-                 layer = paste0("node_", layer),
-                 driver = "ESRI Shapefile")
+
+    if(paste0("node_", layer, ".shp") %in% list.files(dir_path)){
+
+      message(paste0("A layer named ", paste0("node_", layer, ".shp"),
+                     " already exists in the directory ", dir_path,
+                     ". Please remove it or use another name"))
+
+    } else {
+
+      # Export the shapefile layer
+      sf::st_write(obj = node_lay,
+                   dsn = dir_path,
+                   layer = paste0("node_", layer),
+                   driver = "ESRI Shapefile",
+                   delete_layer = TRUE)
+
+      message(paste0("Layer node_", layer, ".shp was saved in the ",
+                     "following directory: ", dir_path))
+    }
+
+
 
   }
 
-  message(paste("Created layer(s) were saved in the following directory: ",
-                dir_path, sep = ""))
+
 }

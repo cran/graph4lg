@@ -51,7 +51,7 @@
 #' and populations ordered in alphabetic order.
 #' }
 #' @seealso For more details about GENEPOP file formatting :
-#' \url{http://genepop.curtin.edu.au/help_input.html#Input}.
+#' \url{https://genepop.curtin.edu.au:443/help_input.html}.
 #' For the opposite conversion, see \code{\link{genepop_to_genind}}.
 #' The output file can be used to compute pairwise FST matrix
 #' with \code{\link{mat_pw_fst}}
@@ -227,8 +227,8 @@ genind_to_genepop <- function(x, output = "data.frame"){
                         loci_names[n.loci], ""),
                       data_gpop2)
 
-  colnames(data_gpop)[2:(length(colnames(data_gpop))-1)] <-
-    paste(colnames(data_gpop)[2:(length(colnames(data_gpop))-1)], ",", sep = "")
+  colnames(data_gpop2)[2:(length(colnames(data_gpop2))-1)] <-
+    paste(colnames(data_gpop2)[2:(length(colnames(data_gpop2))-1)], ",", sep = "")
 
   # Output
   if(output == "data.frame"){

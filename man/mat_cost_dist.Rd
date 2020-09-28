@@ -11,7 +11,8 @@ mat_cost_dist(
   method = "gdistance",
   return = "mat",
   direction = 8,
-  parallel.java = 1
+  parallel.java = 1,
+  alloc_ram = NULL
 )
 }
 \arguments{
@@ -71,6 +72,11 @@ By default, \code{direction=8}.}
 
 \item{parallel.java}{An integer indicating how many computer cores are used
 to run the .jar file. By default, \code{parallel.java=1}.}
+
+\item{alloc_ram}{(optional, default = NULL) Integer or numeric value
+indicating RAM gigabytes allocated to the java process when used. Increasing
+this value can speed up the computations. Too large values may not be
+compatible with your machine settings.}
 }
 \value{
 The function returns:\itemize{
