@@ -13,8 +13,8 @@
 #' @return A data.frame with metrics computed at the patch level.
 #' @details The imported metrics describe the patches and have been computed
 #' from the different graphs created in the Graphab project.
-#' See more information in Graphab 2.4 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf}
+#' See more information in Graphab 2.6 manual:
+#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
 #' @export
 #' @author P. Savary
 #' @examples
@@ -39,8 +39,12 @@ get_graphab_metric <- function(proj_name, # character
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
   } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }

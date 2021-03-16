@@ -28,8 +28,8 @@ Euclidean distance)
 The function gets a linkset computed in the Graphab project
 }
 \details{
-See more information in Graphab 2.4 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf}.
+See more information in Graphab 2.6 manual:
+\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}.
 This function works if \code{link{get_graphab}} function works correctly.
 }
 \examples{

@@ -1,0 +1,23 @@
+citHeader("To cite graph4lg in publications use:")
+
+citEntry(entry = "Article",
+  title        = "{graph4lg}: a package for constructing and analysing graphs for landscape genetics in R",
+  author       = personList(as.person("Paul Savary"),
+                   as.person("Jean-Christophe Foltête"),
+				   as.person("Hervé Moal"),
+				   as.person("Gilles Vuidel"),
+				   as.person("Stéphane Garnier")),
+  journal      = "Methods in Ecology and Evolution",
+  year         = "2020",
+  volume       = "00",
+  number       = "1",
+  pages        = "1--9",
+  url          = "https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13530",
+
+  textVersion  =
+  paste("Savary, P., Foltête, J.C., Moal, H., Vuidel, G. et",
+		"Garnier, S. 2020.",
+        "graph4lg: a package for constructing and analysing graphs for landscape genetics in R.",
+        "Methods in Ecology and Evolution, 00(1), 1-9.",
+        "URL https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13530")
+)

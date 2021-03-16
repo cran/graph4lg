@@ -16,6 +16,11 @@
 #' @param nodata (optional, default=NULL) An integer or numeric value
 #' specifying the code in the raster file associated with nodata value
 #' (often corresponding to peripheric cells)
+#' @param maxsize (optional, default=NULL) An integer or numeric value
+#' specifying the maximum side length of the rectangular full extent of each
+#' habitat patch in metric units. If this side length exceeds \code{maxsize} m,
+#' then several patches are created.
+#' (often corresponding to peripheric cells)
 #' @param alloc_ram (optional, default = NULL) Integer or numeric value
 #' indicating RAM gigabytes allocated to the java process. Increasing this
 #' value can speed up the computations. Too large values may not be compatible
@@ -26,8 +31,8 @@
 #' When 'proj_path = NULL', the project directory is equal to \code{getwd()}.
 #' @details A habitat patch consists of the central pixel with its eight
 #' neighbors if they are of the same value (8-connexity) and the path
-#' geometry is not simplified. See more information in Graphab 2.4 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf}
+#' geometry is not simplified. See more information in Graphab 2.6 manual:
+#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
 #' @export
 #' @author P. Savary
 #' @examples
@@ -46,6 +51,7 @@ graphab_project <- function(proj_name,
                             habitat,
                             minarea = 0,
                             nodata = NULL,
+                            maxsize = NULL,
                             alloc_ram = NULL,
                             proj_path = NULL){
 
@@ -64,28 +70,52 @@ graphab_project <- function(proj_name,
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
   }
 
   #########################################
   # Check for raster class
   if(!inherits(raster, "character")){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'raster' must be a character string")
     # Is raster present in the working directory?
   } else if (!(raster %in% list.files(pattern = ".tif"))){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'raster' must be a .tif raster file present in the working directory")
   }
 
   #########################################
   # Check for habitat class
   if(!inherits(habitat, c("numeric", "integer"))){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'habitat' must be an integer indicating the habitat code")
   }
 
   #########################################
   # Check for minarea class
   if(!inherits(minarea, c("numeric", "integer"))){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'minarea' must be an integer indicating minimum patch size")
+  }
+
+
+  #########################################
+  # Check for maxsize
+  if(!is.null(maxsize)){
+
+    if(!inherits(maxsize, c("numeric", "integer"))){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
+      stop(paste0("'maxsize' must be an integer indicating maximum side length",
+                  " of the rectangular extent of every habitat patch"))
+    }
+
   }
 
   #########################################
@@ -102,7 +132,7 @@ graphab_project <- function(proj_name,
 
   #########################################
   # Get graphab path
-  version <- "graphab-2.4.jar"
+  version <- "graphab-2.6.jar"
   path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
 
 
@@ -117,10 +147,16 @@ graphab_project <- function(proj_name,
     cmd <- c(cmd, paste0("nodata=", nodata))
   }
 
+  if(!is.null(maxsize)){
+    cmd <- c(cmd, paste0("maxsize=", maxsize))
+  }
+
   if(!is.null(alloc_ram)){
     if(inherits(alloc_ram, c("integer", "numeric"))){
       cmd <- c(paste0("-Xmx", alloc_ram, "g"), cmd)
     } else {
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'alloc_ram' must be a numeric or an integer")
     }
   }

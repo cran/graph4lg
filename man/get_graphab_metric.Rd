@@ -26,8 +26,8 @@ the Graphab project
 \details{
 The imported metrics describe the patches and have been computed
 from the different graphs created in the Graphab project.
-See more information in Graphab 2.4 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf}
+See more information in Graphab 2.6 manual:
+\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
 }
 \examples{
 \dontrun{

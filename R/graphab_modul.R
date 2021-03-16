@@ -23,8 +23,8 @@
 #' \deqn{w_{ij} = (a_{i} a_{j})^\beta e^{-\alpha d_{ij}}}.
 #' This function does not allow users to convert automatically Euclidean
 #' distances into cost-distances.
-#' See more information in Graphab 2.4 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf}
+#' See more information in Graphab 2.6 manual:
+#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
 #' @export
 #' @author P. Savary
 #' @examples
@@ -61,8 +61,12 @@ graphab_modul <- function(proj_name, # character
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
   } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
@@ -72,10 +76,16 @@ graphab_modul <- function(proj_name, # character
   #########################################
   # Check for graph class
   if(!inherits(graph, "character")){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'graph' must be a character string")
   } else if (!(paste0(graph, "-voronoi.shp") %in% list.files(path = paste0("./", proj_name)))){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("The graph you refer to does not exist")
   } else if (length(list.files(path = paste0("./", proj_name), pattern = "-voronoi.shp")) == 0){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("There is not any graph in the project you refer to.
          Please use graphab_graph() before.")
   }
@@ -83,14 +93,24 @@ graphab_modul <- function(proj_name, # character
   #########################################
   # Check for dist prob beta
   if(!inherits(dist, c("numeric", "integer"))){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'dist' must be a numeric or integer value")
   } else if(!inherits(prob, c("numeric", "integer"))){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'prob' must be a numeric or integer value")
   } else if(!inherits(beta, c("numeric", "integer"))){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'beta' must be a numeric or integer value")
   } else if(beta < 0 || beta > 1){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'beta' must be between 0 and 1")
   } else if(prob < 0 || prob > 1){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'prob' must be between 0 and 1")
   }
 
@@ -98,6 +118,8 @@ graphab_modul <- function(proj_name, # character
   # Check for nb
   if(!is.null(nb)){
     if(!inherits(nb, c("numeric", "integer"))){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'nb' must be a numeric or integer value")
     }
   }
@@ -106,6 +128,8 @@ graphab_modul <- function(proj_name, # character
   #########################################
   # Check for return
   if(!is.logical(return)){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'return' must be a logical (TRUE or FALSE).")
   }
 
@@ -123,7 +147,7 @@ graphab_modul <- function(proj_name, # character
 
   #########################################
   # Get graphab path
-  version <- "graphab-2.4.jar"
+  version <- "graphab-2.6.jar"
   path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
 
   #########################################
@@ -137,11 +161,16 @@ graphab_modul <- function(proj_name, # character
            paste0("p=", prob),
            paste0("beta=", beta))
 
+  if(!is.null(nb)){
+    cmd <- c(cmd, paste0("nb=", nb))
+  }
 
   if(!is.null(alloc_ram)){
     if(inherits(alloc_ram, c("integer", "numeric"))){
       cmd <- c(paste0("-Xmx", alloc_ram, "g"), cmd)
     } else {
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'alloc_ram' must be a numeric or an integer")
     }
   }

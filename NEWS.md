@@ -1,3 +1,22 @@
+# graph4lg 1.2.0
+
+-- Major changes: 
+- Creation of 9 new functions linked to Graphab software and internal
+- Change of the author email address
+- Addition of a CITATION file following the publication of a software paper
+ 
+-- Minor changes: 
+- Update of Graphab software to 2.6
+- Update of costdist software to 0.4 because of a bug with no data values
+- Use of .xml project files for checking arguments
+- Update of spatstat versions and package names
+ 
+-- Bug fixes:
+- Reset working directory before stopping when it is changed
+- Bug due to unique population in file input of genind_to_genepop
+- nb argument in graphab_modul was not active
+
+
 # graph4lg 1.0.1
 
 -- Minor changes: 

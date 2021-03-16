@@ -36,8 +36,8 @@
 #' value can speed up the computations. Too large values may not be compatible
 #' with your machine settings.
 #' @details By default, intra-patch distances are considered for metric
-#' calculation. See more information in Graphab 2.4 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf}
+#' calculation. See more information in Graphab 2.6 manual:
+#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
 #' @export
 #' @author P. Savary
 #' @examples
@@ -69,8 +69,12 @@ graphab_graph <- function(proj_name,         # character
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
   } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
@@ -81,13 +85,19 @@ graphab_graph <- function(proj_name,         # character
   # Check for linkset class
   if(!is.null(linkset)){
     if(!inherits(linkset, "character")){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'linkset' must be a character string")
     } else if (!(paste0(linkset, "-links.csv") %in% list.files(path = paste0("./", proj_name)))){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("The linkset you refer to does not exist.
            Please use graphab_link() before.")
     }
   } else if (length(list.files(path = paste0("./", proj_name), pattern = "-links.csv")) == 0){
 
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("There is not any linkset in the project you refer to.
          Please use graphab_link() before.")
 
@@ -101,9 +111,13 @@ graphab_graph <- function(proj_name,         # character
   # Check for name
   if(!is.null(name)){
     if(!inherits(name, "character")){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'name' must be a character string")
     }
   } else if (ngraph > 1){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("You cannot specify a graph name when more than one graph is created")
   }
 
@@ -111,6 +125,8 @@ graphab_graph <- function(proj_name,         # character
   # Check for thr
   if(!is.null(thr)){
     if(!inherits(thr, c("numeric", "integer"))){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'thr' must be a numeric or an integer threshold value.")
     }
   }
@@ -118,6 +134,8 @@ graphab_graph <- function(proj_name,         # character
   #########################################
   # Check for cost_conv
   if(!is.logical(cost_conv)){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'cost_conv' must be a logical (TRUE or FALSE).")
   }
 
@@ -135,7 +153,7 @@ graphab_graph <- function(proj_name,         # character
 
   #########################################
   # Get graphab path
-  version <- "graphab-2.4.jar"
+  version <- "graphab-2.6.jar"
   path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
 
   #########################################
@@ -166,6 +184,8 @@ graphab_graph <- function(proj_name,         # character
     if(inherits(alloc_ram, c("integer", "numeric"))){
       cmd <- c(paste0("-Xmx", alloc_ram, "g"), cmd)
     } else {
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'alloc_ram' must be a numeric or an integer")
     }
   }

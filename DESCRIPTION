@@ -1,9 +1,9 @@
 Package: graph4lg
 Type: Package
 Title: Build Graphs for Landscape Genetics Analysis
-Version: 1.0.1
+Version: 1.2.0
 Author: Paul Savary
-Maintainer: Paul Savary <savarypaul660@gmail.com>
+Maintainer: Paul Savary <psavary@protonmail.com>
 Description: Build graphs for landscape genetics analysis. This set of 
 	functions can be used to import and convert spatial and genetic data 
 	initially in different formats, import landscape graphs created with 
@@ -24,13 +24,13 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: true
 Imports: adegenet, ggplot2, stringr, igraph, knitr, rmarkdown, stats,
-        spatstat, Matrix, vegan, utils, methods, pegas, MASS, tidyr,
-        sp, sf, diveRsity, rappdirs, gdistance, raster, foreign,
-        ecodist, Rdpack
+        spatstat.geom, spatstat.core, spatstat.linnet, Matrix, vegan,
+        utils, methods, pegas, MASS, tidyr, sp, sf, diveRsity,
+        rappdirs, gdistance, raster, foreign, ecodist, Rdpack
 RdMacros: Rdpack
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr, rmarkdown
 NeedsCompilation: no
-Packaged: 2020-09-28 06:54:57 UTC; psavary
+Packaged: 2021-03-16 12:36:30 UTC; psavary
 Repository: CRAN
-Date/Publication: 2020-09-28 07:20:02 UTC
+Date/Publication: 2021-03-16 15:20:02 UTC

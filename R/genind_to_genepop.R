@@ -81,6 +81,9 @@ genind_to_genepop <- function(x, output = "data.frame"){
   ### Return a message if there is only one population
   if(length(unique(pop_names)) == 1){
     message("There is only one population in your dataset")
+    unique_pop <- TRUE
+  } else {
+    unique_pop <- FALSE
   }
 
   # If the individuals are not ordered by populations, they are reordered
@@ -129,6 +132,17 @@ genind_to_genepop <- function(x, output = "data.frame"){
   loc_all <- tidyr::separate(loc_all, col = 1, sep = "\\.",
                              into = c("locus", "allele"))
 
+  # Avoid problems when allele names have not the same number of characters
+  max_all_chr <- max(nchar(loc_all$allele))
+  for(i in 1:nrow(loc_all)){
+    name_all_chr <- nchar(loc_all[i, "allele"])
+    loc_all[i, "allele"] <- ifelse(name_all_chr < max_all_chr,
+                                   paste0(rep("0", times = max_all_chr - name_all_chr),
+                                          loc_all[i, "allele"]),
+                                   loc_all[i, "allele"])
+  }
+
+
   loci_names <- as.character(loci_names_l[-which(duplicated(loci_names_l))])
   n.loci <- length(loci_names_l[-which(duplicated(loci_names_l))]  )
 
@@ -136,6 +150,8 @@ genind_to_genepop <- function(x, output = "data.frame"){
   # The first column contains the ID of each individual
   data_gpop <- data.frame(id = paste(pop_names, "_", row.names(data), ",",
                                      sep = ""))
+
+  data_gpop[] <- lapply(data_gpop, gsub, pattern = " ", replacement = "")
 
   # The loop will run over all the loci
   for (i in 1:n.loci){
@@ -196,29 +212,42 @@ genind_to_genepop <- function(x, output = "data.frame"){
   data_gpop[ , ] <- lapply(data_gpop[ , ], as.character)
 
   # Add the pop_names
-  # Get the rows' numbers of the end of the populations
-  num_end_pop <- c()
-  for  (i in (1:(length(pop_names) - 1))){
-    if (pop_names[i] != pop_names[i + 1]){
-      num_end_pop[i] <- i
-    } else {
-      num_end_pop[i] <- 0
+  # Distinguish the case where there is only one pop
+  if(unique_pop){
+
+    # Create data_gpop2 whose first line only is "POP"
+    data_gpop2 <- rbind(c("Pop",rep("", n.loci)), data_gpop)
+
+
+  } else {
+
+
+    # Get the rows' numbers of the end of the populations
+    num_end_pop <- c()
+    for  (i in (1:(length(pop_names) - 1))){
+      if (pop_names[i] != pop_names[i + 1]){
+        num_end_pop[i] <- i
+      } else {
+        num_end_pop[i] <- 0
+      }
     }
-  }
-  num_end_pop <- which(num_end_pop != 0)
+    num_end_pop <- which(num_end_pop != 0)
 
-  # Create data_gpop2 whose first line only is "POP"
-  data_gpop2 <- rbind(c("Pop",rep("", n.loci)), data_gpop[1:num_end_pop[1], ])
 
-  # Then, add the rows of each population, one line with "POP", etc..
-  for (i in 1:(length(num_end_pop)-1)){
+    # Create data_gpop2 whose first line only is "POP"
+    data_gpop2 <- rbind(c("Pop",rep("", n.loci)), data_gpop[1:num_end_pop[1], ])
+
+    # Then, add the rows of each population, one line with "POP", etc..
+    for (i in 1:(length(num_end_pop)-1)){
+      data_gpop2 <- rbind(data_gpop2, c("Pop", rep("", n.loci)),
+                          data_gpop[(num_end_pop[i]+1):num_end_pop[i+1], ])
+    }
+
+    # Add the last population
     data_gpop2 <- rbind(data_gpop2, c("Pop", rep("", n.loci)),
-                        data_gpop[(num_end_pop[i]+1):num_end_pop[i+1], ])
-  }
+                        data_gpop[(num_end_pop[length(num_end_pop)]+1):nrow(data_gpop), ])
 
-  # Add the last population
-  data_gpop2 <- rbind(data_gpop2, c("Pop", rep("", n.loci)),
-             data_gpop[(num_end_pop[length(num_end_pop)]+1):nrow(data_gpop), ])
+  }
 
   # The two first lines are the heading and the names of the loci
   data_gpop2 <- rbind(c("Conversion of an object of class 'genind' into a GENEPOP file with the package 'graph4lg'",

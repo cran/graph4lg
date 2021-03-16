@@ -66,7 +66,7 @@ In the table below, we present **all the functions from `grapha4lg` calling Grap
 
 | Function | Description                                        |
 | ---- | -------------------------------------------------- |
-| `get_graphab` | Check if Graphab software (`graphab-2.4.jar`) is in the user's machine  and downloads it if necessary, provided Java is installed. |
+| `get_graphab` | Check if Graphab software (`graphab-2.6.jar`) is in the user's machine  and downloads it if necessary, provided Java is installed. |
 | `graphab_project` | Creates a Graphab project from a raster file (.tif) |
 | `graphab_link` | Creates a set of links (Euclidean or least cost paths, planar or complete) |
 | `graphab_graph` | Creates a graph from a set of links |
@@ -216,7 +216,7 @@ Once the graph has been created, it can be analysed by **computing graph-theoret
 
 ## Metric calculation
 
-Many **connectivity metrics** can be computed from a landscape graph (see @baranyi2011contribution and @rayfield2011connectivity among other reviews on the subject). Graphab software includes a large range of connectivity metrics and its manual provides users with a **comprehensive description of every one of them** (see [Graphab 2.4 manual](https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf)).
+Many **connectivity metrics** can be computed from a landscape graph (see @baranyi2011contribution and @rayfield2011connectivity among other reviews on the subject). Graphab software includes a large range of connectivity metrics and its manual provides users with a **comprehensive description of every one of them** (see [Graphab 2.6 manual](https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf)).
 
 The function `graphab_metric` computes these metrics. It takes as arguments:
 
@@ -243,7 +243,7 @@ Metrics fall into different categories. PC and IIC are **global metrics** and ta
 
 The other metrics are computed at the **node level**. When `return_val=TRUE`, a `data.frame` is returned in R environment specifying the value of the metric for every graph node.
 
-The description of every metric is beyond the scope of this tutorial. We again invite users to read the help file (`?graphab_metric`) as well as the [Graphab 2.4 user manual](https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf).
+The description of every metric is beyond the scope of this tutorial. We again invite users to read the help file (`?graphab_metric`) as well as the [Graphab 2.6 user manual](https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf).
 
 
 We will compute metrics on the graph `"graph"` in our example. First, we will compute the probability of connectivity at the global level. We set the `dist` and `prob` parameter such that: $p(10km)=e^{-\alpha \times d_{ij}}=0.05$. We convert 10 km in cost-distance units for the computation.

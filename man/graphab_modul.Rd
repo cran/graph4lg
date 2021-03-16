@@ -76,8 +76,8 @@ such as the weight \eqn{w_{ij}} of the link between patches i and j is:
 \deqn{w_{ij} = (a_{i} a_{j})^\beta e^{-\alpha d_{ij}}}.
 This function does not allow users to convert automatically Euclidean
 distances into cost-distances.
-See more information in Graphab 2.4 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf}
+See more information in Graphab 2.6 manual:
+\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
 }
 \examples{
 \dontrun{

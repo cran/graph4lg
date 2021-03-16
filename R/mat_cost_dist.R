@@ -205,7 +205,7 @@ mat_cost_dist <- function(raster,
   if(method == "gdistance"){
 
     ############################
-    # Create an ascii file
+
     if(r_type == "RasterLayer"){
 
       rast_val <- unique(raster::values(raster))
@@ -291,13 +291,13 @@ mat_cost_dist <- function(raster,
 
     data_dir <- rappdirs::user_data_dir()
 
-    if("costdist-0.3.jar" %in% list.files(paste0(data_dir, "/graph4lg_jar"))){
+    if("costdist-0.4.1.jar" %in% list.files(paste0(data_dir, "/graph4lg_jar"))){
 
-      message("costdist-0.3.jar will be used")
+      message("costdist-0.4.1.jar will be used")
 
     } else {
 
-      message("costdist-0.3.jar will be downloaded")
+      message("costdist-0.4.1.jar will be downloaded")
 
       if(!dir.exists(paths = paste0(data_dir, "/graph4lg_jar"))){
 
@@ -305,14 +305,13 @@ mat_cost_dist <- function(raster,
 
       }
 
-      url <- "https://thema.univ-fcomte.fr/productions/download.php?name=graphab&prog=costdist&version=0.3&username=Graph4lg&institution=R"
-      #url <- "https://sourcesup.renater.fr/www/graphab/download/costdist-0.3.jar"
+      url <- "https://thema.univ-fcomte.fr/productions/download.php?name=graphab&prog=costdist&version=0.4.1&username=Graph4lg&institution=R"
 
-      destfile <- "/graph4lg_jar/costdist-0.3.jar"
+      destfile <- "/graph4lg_jar/costdist-0.4.1.jar"
 
       utils::download.file(url, paste0(data_dir, "/", destfile),
-                    method = "auto",
-                    mode = "wb")
+                           method = "auto",
+                           mode = "wb")
 
     }
 
@@ -329,21 +328,10 @@ mat_cost_dist <- function(raster,
 
     } else if (r_type == "RasterFile"){
 
-      if(stringr::str_detect(raster_path, pattern = ".tif")){
+      file_rast <- raster_path
 
-        file_rast <- tempfile(fileext = ".asc")
-        raster <- raster::raster(x = raster_path)
-        raster::writeRaster(raster,
-                            file = file_rast,
-                            overwrite = TRUE)
+      del_rast <- 0
 
-        del_rast <- 1
-
-      } else {
-        file_rast <- raster_path
-
-        del_rast <- 0
-      }
     }
 
     # Point
@@ -378,7 +366,7 @@ mat_cost_dist <- function(raster,
     # Run java code
 
     cmd <- c("-Djava.awt.headless=true", "-jar",
-             paste0(data_dir, "/graph4lg_jar/costdist-0.3.jar"),
+             paste0(data_dir, "/graph4lg_jar/costdist-0.4.1.jar"),
              parallel.java, file_pts, file_rast, file_res, vec_cost)
 
 

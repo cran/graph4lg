@@ -10,6 +10,7 @@ graphab_project(
   habitat,
   minarea = 0,
   nodata = NULL,
+  maxsize = NULL,
   alloc_ram = NULL,
   proj_path = NULL
 )
@@ -33,6 +34,12 @@ the minimum area in hectares for a habitat patch size to become a graph node.}
 specifying the code in the raster file associated with nodata value
 (often corresponding to peripheric cells)}
 
+\item{maxsize}{(optional, default=NULL) An integer or numeric value
+specifying the maximum side length of the rectangular full extent of each
+habitat patch in metric units. If this side length exceeds \code{maxsize} m,
+then several patches are created.
+(often corresponding to peripheric cells)}
+
 \item{alloc_ram}{(optional, default = NULL) Integer or numeric value
 indicating RAM gigabytes allocated to the java process. Increasing this
 value can speed up the computations. Too large values may not be compatible
@@ -50,8 +57,8 @@ which habitat patches can be delimited.
 \details{
 A habitat patch consists of the central pixel with its eight
 neighbors if they are of the same value (8-connexity) and the path
-geometry is not simplified. See more information in Graphab 2.4 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf}
+geometry is not simplified. See more information in Graphab 2.6 manual:
+\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
 }
 \examples{
 \dontrun{

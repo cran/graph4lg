@@ -128,8 +128,8 @@ The function computes connectivity metrics on a graph from a
 link set in a Graphab project
 }
 \details{
-The metrics are described in Graphab 2.4 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf}
+The metrics are described in Graphab 2.6 manual:
+\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
 Graphab software makes possible the computation of other metrics.
 }
 \examples{

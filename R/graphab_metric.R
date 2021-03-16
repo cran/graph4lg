@@ -96,8 +96,8 @@
 #' @return If \code{return_val=TRUE}, the function returns a \code{data.frame}
 #' with the computed metric values and the corresponding patch ID when the
 #' metric is local or delta metric, or the numeric value of the global metric.
-#' @details The metrics are described in Graphab 2.4 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf}
+#' @details The metrics are described in Graphab 2.6 manual:
+#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
 #' Graphab software makes possible the computation of other metrics.
 #' @export
 #' @author P. Savary
@@ -138,8 +138,12 @@ graphab_metric <- function(proj_name, # character
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
   } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
@@ -149,10 +153,16 @@ graphab_metric <- function(proj_name, # character
   #########################################
   # Check for graph class
   if(!inherits(graph, "character")){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'graph' must be a character string")
   } else if (!(paste0(graph, "-voronoi.shp") %in% list.files(path = paste0("./", proj_name)))){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("The graph you refer to does not exist")
   } else if (length(list.files(path = paste0("./", proj_name), pattern = "-voronoi.shp")) == 0){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("There is not any graph in the project you refer to.
          Please use graphab_graph() before.")
   }
@@ -169,17 +179,29 @@ graphab_metric <- function(proj_name, # character
 
   if(metric %in% list_dist_metrics){
     if(is.null(dist)){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop(paste0("To compute ", metric, ", specify a distance associated to
                   a dispersal probability (default=0.05)"))
     } else if(!inherits(dist, c("numeric", "integer"))){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'dist' must be a numeric or integer value")
     } else if(!inherits(prob, c("numeric", "integer"))){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'prob' must be a numeric or integer value")
     } else if(!inherits(beta, c("numeric", "integer"))){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'beta' must be a numeric or integer value")
     } else if(beta < 0 || beta > 1){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'beta' must be between 0 and 1")
     } else if(prob < 0 || prob > 1){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'prob' must be between 0 and 1")
     }
   }
@@ -187,6 +209,8 @@ graphab_metric <- function(proj_name, # character
   ### Special case with dPC
   if(metric == "dPC"){
     if(cost_conv){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("Option 'cost_conv = TRUE' is not available with the metric dPC")
     }
   }
@@ -194,13 +218,19 @@ graphab_metric <- function(proj_name, # character
   # Special case of CF with beta
   if(metric == "CF"){
     if(beta < 0 || beta > 1){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'beta' must be between 0 and 1")
     }
   }
 
   if(!inherits(metric, "character")){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'metric' must be a character string")
   } else if(!(metric %in% list_all_metrics)){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop(paste0("'metric' must be ", paste(list_all_metrics, collapse = " or ")))
   } else if(metric %in% list_loc_metrics){
     level <- "patch"
@@ -211,12 +241,16 @@ graphab_metric <- function(proj_name, # character
   #########################################
   # Check for cost_conv
   if(!is.logical(cost_conv)){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'cost_conv' must be a logical (TRUE or FALSE).")
   }
 
   #########################################
   # Check for return_val
   if(!is.logical(return_val)){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'return_val' must be a logical (TRUE or FALSE).")
   }
 
@@ -234,7 +268,7 @@ graphab_metric <- function(proj_name, # character
 
   #########################################
   # Get graphab path
-  version <- "graphab-2.4.jar"
+  version <- "graphab-2.6.jar"
   path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
 
   #########################################
@@ -277,6 +311,8 @@ graphab_metric <- function(proj_name, # character
     if(inherits(alloc_ram, c("integer", "numeric"))){
       cmd <- c(paste0("-Xmx", alloc_ram, "g"), cmd)
     } else {
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'alloc_ram' must be a numeric or an integer")
     }
   }

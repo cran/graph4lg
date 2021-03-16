@@ -75,11 +75,18 @@ graph_plan <- function(crds, ID = NULL, x = NULL, y = NULL, weight = TRUE){
   colnames(crds) <- c("ID", "x", "y")
 
   # Compute the delaunay network with spatstat package
-  pts_ppp <- spatstat::ppp(x = crds$x, y = crds$y, marks = crds$ID,
-                           xrange = c(min(crds$x), max(crds$x)),
-                           yrange = c(min(crds$y), max(crds$y)))
+  #pts_ppp <- spatstat::ppp(x = crds$x, y = crds$y, marks = crds$ID,
+   #                         xrange = c(min(crds$x), max(crds$x)),
+    #                        yrange = c(min(crds$y), max(crds$y)))
 
-  res_plan <- spatstat::delaunayNetwork(pts_ppp)
+  pts_ppp <- spatstat.geom::ppp(x = crds$x, y = crds$y, marks = crds$ID,
+                                 xrange = c(min(crds$x), max(crds$x)),
+                                 yrange = c(min(crds$y), max(crds$y)))
+
+
+  #res_plan <- spatstat::delaunayNetwork(pts_ppp)
+
+  res_plan <- spatstat.linnet::delaunayNetwork(pts_ppp)
 
   # Get the adjacency matrix
   mat_plan <- as.matrix(res_plan$m)

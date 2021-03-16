@@ -8,6 +8,7 @@ graphab_pointset(
   proj_name,
   linkset,
   pointset,
+  id = "ID",
   return_val = TRUE,
   proj_path = NULL,
   alloc_ram = NULL
@@ -28,11 +29,18 @@ with \code{\link{graphab_link}}.}
 shapefile point layer}
 \item{A character string indicating the path to a .csv file with three
 columns: ID, x and y, respectively indicating the point ID, longitude
-and latitude}
+and latitude.}
 \item{A data.frame with three columns:
 ID, x and y, respectively indicating the point ID, longitude and latitude.}
 \item{A SpatialPointsDataFrame}
-}}
+}
+The point ID column must be 'ID' by default but can also be specified
+by the \code{id} argument in all three cases.}
+
+\item{id}{A character string indicating the name of the column in either
+the .csv table, data.frame or attribute table, corresponding to the ID
+of the points. By default, it should be 'ID'. This column is used for naming
+the points when returning the output.}
 
 \item{return_val}{Logical (default=TRUE) indicating whether the metrics
 associated with closest habitat patches from the points are returned to
@@ -61,8 +69,8 @@ get corresponding connectivity metrics.
 \details{
 Point coordinates must be in the same coordinate reference system
 as the habitat patches (and initial raster layer). See more information in
-Graphab 2.4 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf}
+Graphab 2.6 manual:
+\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
 }
 \examples{
 \dontrun{

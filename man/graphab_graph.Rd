@@ -60,8 +60,8 @@ The function creates a graph from a link set in a Graphab project
 }
 \details{
 By default, intra-patch distances are considered for metric
-calculation. See more information in Graphab 2.4 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf}
+calculation. See more information in Graphab 2.6 manual:
+\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
 }
 \examples{
 \dontrun{

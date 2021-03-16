@@ -42,8 +42,8 @@
 #' @details By default, links crossing patches are not ignored nor broken into
 #' two links. For example, a link from patches A to C crossing patch B
 #' is created. It takes into account the distance inside patch B. It can be a
-#' problem when computing BC index. See more information in Graphab 2.4 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf}
+#' problem when computing BC index. See more information in Graphab 2.6 manual:
+#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
 #' @export
 #' @author P. Savary
 #' @examples
@@ -82,8 +82,12 @@ graphab_link <- function(proj_name,         # character
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
   } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
@@ -93,8 +97,12 @@ graphab_link <- function(proj_name,         # character
   #########################################
   # Check for distance
   if(!inherits(distance, "character")){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'distance' must be a character string")
   } else if (!(distance %in% c("cost", "euclid"))){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'distance' must be equal to 'cost' or 'euclid'")
   }
 
@@ -105,16 +113,22 @@ graphab_link <- function(proj_name,         # character
   if(distance == "cost"){
 
     if(!inherits(cost, "data.frame")){
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'cost' must be a data.frame object")
     } else {
       if(!all(c("code", "cost") %in% colnames(cost))){
+        # Before returning an error, get back to initial working dir
+        if(chg == 1){setwd(dir = wd1)}
         stop("The columns of cost must include 'code' and 'cost'")
       } else if (any(is.na(as.numeric(cost$code)))){
-
+        # Before returning an error, get back to initial working dir
+        if(chg == 1){setwd(dir = wd1)}
         stop("'code' column must include numeric values")
 
       } else if (any(is.na(as.numeric(cost$cost)))){
-
+        # Before returning an error, get back to initial working dir
+        if(chg == 1){setwd(dir = wd1)}
         stop("'cost' column must include numeric values")
 
       }
@@ -126,6 +140,16 @@ graphab_link <- function(proj_name,         # character
       if(inherits(cost$cost, c("factor", "character"))){
         cost$cost <- as.numeric(as.character(cost$cost))
       }
+
+      rast_codes <- graph4lg::get_graphab_raster_codes(proj_name = proj_name,
+                                         mode = 'all')
+
+      if(!all(rast_codes %in% cost$code)){
+        # Before returning an error, get back to initial working dir
+        if(chg == 1){setwd(dir = wd1)}
+        stop("'code' column must include all the raster code values.")
+      }
+
 
     }
 
@@ -148,6 +172,8 @@ graphab_link <- function(proj_name,         # character
   #########################################
   # Check for name
   if(!inherits(name, "character")){
+    # Before returning an error, get back to initial working dir
+    if(chg == 1){setwd(dir = wd1)}
     stop("'name' must be a character string")
   }
 
@@ -166,7 +192,7 @@ graphab_link <- function(proj_name,         # character
 
   #########################################
   # Get graphab path
-  version <- "graphab-2.4.jar"
+  version <- "graphab-2.6.jar"
   path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
 
   #########################################
@@ -190,6 +216,8 @@ graphab_link <- function(proj_name,         # character
     if(inherits(alloc_ram, c("integer", "numeric"))){
       cmd <- c(paste0("-Xmx", alloc_ram, "g"), cmd)
     } else {
+      # Before returning an error, get back to initial working dir
+      if(chg == 1){setwd(dir = wd1)}
       stop("'alloc_ram' must be a numeric or an integer")
     }
   }

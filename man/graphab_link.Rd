@@ -66,8 +66,8 @@ Graphab project.
 By default, links crossing patches are not ignored nor broken into
 two links. For example, a link from patches A to C crossing patch B
 is created. It takes into account the distance inside patch B. It can be a
-problem when computing BC index. See more information in Graphab 2.4 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.4-en.pdf}
+problem when computing BC index. See more information in Graphab 2.6 manual:
+\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
 }
 \examples{
 \dontrun{
