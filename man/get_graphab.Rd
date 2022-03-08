@@ -28,7 +28,7 @@ installed java on their machine.
 If the download does not work, you can create a directory named
 'graph4lg_jar' in the directory \code{rappdirs::user_data_dir()} and copy
 Graphab software downloaded from
-\url{https://thema.univ-fcomte.fr/productions/download.php?name=graphab&version=2.6&username=Graph4lg&institution=R}
+\url{https://thema.univ-fcomte.fr/productions/download.php?name=graphab&version=2.8&username=Graph4lg&institution=R}
 }
 \examples{
 \dontrun{

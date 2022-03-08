@@ -10,6 +10,7 @@ graphab_link(
   name,
   cost = NULL,
   topo = "planar",
+  remcrosspath = FALSE,
   proj_path = NULL,
   alloc_ram = NULL
 )
@@ -31,12 +32,15 @@ corresponding cost-distance and the length of the least-cost path in meters
 
 \item{name}{A character string indicating the name of the created linkset.}
 
-\item{cost}{A \code{data.frame} indicating the cost values associated to each
+\item{cost}{This argument could be:\itemize{
+\item{A \code{data.frame} indicating the cost values associated to each
 raster cell value. These values refer to the raster used to create the
 project with \code{graphab_project}. The data.frame must have two
 columns:\itemize{
 \item{'code': raster cell values}
 \item{'cost': corresponding cost values}
+}}
+\item{The path to an external raster file in .tif format with cost values.}
 }}
 
 \item{topo}{A character string indicating the topology of the created
@@ -47,6 +51,9 @@ complete graphs with \code{\link{graphab_graph}}.}
 \item{Complete (\code{topo='complete'}): a complete set of links is created.
 A link is computed between every pair of patches.}
 }}
+
+\item{remcrosspath}{(optional, default = FALSE) A logical indicating whether
+links crossing patches are removed (TRUE).}
 
 \item{proj_path}{(optional) A character string indicating the path to the
 directory that contains the project directory. It should be used when the
@@ -66,8 +73,8 @@ Graphab project.
 By default, links crossing patches are not ignored nor broken into
 two links. For example, a link from patches A to C crossing patch B
 is created. It takes into account the distance inside patch B. It can be a
-problem when computing BC index. See more information in Graphab 2.6 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
+problem when computing BC index. See more information in Graphab 2.8 manual:
+\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
 }
 \examples{
 \dontrun{
@@ -81,5 +88,5 @@ graphab_link(proj_name = "grphb_ex",
 }
 }
 \author{
-P. Savary
+P. Savary, T. Rudolph
 }

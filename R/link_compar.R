@@ -53,39 +53,35 @@ link_compar <- function(proj_name,         # character
   #########################################
   # Check for project directory path
   if(!is.null(proj_path)){
-    chg <- 1
-    wd1 <- getwd()
-    setwd(dir = proj_path)
+    if(!dir.exists(proj_path)){
+      stop(paste0(proj_path, " is not an existing directory or the path is ",
+                  "incorrectly specified."))
+    } else {
+      proj_path <- normalizePath(proj_path)
+    }
   } else {
-    chg <- 0
-    proj_path <- getwd()
+    proj_path <- normalizePath(getwd())
   }
 
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
-  } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(proj_name, ".xml") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
 
-  proj_end_path <- paste0(proj_name, "/", proj_name, ".xml")
+  proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
 
   #########################################
   # Check for linkset1 class
   if(!inherits(linkset1, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'linkset1' must be a character string specifying the name of the
          first link set involved in the comparison.")
-  } else if (!(paste0(linkset1, "-links.csv") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(linkset1, "-links.csv") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The linkset you refer to does not exist.
            Please use graphab_link() before.")
   }
@@ -93,13 +89,10 @@ link_compar <- function(proj_name,         # character
   #########################################
   # Check for linkset2 class
   if(!inherits(linkset2, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'linkset2' must be a character string specifying the name of the
          second link set involved in the comparison.")
-  } else if (!(paste0(linkset2, "-links.csv") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(linkset2, "-links.csv") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The linkset you refer to does not exist.
            Please use graphab_link() before.")
   }
@@ -107,8 +100,6 @@ link_compar <- function(proj_name,         # character
   #########################################
   # Check for buffer_width
   if(!inherits(buffer_width, c("numeric", "integer"))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'buffer_width' must be a numeric or integer value")
   }
 
@@ -117,8 +108,6 @@ link_compar <- function(proj_name,         # character
   # Check for min_length
   if(!is.null(min_length)){
     if(!inherits(min_length, c("numeric", "integer"))){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'min_length' must be a numeric or an integer threshold value.")
     }
   }
@@ -127,12 +116,12 @@ link_compar <- function(proj_name,         # character
   ###########################################
   # Open layers corresponding to linksets
 
-  ls1 <- suppressWarnings(sf::as_Spatial(sf::st_read(dsn = paste0(getwd(),
+  ls1 <- suppressWarnings(sf::as_Spatial(sf::st_read(dsn = paste0(proj_path,
                                                                   "/", proj_name),
                                                      layer = paste0(linkset1,
                                                                     "-links"))))
 
-  ls2 <- suppressWarnings(sf::as_Spatial(sf::st_read(dsn = paste0(getwd(),
+  ls2 <- suppressWarnings(sf::as_Spatial(sf::st_read(dsn = paste0(proj_path,
                                                                   "/", proj_name),
                                                      layer = paste0(linkset2,
                                                                     "-links"))))
@@ -150,12 +139,8 @@ link_compar <- function(proj_name,         # character
   # Check that they share the same links
 
   if(nrow(ls1) != nrow(ls2)){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'linkset1' and 'linkset2' must have the same number of links.")
   } else if(!(all(ls1$Id %in% ls2$Id))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'linkset1' and 'linkset2' must have the same link IDs.")
   }
 
@@ -251,11 +236,6 @@ link_compar <- function(proj_name,         # character
   res <- list(df_res, correl)
   names(res) <- c("Spatial overlap table",
                   "Correlation coefficient between cost distances")
-
-  #########################################
-  if(chg == 1){
-    setwd(dir = wd1)
-  }
 
   return(res)
 

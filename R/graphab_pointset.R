@@ -43,8 +43,8 @@
 #' as well as the distance from each point to the nearest patch.
 #' @details Point coordinates must be in the same coordinate reference system
 #' as the habitat patches (and initial raster layer). See more information in
-#' Graphab 2.6 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
+#' Graphab 2.8 manual:
+#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
 #' @export
 #' @author P. Savary
 #' @examples
@@ -63,51 +63,46 @@ graphab_pointset <- function(proj_name,
                              proj_path = NULL,
                              alloc_ram = NULL){
 
+  #########################################
   # Check for project directory path
   if(!is.null(proj_path)){
-    chg <- 1
-    wd1 <- getwd()
-    setwd(dir = proj_path)
+    if(!dir.exists(proj_path)){
+      stop(paste0(proj_path, " is not an existing directory or the path is ",
+                  "incorrectly specified."))
+    } else {
+      proj_path <- normalizePath(proj_path)
+    }
   } else {
-    chg <- 0
-    proj_path <- getwd()
+    proj_path <- normalizePath(getwd())
   }
 
+  #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
-  } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(proj_name, ".xml") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
 
-  proj_end_path <- paste0(proj_name, "/", proj_name, ".xml")
+  proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
 
   # Check for linkset
   if(!inherits(linkset, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'linkset' must be a character string")
-  } else if (length(list.files(path = paste0("./", proj_name), pattern = "-links.csv")) == 0){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (length(list.files(path = paste0(proj_path, "/", proj_name),
+                               pattern = "-links.csv")) == 0){
     stop("There is not any linkset in the project you refer to.
          Please use graphab_link() before.")
-  } else if (!(paste0(linkset, "-links.csv") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(linkset, "-links.csv") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The linkset you refer to does not exist.
            Please use graphab_link() before.")
   }
 
   # Check for id
   if(!inherits(id, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop(paste0("'id' argument must be a character string specifying the",
                 " name of the point ID column."))
 
@@ -123,42 +118,26 @@ graphab_pointset <- function(proj_name,
 
       if(file.exists(pointset)){
 
-        pts_shape <- pointset
+        pts_shape <- normalizePath(pointset)
         p_type <- "shp"
 
-        path_s <- strsplit(pts_shape, "/|\\\\")[[1]]
-
-        n <- length(path_s)
-        layer_shp <- stringr::str_sub(path_s[n], 1, -5)
-        dir_shp <- stringr::str_sub(pts_shape, 1, -(nchar(layer_shp)+6))
+        layer_shp <- stringr::str_sub(basename(pts_shape), 1, -5)
+        dir_shp <- dirname(pts_shape)
 
         # Open the attribute table of the shapefile
-        if(dir_shp == ""){
-
-          pts_table <- foreign::read.dbf(file = paste0("./", layer_shp,
-                                                       ".dbf"))
-
-        } else {
-          pts_table <- foreign::read.dbf(file = paste0("./", dir_shp, "/",
-                                                       layer_shp,
-                                                       ".dbf"))
-        }
+        pts_table <- foreign::read.dbf(file = paste0(dir_shp, "/",
+                                                     layer_shp,
+                                                     ".dbf"))
 
         # Check for an id column in the layer attributes
         if(!(id %in% colnames(pts_table))){
-
           # Return an error if id is not a column of the attribute table
-          # Before returning an error, get back to initial working dir
-          if(chg == 1){setwd(dir = wd1)}
           stop(paste0("'pointset' shapefile layer must include an attribute",
                       " named ", id, "."))
-
         }
 
 
       } else {
-        # Before returning an error, get back to initial working dir
-        if(chg == 1){setwd(dir = wd1)}
         stop(paste0("'pointset' shapefile layer '", pointset,
                     "' does not exist."))
       }
@@ -172,8 +151,6 @@ graphab_pointset <- function(proj_name,
         pts <- utils::read.csv(file = pointset)
 
         if(!all(c(id, 'x', 'y') %in% colnames(pts))){
-          # Before returning an error, get back to initial working dir
-          if(chg == 1){setwd(dir = wd1)}
           stop(paste0("The columns of pts must include '", id, "', 'x' and 'y'"))
         } else {
           pts <- pts[, c(id, 'x', 'y')]
@@ -198,8 +175,6 @@ graphab_pointset <- function(proj_name,
     # Check for an id column in the spdf attributes
     if(!(id %in% colnames(pointset@data))){
       # Return an error if id is not a column of the attribute table
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop(paste0("'pointset' SpatialPointsDataFrame must include an attribute",
                   " named ", id, "."))
     }
@@ -218,16 +193,12 @@ graphab_pointset <- function(proj_name,
                                               data = pts)
 
     } else {
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop(paste0("The columns of pts must include '", id, "', 'x' and 'y'"))
     }
 
   } else {
 
     # else ERROR
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'pointset' must be either a path to a shapefile layer, to a .csv file,
           a SpatialPointsDataFrame object or a data.frame.")
   }
@@ -237,11 +208,8 @@ graphab_pointset <- function(proj_name,
 
     pts_shape <- tempfile(fileext = ".shp")
 
-    path_s <- strsplit(pts_shape, "/|\\\\")[[1]]
-
-    n <- length(path_s)
-    layer_shp <- stringr::str_sub(path_s[n], 1, -5)
-    dir_shp <- stringr::str_sub(pts_shape, 1, -(nchar(layer_shp)+6))
+    layer_shp <- stringr::str_sub(basename(pts_shape), 1, -5)
+    dir_shp <- dirname(pts_shape)
 
     # Export the shapefile layer
     sf::st_write(obj = sf::st_as_sf(pts_layer),
@@ -253,8 +221,6 @@ graphab_pointset <- function(proj_name,
 
   # Check for return_val
   if(!is.logical(return_val)){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'return_val' must be a logical (TRUE or FALSE).")
   }
 
@@ -269,7 +235,7 @@ graphab_pointset <- function(proj_name,
   java.path <- Sys.which("java")
 
   # Get graphab path
-  version <- "graphab-2.6.jar"
+  version <- "graphab-2.8.jar"
   path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
 
   # Command line
@@ -284,8 +250,6 @@ graphab_pointset <- function(proj_name,
     if(inherits(alloc_ram, c("integer", "numeric"))){
       cmd <- c(paste0("-Xmx", alloc_ram, "g"), cmd)
     } else {
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'alloc_ram' must be a numeric or an integer")
     }
   }
@@ -293,16 +257,19 @@ graphab_pointset <- function(proj_name,
   # Run the command line
   rs <- system2(java.path, args = cmd, stdout = TRUE)
 
+  name_pts <- paste0("Exo-",
+                     layer_shp,
+                     "_", linkset)
+
   if(return_val){
 
-    name_pts <- paste0("Exo-",
-                       layer_shp,
-                       "_", linkset)
-
-    df_pts <- foreign::read.dbf(file = paste0(proj_name, "/", name_pts, ".dbf"))
+    df_pts <- foreign::read.dbf(file = paste0(proj_path, "/",
+                                              proj_name, "/",
+                                              name_pts, ".dbf"))
     df_pts <- df_pts[, which(colnames(df_pts) %in% c("Id", "IdPatch", "Cost"))]
 
-    patches <- utils::read.csv(file = paste0(proj_name, "/patches.csv"))
+    patches <- utils::read.csv(file = paste0(proj_path, "/",
+                                             proj_name, "/patches.csv"))
 
     df_pts <- merge(df_pts, patches, by.x = "IdPatch", by.y = "Id")
 
@@ -317,20 +284,29 @@ graphab_pointset <- function(proj_name,
     #   }
     # }
 
-    if(chg == 1){
-      setwd(dir = wd1)
-    }
 
     if(length(rs) == 1){
       if(rs == 1){
         message("An error occurred")
       } else {
-        message(paste0("Point set has been added to the project ",
-                       proj_name))
+        if(file.exists(paste0(proj_path, "/",
+                              proj_name, "/",
+                              name_pts, ".shp"))){
+          message(paste0("Point set '", name_pts ,"' has been added to the project ",
+                         proj_name))
+        } else {
+          message("The point set import did not succeed.")
+        }
       }
     } else {
-      message(paste0("Point set has been added to the project ",
-                     proj_name))
+      if(file.exists(paste0(proj_path, "/",
+                            proj_name, "/",
+                            name_pts, ".shp"))){
+        message(paste0("Point set '", name_pts ,"' has been added to the project ",
+                       proj_name))
+      } else {
+        message("The point set import did not succeed.")
+      }
     }
 
     return(df_pts)
@@ -342,20 +318,28 @@ graphab_pointset <- function(proj_name,
     #   }
     # }
 
-    if(chg == 1){
-      setwd(dir = wd1)
-    }
-
     if(length(rs) == 1){
       if(rs == 1){
         message("An error occurred")
       } else {
-        message(paste0("Point set has been added to the project ",
-                       proj_name))
+        if(file.exists(paste0(proj_path, "/",
+                              proj_name, "/",
+                              name_pts, ".shp"))){
+          message(paste0("Point set '", name_pts ,"' has been added to the project ",
+                         proj_name))
+        } else {
+          message("The point set import did not succeed.")
+        }
       }
     } else {
-      message(paste0("Point set has been added to the project ",
-                     proj_name))
+      if(file.exists(paste0(proj_path, "/",
+                            proj_name, "/",
+                            name_pts, ".shp"))){
+        message(paste0("Point set '", name_pts ,"' has been added to the project ",
+                       proj_name))
+      } else {
+        message("The point set import did not succeed.")
+      }
     }
 
 

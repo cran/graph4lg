@@ -9,7 +9,8 @@ graphab_project_desc(
   mode = "patches",
   linkset = NULL,
   proj_path = NULL,
-  fig = FALSE
+  fig = FALSE,
+  return_val = TRUE
 )
 }
 \arguments{
@@ -44,6 +45,10 @@ When 'proj_path = NULL', the project directory is equal to \code{getwd()}.}
 the resulting spatial graph. The figure is plotted using function
 \code{\link{plot_graph_lg}}. The plotting can be long if the graph has many
 nodes and links.}
+
+\item{return_val}{Logical (default = TRUE) indicating whether the project
+features are returned as a list (TRUE) or only displayed in the
+R console (FALSE).}
 }
 \description{
 The function describes the objects of a Graphab project

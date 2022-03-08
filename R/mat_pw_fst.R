@@ -66,7 +66,7 @@ mat_pw_fst <- function(x, pop_names = NULL){
     row.names(mat_fst) <- colnames(mat_fst) <- pop_names
 
   # If 'x' is the path to a GENEPOP formatted text file
-  } else if (class(x) == "character"){
+  } else if (inherits(x, "character")){
 
     # Compute the distance matrix between populations using diffCalc from
     # diveRsity package, directly from the GENEPOP file

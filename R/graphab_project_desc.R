@@ -20,6 +20,9 @@
 #' the resulting spatial graph. The figure is plotted using function
 #' \code{\link{plot_graph_lg}}. The plotting can be long if the graph has many
 #' nodes and links.
+#' @param return_val Logical (default = TRUE) indicating whether the project
+#' features are returned as a list (TRUE) or only displayed in the
+#' R console (FALSE).
 #' @import ggplot2
 #' @export
 #' @author P. Savary
@@ -35,45 +38,48 @@ graphab_project_desc <- function(proj_name,
                                  mode = "patches",
                                  linkset = NULL,
                                  proj_path = NULL,
-                                 fig = FALSE){
+                                 fig = FALSE,
+                                 return_val = TRUE){
 
 
   #########################################
   # Check for project directory path
   if(!is.null(proj_path)){
-    chg <- 1
-    wd1 <- getwd()
-    setwd(dir = proj_path)
+    if(!dir.exists(proj_path)){
+      stop(paste0(proj_path, " is not an existing directory or the path is ",
+                  "incorrectly specified."))
+    } else {
+      proj_path <- normalizePath(proj_path)
+    }
   } else {
-    chg <- 0
-    proj_path <- getwd()
+    proj_path <- normalizePath(getwd())
   }
 
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
-  } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(proj_name, ".xml") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
 
-  proj_end_path <- paste0(proj_name, "/", proj_name, ".xml")
+  proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
 
   ##########################################
   # Check for mode
   if(!inherits(mode, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'mode' must be a character string")
   } else if(!(mode %in% c("patches", "linkset", "both"))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'mode' must be equal to either 'patches', 'linkset' or 'both'.")
+  }
+
+
+  ##########################################
+  # Check for return_val
+  if(!inherits(return_val, "logical")){
+    stop("'return_val' must be a logical")
   }
 
 
@@ -83,16 +89,20 @@ graphab_project_desc <- function(proj_name,
 
     # Get all codes
     all_codes <- get_graphab_raster_codes(proj_name = proj_name,
-                                          mode = 'all')
+                                          mode = 'all',
+                                          proj_path = proj_path)
     # Get habitat code
     hab_code <- get_graphab_raster_codes(proj_name = proj_name,
-                                         mode = 'habitat')
+                                         mode = 'habitat',
+                                         proj_path = proj_path)
     # Get patches information
-    patches <- get_graphab_metric(proj_name = proj_name)
+    patches <- get_graphab_metric(proj_name = proj_name,
+                                  proj_path = proj_path)
 
     all_codes_p <- paste0("Raster source layer codes: ",
                           paste(all_codes, collapse = ", "))
-    hab_codes_p <- paste0("Habitat patch code: ", hab_code)
+    hab_codes_p <- paste0("Habitat patch codes: ",
+                          paste(hab_code, collapse = ", "))
     nb_p <- paste0("Number of patches: ", nrow(patches))
     cap <- "Patch capacities:"
     total_cap <- paste0("  Total: ", sum(patches$Capacity))
@@ -118,6 +128,26 @@ graphab_project_desc <- function(proj_name,
           gini_cap, "\n"),
         "\n", sep = "")
 
+    if(return_val){
+      res_p <- list(all_codes, hab_code,
+                    nrow(patches), sum(patches$Capacity),
+                    min(patches$Capacity), max(patches$Capacity),
+                    mean(patches$Capacity), stats::median(patches$Capacity),
+                    stats::sd(patches$Capacity), harm_mean(patches$Capacity),
+                    gini_coeff(patches$Capacity))
+      names(res_p) <- c("Raster source layer codes",
+                        "Habitat patch codes",
+                        "Number of patches",
+                        "Total patch capacities",
+                        "Min. patch capacity",
+                        "Max. patch capacity",
+                        "Mean patch capacity",
+                        "Median patch capacity",
+                        "Std. deviation patch capacity",
+                        "Harmonic mean patch capacity",
+                        "Gini coeff. patch capacity")
+    }
+
 
     if(fig){
       range <- max(patches$Capacity) - min(patches$Capacity)
@@ -126,7 +156,7 @@ graphab_project_desc <- function(proj_name,
         b_w <- range/80
 
         fig_patch <- ggplot(data = patches,
-                            aes_string(x = "Capacity")) +
+                            aes(x = .data$Capacity)) +
           geom_histogram(binwidth = b_w,
                          fill = "#396D35",
                          color = "#776F62", size = .2) +
@@ -153,10 +183,12 @@ graphab_project_desc <- function(proj_name,
 
     # Get linkset
     linkset_desc <- get_graphab_linkset_cost(proj_name = proj_name,
-                                             linkset = linkset)
+                                             linkset = linkset,
+                                             proj_path = proj_path)
     # Get linkset values
     all_links <- get_graphab_linkset(proj_name = proj_name,
-                                     linkset = linkset)
+                                     linkset = linkset,
+                                     proj_path = proj_path)
 
     all_codes_l <- paste0("Raster source layer codes considered for the costs: ",
                           paste(linkset_desc$code, collapse = ", "))
@@ -186,6 +218,26 @@ graphab_project_desc <- function(proj_name,
         "\n", sep = "")
 
 
+    if(return_val){
+      res_l <- list(linkset_desc$code, linkset_desc$cost,
+                    nrow(all_links),
+                    min(all_links$Dist), max(all_links$Dist),
+                    mean(all_links$Dist), stats::median(all_links$Dist),
+                    stats::sd(all_links$Dist), harm_mean(all_links$Dist),
+                    gini_coeff(all_links$Dist))
+      names(res_l) <- c("Raster source layer codes considered for the costs",
+                        "Corresponding costs",
+                        "Number of links",
+                        "Min. cost distance",
+                        "Max. cost distance",
+                        "Mean cost distance",
+                        "Median cost distance",
+                        "Std. deviation cost distance",
+                        "Harmonic mean cost distance",
+                        "Gini coeff. cost distance")
+    }
+
+
     if(fig){
       range <- max(all_links$Dist) - min(all_links$Dist)
 
@@ -193,7 +245,7 @@ graphab_project_desc <- function(proj_name,
         b_w <- range/80
 
         fig_cd <- ggplot(data = all_links,
-                         aes_string(x = "Dist")) +
+                         aes(x = .data$Dist)) +
           geom_histogram(binwidth = b_w,
                          fill = "#396D35",
                          color = "#776F62", size = .2) +
@@ -214,6 +266,19 @@ graphab_project_desc <- function(proj_name,
     }
 
   }
+
+
+  if(return_val){
+    if(mode == "both"){
+      res <- list(res_p, res_l)
+    } else if(mode == "patches"){
+      res <- res_p
+    } else if(mode == "linkset"){
+      res <- res_l
+    }
+    return(res)
+  }
+
 }
 
 

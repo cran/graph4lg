@@ -7,6 +7,7 @@
 graphab_capacity(
   proj_name,
   mode = "area",
+  patch_codes = NULL,
   exp = NULL,
   ext_file = NULL,
   thr = NULL,
@@ -36,6 +37,12 @@ with a value given by \code{codes} argument is summed up to the
 distance \code{thr}. This number can be weighted according to the
 \code{weight} argument.}
 }}
+
+\item{patch_codes}{(optional, default=NULL) An integer value or vector
+specifying the codes corresponding to the habitat pixel whose corresponding
+patches are included to compute the capacity as the area of the habitat
+when \code{mode='area'}. Patches corresponding to other initial habitat
+codes are weighted by 0.}
 
 \item{exp}{An integer value specifying the power to which patch area are
 raised when \code{mode='area'}. When not specified, \code{exp=1} by default.}
@@ -89,8 +96,8 @@ The function computes custom capacities of patches
 in the Graphab project
 }
 \details{
-See more information in Graphab 2.6 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
+See more information in Graphab 2.8 manual:
+\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
 Be careful, when capacity has been changed. The last changes are taken into
 account for subsequent calculations in a project.
 }
@@ -103,4 +110,3 @@ graphab_capacity(proj_name = "grphb_ex",
 \author{
 P. Savary
 }
-\keyword{internal}

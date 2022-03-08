@@ -137,42 +137,67 @@ genepop_to_genind <- function(path,
   sep_col$POP <- rep(1:length(rpop), times = n.ind.pop)
 
   # Fill sep_col with the codes of the msats separated by "/"
-  sep_col[, 2:ncol(sep_col)] <- lapply(sep_col[, 2:ncol(sep_col)],
-                                       function(x){
-                                         paste(stringr::str_sub(x,
-                                                                1,
-                                                                allele.digit.coding),
-                                               "/",
-                                               stringr::str_sub(x,
-                                                                allele.digit.coding+1,
-                                                                2*allele.digit.coding),
-                                               sep = "")})
+  all_sep <- lapply(sep_col[, 2:ncol(sep_col)],
+                    function(x){
+                      paste(stringr::str_sub(x,
+                                             1,
+                                             allele.digit.coding),
+                            "/",
+                            stringr::str_sub(x,
+                                             allele.digit.coding+1,
+                                             2*allele.digit.coding),
+                            sep = "")})
+
+  if(ncol(sep_col) == 2){
+    sep_col[, 2:ncol(sep_col)] <- unlist(all_sep)
+  } else {
+    sep_col[, 2:ncol(sep_col)] <- all_sep
+  }
 
 
   # Replace missing values by NA
-  sep_col[, 2:ncol(sep_col)] <- lapply(sep_col[, 2:ncol(sep_col)],
-                                       gsub,
-                                       pattern = paste0(paste(rep("0", allele.digit.coding),
-                                                              collapse = ""),
-                                                        "/",
-                                                        paste(rep("0", allele.digit.coding),
-                                                              collapse = "")),
-                                       replacement = 'NA/NA')
+  na_rep1 <- lapply(sep_col[, 2:ncol(sep_col)],
+                    gsub,
+                    pattern = paste0(paste(rep("0", allele.digit.coding),
+                                           collapse = ""),
+                                     "/",
+                                     paste(rep("0", allele.digit.coding),
+                                           collapse = "")),
+                    replacement = 'NA/NA')
+
+  if(ncol(sep_col) == 2){
+    sep_col[, 2:ncol(sep_col)] <- unlist(na_rep1)
+  } else {
+    sep_col[, 2:ncol(sep_col)] <- na_rep1
+  }
 
 
-  sep_col[, 2:ncol(sep_col)] <- lapply(sep_col[, 2:ncol(sep_col)],
-                                       gsub,
-                                       pattern = paste0("/",
-                                                        paste(rep("0", allele.digit.coding),
-                                                              collapse = "")),
-                                       replacement = '/NA')
+  na_rep2 <- lapply(sep_col[, 2:ncol(sep_col)],
+                    gsub,
+                    pattern = paste0("/",
+                                     paste(rep("0", allele.digit.coding),
+                                           collapse = "")),
+                    replacement = '/NA')
 
-  sep_col[, 2:ncol(sep_col)] <- lapply(sep_col[, 2:ncol(sep_col)],
-                                       gsub,
-                                       pattern = paste0(paste(rep("0", allele.digit.coding),
-                                                              collapse = ""),
-                                                        "/"),
-                                       replacement = 'NA/')
+  if(ncol(sep_col) == 2){
+    sep_col[, 2:ncol(sep_col)] <- unlist(na_rep2)
+  } else {
+    sep_col[, 2:ncol(sep_col)] <- na_rep2
+  }
+
+  na_rep3 <- lapply(sep_col[, 2:ncol(sep_col)],
+                    gsub,
+                    pattern = paste0(paste(rep("0", allele.digit.coding),
+                                           collapse = ""),
+                                     "/"),
+                    replacement = 'NA/')
+
+
+  if(ncol(sep_col) == 2){
+    sep_col[, 2:ncol(sep_col)] <- unlist(na_rep3)
+  } else {
+    sep_col[, 2:ncol(sep_col)] <- na_rep3
+  }
 
   if (is.vector(pop_names)){
     if(length(pop_names) != length(table(sep_col$POP))){

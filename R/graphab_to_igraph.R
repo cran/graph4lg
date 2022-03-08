@@ -73,8 +73,6 @@ graphab_to_igraph <- function(proj_name,
   # Check whether the input fig and crds are logical
   if(!all(c(is.logical(fig),
             is.logical(crds)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("Inputs 'fig' and 'crds' must be TRUE or FALSE")
   }
 
@@ -82,44 +80,38 @@ graphab_to_igraph <- function(proj_name,
   #########################################
   # Check for project directory path
   if(!is.null(proj_path)){
-    chg <- 1
-    wd1 <- getwd()
-    setwd(dir = proj_path)
+    if(!dir.exists(proj_path)){
+      stop(paste0(proj_path, " is not an existing directory or the path is ",
+                  "incorrectly specified."))
+    } else {
+      proj_path <- normalizePath(proj_path)
+    }
   } else {
-    chg <- 0
-    proj_path <- getwd()
+    proj_path <- normalizePath(getwd())
   }
 
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
-  } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(proj_name, ".xml") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
 
+  proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
 
   #########################################
   # Check for linkset class
   if(!inherits(linkset, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'linkset' must be a character string")
-  } else if (length(list.files(path = paste0("./", proj_name),
+  } else if (length(list.files(path = paste0(proj_path, "/", proj_name),
                                pattern = "-links.csv")) == 0){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("There is not any linkset in the project you refer to.
          Please use graphab_link() before.")
-  } else if (!(paste0(linkset, "-links.csv") %in% list.files(path = paste0("./",
-                                                                           proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(linkset, "-links.csv") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The linkset you refer to does not exist.
            Please use graphab_link() before.")
   }
@@ -127,13 +119,13 @@ graphab_to_igraph <- function(proj_name,
   #########################################
   # Check for nodes
   if(!inherits(nodes, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'nodes' must be a character string.")
   } else if(!file.exists(paste0("./", proj_name, "/patches.csv"))){
-    df_nodes <- foreign::read.dbf(file = paste0("./", proj_name, "/patches.dbf"))
+    df_nodes <- foreign::read.dbf(file = paste0(proj_path, "/",
+                                                proj_name, "/patches.dbf"))
   } else {
-    df_nodes <- utils::read.csv(file = paste0("./", proj_name, "/patches.csv"))
+    df_nodes <- utils::read.csv(file = paste0(proj_path, "/",
+                                              proj_name, "/patches.csv"))
   }
 
   #########################################
@@ -141,16 +133,14 @@ graphab_to_igraph <- function(proj_name,
 
   if(nodes != "patches"){
 
-    if (length(list.files(path = paste0("./", proj_name), pattern = "-voronoi.shp")) == 0){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
+    if (length(list.files(path = paste0(proj_path, "/",
+                                        proj_name),
+                          pattern = "-voronoi.shp")) == 0){
       stop("There is not any graph in the project you refer to.
          Please use graphab_graph() before.")
     } else if(!(paste0(nodes,
-                       "-voronoi.shp") %in% list.files(path = paste0("./",
-                                                                     proj_name)))){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
+                       "-voronoi.shp") %in%
+                list.files(path = paste0(proj_path, "/", proj_name)))){
       stop("The graph you refer to does not exist")
 
     } else {
@@ -168,7 +158,8 @@ graphab_to_igraph <- function(proj_name,
   # Get links
 
   df_links <- get_graphab_linkset(proj_name = proj_name,
-                                  linkset = linkset)
+                                  linkset = linkset,
+                                  proj_path = proj_path)
 
   # If as many node ID in df_nodes and in df_links, then there is not any
   # isolated node and the graph can be created directly from the edge list
@@ -184,8 +175,6 @@ graphab_to_igraph <- function(proj_name,
     } else if (weight == "euclid"){
       igraph::E(graph)$weight <- df_links[, "DistM"]
     } else {
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("You must specify a correct 'weight' option ('cost' or 'euclid').")
     }
 
@@ -218,8 +207,6 @@ graphab_to_igraph <- function(proj_name,
       df <- df[-which(df$Id %in% df_links$Id), ]
       df <- rbind(df, df_links)
     } else {
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("Error probably due to unusual structure
            of the links spatial layer.")
     }
@@ -235,8 +222,6 @@ graphab_to_igraph <- function(proj_name,
     } else if (weight == "euclid"){
       igraph::E(graph)$weight <- df[, "DistM"]
     } else {
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("You must specify a correct 'weight' option ('cost' or 'euclid').")
     }
 
@@ -266,7 +251,7 @@ graphab_to_igraph <- function(proj_name,
     #sp_patches <- suppressWarnings(rgdal::readOGR(dsn = paste0(getwd(), "/", proj_name),
     #                                             layer = "patches"))
 
-    sp_patches <- suppressWarnings(sf::as_Spatial(sf::st_read(dsn = paste0(getwd(),
+    sp_patches <- suppressWarnings(sf::as_Spatial(sf::st_read(dsn = paste0(proj_path,
                                                                            "/", proj_name),
                                                               layer = "patches")))
 

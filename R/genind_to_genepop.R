@@ -173,8 +173,8 @@ genind_to_genepop <- function(x, output = "data.frame"){
         a[j] <- paste(loc_all[col_loc[hom], 'allele'],
                       loc_all[col_loc[hom], 'allele'],
                       sep = "")
-      # If heterozygote, then copy the code of the two alleles of ind j
-      # the lower code number is the first
+        # If heterozygote, then copy the code of the two alleles of ind j
+        # the lower code number is the first
       } else if (length(het) != 0){
 
         if (as.character(loc_all[col_loc[het[1]], 'allele']) <
@@ -250,14 +250,21 @@ genind_to_genepop <- function(x, output = "data.frame"){
   }
 
   # The two first lines are the heading and the names of the loci
-  data_gpop2 <- rbind(c("Conversion of an object of class 'genind' into a GENEPOP file with the package 'graph4lg'",
-                        rep("", n.loci)),
-                      c(paste(loci_names[1:(n.loci-1)],",", sep = ""),
-                        loci_names[n.loci], ""),
-                      data_gpop2)
+  if(n.loci > 1){
+    data_gpop2 <- rbind(c("Conversion of an object of class 'genind' into a GENEPOP file with the package 'graph4lg'",
+                          rep("", n.loci)),
+                        c(paste(loci_names[1:(n.loci-1)],",", sep = ""),
+                          loci_names[n.loci], ""),
+                        data_gpop2)
+    colnames(data_gpop2)[2:(length(colnames(data_gpop2))-1)] <-
+      paste(colnames(data_gpop2)[2:(length(colnames(data_gpop2))-1)], ",", sep = "")
 
-  colnames(data_gpop2)[2:(length(colnames(data_gpop2))-1)] <-
-    paste(colnames(data_gpop2)[2:(length(colnames(data_gpop2))-1)], ",", sep = "")
+  } else {
+    data_gpop2 <- rbind(c("Conversion of an object of class 'genind' into a GENEPOP file with the package 'graph4lg'",
+                          rep("", n.loci)),
+                        c(loci_names[n.loci], ""),
+                        data_gpop2)
+  }
 
   # Output
   if(output == "data.frame"){

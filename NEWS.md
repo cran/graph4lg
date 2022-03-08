@@ -1,3 +1,32 @@
+# graph4lg 1.4.0
+
+-- Major changes: 
+- Creation of a new genetic data conversion function (genind_to_structure)
+(internal function for the moment)
+- Creation of a function for rarefied genetic diversity indices called
+pop_rare_gen_index()
+(internal function for the moment)
+- Creation of a new function for computing corridors in a Graphab project
+- Addition of a new contributor to the package
+- Modification of graphab_project for allowing users to create multi-habitat
+graph projects
+- Modification of graphab_metric for allowing users to compute multi-habitat
+graph metrics
+- Modification of graphab_link for allowing users to include an external
+cost surface
+
+-- Minor changes: 
+- Update of Graphab software to 2.8
+- Creation of a function checking for multihabitat graph projects
+- Modification of functions using ggplot2 to avoid aes_string()
+- Update of spatstat versions and package names
+- Creation of a git repository on Gitlab
+
+-- Bug fixes:
+
+- Modifications of the way the current directory are managed in graphab-based
+functions 
+
 # graph4lg 1.2.0
 
 -- Major changes: 

@@ -33,40 +33,34 @@ get_graphab_raster_codes <- function(proj_name,
   #########################################
   # Check for project directory path
   if(!is.null(proj_path)){
-    chg <- 1
-    wd1 <- getwd()
-    setwd(dir = proj_path)
+    if(!dir.exists(proj_path)){
+      stop(paste0(proj_path, " is not an existing directory or the path is ",
+                  "incorrectly specified."))
+    } else {
+      proj_path <- normalizePath(proj_path)
+    }
   } else {
-    chg <- 0
-    proj_path <- getwd()
+    proj_path <- normalizePath(getwd())
   }
-
 
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
-  } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(proj_name, ".xml") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
 
-  proj_end_path <- paste0(proj_name, "/", proj_name, ".xml")
+  proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
 
 
   #######################
   # Check for mode
   if(!inherits(mode, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'mode' must be a character string.")
   } else if (!(mode %in% c("all", "habitat"))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'mode' must be equal to 'all' or 'habitat'.")
   }
 
@@ -108,8 +102,9 @@ get_graphab_raster_codes <- function(proj_name,
 
   } else if(mode == "habitat"){
 
-    first_code <- which(file_data[, 1] == "<patchCodes>")+1
-    vec_codes <- file_data[first_code, 1]
+    first_code <- min(which(file_data[, 1] == "<patchCodes>")) + 1
+    last_code <- min(which(file_data[, 1] == "</patchCodes>")) - 1
+    vec_codes <- file_data[first_code:last_code, 1]
 
   }
 
@@ -124,11 +119,6 @@ get_graphab_raster_codes <- function(proj_name,
     # Print a message
     message(paste0("No data value is equal to ", na_code))
     }
-  }
-
-  #########################################
-  if(chg == 1){
-    setwd(dir = wd1)
   }
 
   vec_codes <- as.numeric(vec_codes)

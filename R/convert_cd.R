@@ -111,7 +111,7 @@ convert_cd <- function(mat_euc, mat_ld,
     model <- stats::lm(data = df, formula = log_ld ~ log_euc)
 
     converted <- exp(stats::predict(model,
-                            newdata = data.frame(log_euc = log(to_convert))))
+                                    newdata = data.frame(log_euc = log(to_convert))))
 
 
   } else if (method == "lm"){
@@ -151,11 +151,11 @@ convert_cd <- function(mat_euc, mat_ld,
 
       plot <- ggplot() +
         geom_point(data = df,
-                   aes_string(x = 'log_euc', y = 'log_ld'), color = pts_col)+
-        geom_line(data = df, aes_string(x = 'log_euc', y = 'predict'),
+                   aes(x = .data$log_euc, y = .data$log_ld), color = pts_col)+
+        geom_line(data = df, aes(x = .data$log_euc, y = .data$predict),
                   color = line_col)+
         geom_point(data = df2,
-                   aes_string(x = 'log_euc', y = 'log_conv'),
+                   aes(x = .data$log_euc, y = .data$log_conv),
                    color = "black", size = 3)+
         labs(x = "log ( Euclidean distance )",
              y = "log ( Landscape distance )") +
@@ -168,13 +168,13 @@ convert_cd <- function(mat_euc, mat_ld,
 
       plot <- ggplot() +
         geom_point(data = df,
-                   aes_string(x = 'euc', y = 'ld'),
+                   aes(x = .data$euc, y = .data$ld),
                    color = pts_col)+
         geom_line(data = df,
-                  aes_string(x = 'euc', y = 'predict'),
+                  aes(x = .data$euc, y = .data$predict),
                   color = line_col)+
         geom_point(data = df2,
-                   aes_string(x = 'euc', y = 'conv'),
+                   aes(x = .data$euc, y = .data$conv),
                    color = "black", size = 3)+
         labs(x = "Euclidean distance",
              y = "Landscape distance") +

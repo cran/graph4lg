@@ -304,15 +304,15 @@ plot_graph_lg <- function(graph,
   }
 
   g <- ggplot() +
-    geom_segment(data = graph_df, aes_string(x = 'x', y = 'y',
-                                             xend = 'xend', yend = 'yend',
-                                             size = 'l_w'),
+    geom_segment(data = graph_df, aes(x = .data$x, y = .data$y,
+                                      xend = .data$xend, yend = .data$yend,
+                                      size = .data$l_w),
                  color = "black") +
-    geom_point(data = crds, aes_string(x = 'x', y = 'y',
-                                       size = "n_size",
-                                       color = "module")) +
-    geom_text(data = crds, aes_string(x = 'x', y = 'y',
-                                      label = 'ID'),
+    geom_point(data = crds, aes(x = .data$x, y = .data$y,
+                                size = .data$n_size,
+                                color = .data$module)) +
+    geom_text(data = crds, aes(x = .data$x, y = .data$y,
+                               label = .data$ID),
               size = 4, color = "black", fontface = "bold") +
     scale_size_identity() +
     scale_color_manual(values = pal) +

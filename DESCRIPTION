@@ -1,8 +1,20 @@
 Package: graph4lg
 Type: Package
 Title: Build Graphs for Landscape Genetics Analysis
-Version: 1.2.0
-Author: Paul Savary
+Version: 1.4.0
+Authors@R: 
+    c(person(given = "Paul",
+             family = "Savary",
+             role = c("aut", "cre"),
+             email = "psavary@protonmail.com",
+             comment = c(ORCID = "0000-0002-2104-9941")),
+	  person(given = "Gilles",
+             family = "Vuidel",
+             role = "ctb",
+             comment = c(ORCID = "0000-0001-6330-6136")),
+      person(given = "Tyler",
+             family = "Rudolph",
+             role = "ctb"))
 Maintainer: Paul Savary <psavary@protonmail.com>
 Description: Build graphs for landscape genetics analysis. This set of 
 	functions can be used to import and convert spatial and genetic data 
@@ -23,14 +35,18 @@ Depends: R(>= 3.1.0)
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-Imports: adegenet, ggplot2, stringr, igraph, knitr, rmarkdown, stats,
-        spatstat.geom, spatstat.core, spatstat.linnet, Matrix, vegan,
-        utils, methods, pegas, MASS, tidyr, sp, sf, diveRsity,
-        rappdirs, gdistance, raster, foreign, ecodist, Rdpack
+Imports: adegenet, ggplot2, stringr, igraph, stats, spatstat.geom,
+        spatstat.linnet, Matrix, vegan, utils, methods, pegas, MASS,
+        tidyr, sp, sf, diveRsity, rappdirs, gdistance, raster, foreign,
+        ecodist, Rdpack
+Suggests: knitr, rmarkdown
 RdMacros: Rdpack
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 VignetteBuilder: knitr, rmarkdown
 NeedsCompilation: no
-Packaged: 2021-03-16 12:36:30 UTC; psavary
+Packaged: 2022-03-07 21:47:24 UTC; paul
+Author: Paul Savary [aut, cre] (<https://orcid.org/0000-0002-2104-9941>),
+  Gilles Vuidel [ctb] (<https://orcid.org/0000-0001-6330-6136>),
+  Tyler Rudolph [ctb]
 Repository: CRAN
-Date/Publication: 2021-03-16 15:20:02 UTC
+Date/Publication: 2022-03-08 08:40:15 UTC

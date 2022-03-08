@@ -16,12 +16,15 @@
 #' (if \code{distance='cost'}) or with its length in Euclidean distance
 #' (if \code{distance='euclid'})
 #' @param name A character string indicating the name of the created linkset.
-#' @param cost A \code{data.frame} indicating the cost values associated to each
+#' @param cost This argument could be:\itemize{
+#' \item{A \code{data.frame} indicating the cost values associated to each
 #' raster cell value. These values refer to the raster used to create the
 #' project with \code{graphab_project}. The data.frame must have two
 #' columns:\itemize{
 #' \item{'code': raster cell values}
 #' \item{'cost': corresponding cost values}
+#' }}
+#' \item{The path to an external raster file in .tif format with cost values.}
 #' }
 #' @param topo A character string indicating the topology of the created
 #' link set. It can be:\itemize{
@@ -31,6 +34,8 @@
 #' \item{Complete (\code{topo='complete'}): a complete set of links is created.
 #' A link is computed between every pair of patches.}
 #' }
+#' @param remcrosspath (optional, default = FALSE) A logical indicating whether
+#' links crossing patches are removed (TRUE).
 #' @param alloc_ram (optional, default = NULL) Integer or numeric value
 #' indicating RAM gigabytes allocated to the java process. Increasing this
 #' value can speed up the computations. Too large values may not be compatible
@@ -42,10 +47,10 @@
 #' @details By default, links crossing patches are not ignored nor broken into
 #' two links. For example, a link from patches A to C crossing patch B
 #' is created. It takes into account the distance inside patch B. It can be a
-#' problem when computing BC index. See more information in Graphab 2.6 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
+#' problem when computing BC index. See more information in Graphab 2.8 manual:
+#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
 #' @export
-#' @author P. Savary
+#' @author P. Savary, T. Rudolph
 #' @examples
 #' \dontrun{
 #' df_cost <- data.frame(code = 1:5,
@@ -61,8 +66,9 @@
 graphab_link <- function(proj_name,         # character
                          distance = "cost", # cost or euclid
                          name, # character
-                         cost = NULL, # NULL or data.frame code cost
+                         cost = NULL, # NULL, data.frame code cost or ext file
                          topo = "planar", # planar or complete
+                         remcrosspath = FALSE,
                          proj_path = NULL, # if null getwd() otherwise a character path
                          alloc_ram = NULL){
 
@@ -71,64 +77,57 @@ graphab_link <- function(proj_name,         # character
   #########################################
   # Check for project directory path
   if(!is.null(proj_path)){
-    chg <- 1
-    wd1 <- getwd()
-    setwd(dir = proj_path)
+    if(!dir.exists(proj_path)){
+      stop(paste0(proj_path, " is not an existing directory or the path is ",
+                  "incorrectly specified."))
+    } else {
+      proj_path <- normalizePath(proj_path)
+    }
   } else {
-    chg <- 0
-    proj_path <- getwd()
+    proj_path <- normalizePath(getwd())
   }
 
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
-  } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(proj_name, ".xml") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
 
-  proj_end_path <- paste0(proj_name, "/", proj_name, ".xml")
+  proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
 
   #########################################
   # Check for distance
   if(!inherits(distance, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'distance' must be a character string")
   } else if (!(distance %in% c("cost", "euclid"))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'distance' must be equal to 'cost' or 'euclid'")
   }
 
+
+  #########################################
+  # Check for remcrosspatch
+  if(!inherits(remcrosspath, "logical")){
+    stop("'remcrosspath' must be a logical.")
+  }
 
   ###########################################################################################
   # Check cost argument
 
   if(distance == "cost"){
 
-    if(!inherits(cost, "data.frame")){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
-      stop("'cost' must be a data.frame object")
-    } else {
+    # Scenario 1: 'cost' argument is a lookup table (data.frame)
+    if(inherits(cost, "data.frame")){
+
       if(!all(c("code", "cost") %in% colnames(cost))){
-        # Before returning an error, get back to initial working dir
-        if(chg == 1){setwd(dir = wd1)}
         stop("The columns of cost must include 'code' and 'cost'")
       } else if (any(is.na(as.numeric(cost$code)))){
-        # Before returning an error, get back to initial working dir
-        if(chg == 1){setwd(dir = wd1)}
         stop("'code' column must include numeric values")
 
       } else if (any(is.na(as.numeric(cost$cost)))){
-        # Before returning an error, get back to initial working dir
-        if(chg == 1){setwd(dir = wd1)}
         stop("'cost' column must include numeric values")
 
       }
@@ -142,23 +141,39 @@ graphab_link <- function(proj_name,         # character
       }
 
       rast_codes <- graph4lg::get_graphab_raster_codes(proj_name = proj_name,
-                                         mode = 'all')
+                                                       mode = 'all',
+                                                       proj_path = proj_path)
 
       if(!all(rast_codes %in% cost$code)){
-        # Before returning an error, get back to initial working dir
-        if(chg == 1){setwd(dir = wd1)}
         stop("'code' column must include all the raster code values.")
       }
 
+      # Cost values argument
+      ncode <- nrow(cost)
 
-    }
+      vec_cost <- c()
+      for(i in 1:ncode){
+        vec_cost <- c(vec_cost, paste0(cost[i, "code"], "=", cost[i, 'cost']))
+      }
 
-    # Cost values argument
-    ncode <- nrow(cost)
 
-    vec_cost <- c()
-    for(i in 1:ncode){
-      vec_cost <- c(vec_cost, paste0(cost[i, "code"], "=", cost[i, 'cost']))
+      # Scenario 2: 'cost' argument is a filename referencing a
+      # cost surface raster (GeoTiff)
+    } else {
+
+      if(inherits(cost, "character")){
+
+        if(stringr::str_sub(cost, start=-4L) == '.tif'){
+          extcost <- cost
+          if(!(file.exists(normalizePath(extcost, mustWork = FALSE)))){
+            stop(paste0(extcost,
+                        " must be an existing cost surface raster file ('.tif')"))
+          }
+        }
+
+      } else {
+        stop("'cost' must be a data.frame or a cost surface raster file ('.tif')")
+      }
 
     }
 
@@ -172,8 +187,6 @@ graphab_link <- function(proj_name,         # character
   #########################################
   # Check for name
   if(!inherits(name, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'name' must be a character string")
   }
 
@@ -192,7 +205,7 @@ graphab_link <- function(proj_name,         # character
 
   #########################################
   # Get graphab path
-  version <- "graphab-2.6.jar"
+  version <- "graphab-2.8.jar"
   path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
 
   #########################################
@@ -208,36 +221,53 @@ graphab_link <- function(proj_name,         # character
     cmd <- c(cmd, "complete")
   }
 
-  if(distance == "cost"){
-    cmd <- c(cmd, vec_cost)
+  if(remcrosspath){
+    cmd <- c(cmd, "remcrosspath")
+  }
+
+
+  if (distance == "cost") {
+    if(inherits(cost, "data.frame")) {
+      cmd <- c(cmd, vec_cost)
+    } else {
+      cmd <- c(cmd, paste0('extcost=', extcost))
+    }
   }
 
   if(!is.null(alloc_ram)){
     if(inherits(alloc_ram, c("integer", "numeric"))){
       cmd <- c(paste0("-Xmx", alloc_ram, "g"), cmd)
     } else {
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'alloc_ram' must be a numeric or an integer")
     }
   }
+
+
 
   #########################################
   # Run the command line
   rs <- system2(java.path, args = cmd, stdout = TRUE)
 
-  #########################################
-  if(chg == 1){
-    setwd(dir = wd1)
-  }
 
   if(length(rs) == 1){
     if(rs == 1){
       message("An error occurred")
+    } else {
+      if(file.exists(paste0(proj_path, "/", proj_name, "/", name, "-links.shp"))){
+        message(paste0("Link set '", name, "' has been created in the project ",
+                       proj_name))
+      } else {
+        message("The link set creation did not succeed.")
+      }
     }
   } else {
-    message(paste0("Link set '", name, "' has been created in the project ",
-                   proj_name))
+
+    if(file.exists(paste0(proj_path, "/", proj_name, "/", name, "-links.shp"))){
+      message(paste0("Link set '", name, "' has been created in the project ",
+                     proj_name))
+    } else {
+      message("The link set creation did not succeed.")
+    }
   }
 
 }

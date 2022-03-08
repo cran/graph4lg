@@ -19,6 +19,11 @@
 #' distance \code{thr}. This number can be weighted according to the
 #' \code{weight} argument.}
 #' }
+#' @param patch_codes (optional, default=NULL) An integer value or vector
+#' specifying the codes corresponding to the habitat pixel whose corresponding
+#' patches are included to compute the capacity as the area of the habitat
+#' when \code{mode='area'}. Patches corresponding to other initial habitat
+#' codes are weighted by 0.
 #' @param exp An integer value specifying the power to which patch area are
 #' raised when \code{mode='area'}. When not specified, \code{exp=1} by default.
 #' @param ext_file A character string specifying the name of the .csv file in
@@ -57,11 +62,10 @@
 #' indicating RAM gigabytes allocated to the java process. Increasing this
 #' value can speed up the computations. Too large values may not be compatible
 #' with your machine settings.
-#' @details See more information in Graphab 2.6 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
+#' @details See more information in Graphab 2.8 manual:
+#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
 #' Be careful, when capacity has been changed. The last changes are taken into
 #' account for subsequent calculations in a project.
-#' @keywords internal
 #' @export
 #' @author P. Savary
 #' @examples
@@ -76,6 +80,7 @@
 
 graphab_capacity <- function(proj_name,         # character
                              mode = "area", # character
+                             patch_codes = NULL, # NULL or integer vector
                              exp = NULL, # integer
                              ext_file = NULL, # character
                              thr = NULL, # threshold NULL or numerical vector
@@ -89,29 +94,27 @@ graphab_capacity <- function(proj_name,         # character
   #########################################
   # Check for project directory path
   if(!is.null(proj_path)){
-    chg <- 1
-    wd1 <- getwd()
-    setwd(dir = proj_path)
+    if(!dir.exists(proj_path)){
+      stop(paste0(proj_path, " is not an existing directory or the path is ",
+                  "incorrectly specified."))
+    } else {
+      proj_path <- normalizePath(proj_path)
+    }
   } else {
-    chg <- 0
-    proj_path <- getwd()
+    proj_path <- normalizePath(getwd())
   }
-
 
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
-  } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(proj_name, ".xml") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
 
-  proj_end_path <- paste0(proj_name, "/", proj_name, ".xml")
+  proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
 
 
   # Distinguish the modes
@@ -130,7 +133,7 @@ graphab_capacity <- function(proj_name,         # character
 
 
     # Get graphab path
-    version <- "graphab-2.6.jar"
+    version <- "graphab-2.8.jar"
     path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
     #### Command line
     cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab,
@@ -140,15 +143,39 @@ graphab_capacity <- function(proj_name,         # character
 
     if(!is.null(exp)){
       if(!inherits(exp, c("numeric", "integer"))){
-        # Before returning an error, get back to initial working dir
-        if(chg == 1){setwd(dir = wd1)}
         stop("'exp' argument must be a numeric or integer value")
       } else if (length(exp) > 1){
-        # Before returning an error, get back to initial working dir
-        if(chg == 1){setwd(dir = wd1)}
         stop("'exp' argument must be a numeric or integer value")
       } else {
         cmd <- c(cmd, paste0("exp=", exp))
+      }
+    }
+
+
+    if(!is.null(patch_codes)){
+      if(!inherits(patch_codes, c("numeric", "integer"))){
+        stop("'patch_codes' argument must be a numeric or integer vector/value")
+      } else {
+
+
+        # Get habitat codes
+        hab_codes <- get_graphab_raster_codes(proj_name = proj_name,
+                                              mode = "habitat",
+                                              proj_path = proj_path)
+
+        # Check whether all habitat codes are in patch_codes
+        if(!all(hab_codes %in% patch_codes)){
+          # Distinguish the habitat codes
+          hab_w <- patch_codes
+          hab_now <- hab_codes[!(hab_codes %in% patch_codes)]
+
+          cmd <- c(cmd,
+                   paste0(paste(hab_w, collapse = ","), "=1"),
+                   paste0(paste(hab_now, collapse = ","), "=0"))
+        } else {
+          cmd <- c(cmd, paste0(paste(patch_codes, collapse = ","), "=1"))
+        }
+
       }
     }
 
@@ -157,13 +184,15 @@ graphab_capacity <- function(proj_name,         # character
 
     # Check for not null parameters and return a message if not used
     if(!is.null(linkset)){
-      message("Argument 'linkset' is not used when 'mode='area''.")
+      message("Argument 'linkset' is not used when 'mode='ext_file''.")
     } else if(!is.null(codes)){
-      message("Argument 'codes' is not used when 'mode='area''.")
+      message("Argument 'codes' is not used when 'mode='ext_file''.")
     } else if(!is.null(thr)){
-      message("Argument 'thr' is not used when 'mode='area''.")
+      message("Argument 'thr' is not used when 'mode='ext_file''.")
     } else if(!is.null(exp)){
-      message("Argument 'exp' is not used when 'mode='area''.")
+      message("Argument 'exp' is not used when 'mode='ext_file''.")
+    } else if(!is.null(patch_codes)){ # NEW
+      message("Argument 'patch_codes' is not used when 'mode='ext_file''.")
     }
 
 
@@ -171,44 +200,32 @@ graphab_capacity <- function(proj_name,         # character
     # Check ext_file
 
     if(is.null(ext_file)){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'ext_file' argument must be specified when 'mode='ext_file''.")
 
     } else if(!inherits(ext_file, "character")){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'ext_file' argument must be a character string specifying the
            path to an existing .csv file.")
-    } else if(!file.exists(ext_file)){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
-      stop(paste0(ext_file, " is not a .csv file located in ",
-                  getwd()))
+    } else if(!file.exists(normalizePath(ext_file, mustWork = FALSE))){
+      stop(paste0(normalizePath(ext_file, mustWork = FALSE),
+                  " is not an existing .csv file."))
     } else {
 
       # Open ext_file to check for column names
       capa_file <- utils::read.csv(file = ext_file)
 
-      patches <- foreign::read.dbf(file = paste0("./",
+      patches <- foreign::read.dbf(file = paste0(proj_path, "/",
                                                  proj_name, "/patches.dbf"))
       nb_patches <- nrow(patches)
 
 
       # Check for column names
       if(!all(c("Id", "Capacity") %in% colnames(capa_file))){
-        # Before returning an error, get back to initial working dir
-        if(chg == 1){setwd(dir = wd1)}
         stop(paste0("Column names of ", ext_file, " must include ",
                     "'Id' and 'Capacity'."))
       } else if(nrow(capa_file) != nb_patches){
-        # Before returning an error, get back to initial working dir
-        if(chg == 1){setwd(dir = wd1)}
         stop(paste0(ext_file, " must include as many rows as there ",
                     "are patches in the project."))
       } else if(!all(patches$Id %in% capa_file$Id)){
-        # Before returning an error, get back to initial working dir
-        if(chg == 1){setwd(dir = wd1)}
         stop(paste0(ext_file, " must include all the Id of ",
                     "the patches in the project."))
       }
@@ -217,7 +234,7 @@ graphab_capacity <- function(proj_name,         # character
 
     ###############################################################
     # Get graphab path
-    version <- "graphab-2.6.jar"
+    version <- "graphab-2.8.jar"
     path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
     #### Command line
     cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab,
@@ -232,21 +249,19 @@ graphab_capacity <- function(proj_name,         # character
 
     # Check for not null parameters and return a message if not used
     if(!is.null(ext_file)){
-      message("Argument 'ext_file' is not used when 'mode='area''.")
+      message("Argument 'ext_file' is not used when 'mode='neigh''.")
     } else if(!is.null(exp)){
-      message("Argument 'exp' is not used when 'mode='area''.")
+      message("Argument 'exp' is not used when 'mode='neigh''.")
+    } else if(!is.null(patch_codes)){
+      message("Argument 'patch_codes' is not used when 'mode='neigh''.")
     }
 
     #######################
     # Check for thr
     if(is.null(thr)){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'thr' must be a specified numeric or integer value
            when 'mode='neigh''.")
     } else if (!(inherits(thr, c("integer", "numeric")))){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'thr' must be a specified numeric or integer value
            when 'mode='neigh''.")
     }
@@ -254,19 +269,14 @@ graphab_capacity <- function(proj_name,         # character
     #######################
     # Check for codes
     if(is.null(codes)){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'codes' must be integer values when 'mode='neigh''.")
     } else if (!(inherits(codes, c("integer", "numeric")))){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'codes' must be numeric or integer values.")
     } else {
       list_codes <- graph4lg::get_graphab_raster_codes(proj_name = proj_name,
-                                                       mode = "all")
+                                                       mode = "all",
+                                                       proj_path = proj_path)
       if(!(all(codes %in% list_codes))){
-        # Before returning an error, get back to initial working dir
-        if(chg == 1){setwd(dir = wd1)}
         stop("All 'codes' values must be values existing in the source raster.")
       }
     }
@@ -275,16 +285,10 @@ graphab_capacity <- function(proj_name,         # character
     #######################
     # Check for linkset
     if(is.null(linkset)){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'linkset' must be a character string when 'mode='neigh''.")
     } else if(!inherits(linkset, "character")){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'linkset' must be a character string when 'mode='neigh''.")
-    } else if (!(paste0(linkset, "-links.csv") %in% list.files(path = paste0("./", proj_name)))){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
+    } else if (!(paste0(linkset, "-links.csv") %in% list.files(path = paste0(proj_path, "/", proj_name)))){
       stop("The linkset you refer to does not exist.
            Please use graphab_link() before.")
     }
@@ -292,23 +296,20 @@ graphab_capacity <- function(proj_name,         # character
     #########################################
     # Check for cost_conv
     if(!is.logical(cost_conv)){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'cost_conv' must be a logical (TRUE or FALSE).")
     }
 
     #########################################
     # Check for weight
     if(!is.logical(weight)){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'weight' must be a logical (TRUE or FALSE).")
     }
 
 
     ###### Print used costs and codes
     df_cost <- graph4lg::get_graphab_linkset_cost(proj_name = proj_name,
-                                                  linkset = linkset)
+                                                  linkset = linkset,
+                                                  proj_path = proj_path)
     print(paste0("The following cost parameters will be used for ",
                  "computing capacities neighbouring the patches"))
     print(df_cost)
@@ -316,7 +317,7 @@ graphab_capacity <- function(proj_name,         # character
 
     ###############################################################
     # Get graphab path
-    version <- "graphab-2.6.jar"
+    version <- "graphab-2.8.jar"
     path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
     #### Command line
     cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab,
@@ -351,8 +352,6 @@ graphab_capacity <- function(proj_name,         # character
     #########################################################################
 
   } else {
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'mode' must be a character string equal to either 'area',
          'ext_file' or 'neigh'.")
 
@@ -376,8 +375,6 @@ graphab_capacity <- function(proj_name,         # character
     if(inherits(alloc_ram, c("integer", "numeric"))){
       cmd <- c(paste0("-Xmx", alloc_ram, "g"), cmd)
     } else {
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'alloc_ram' must be a numeric or an integer")
     }
   }
@@ -387,10 +384,6 @@ graphab_capacity <- function(proj_name,         # character
   # Run the command line
   rs <- system2(java.path, args = cmd, stdout = TRUE)
 
-  #########################################
-  if(chg == 1){
-    setwd(dir = wd1)
-  }
 
   if(length(rs) == 1){
     if(rs == 1){

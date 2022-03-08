@@ -8,6 +8,7 @@ graphab_metric(
   proj_name,
   graph,
   metric,
+  multihab = FALSE,
   dist = NULL,
   prob = 0.05,
   beta = 1,
@@ -36,6 +37,11 @@ area of all pairs of patches weighted by their interaction probability,
 divided by the square of the area of the study zone.
 This ratio is the equivalent to the probability that two points randomly
 placed in the study area are connected.}
+\item{Equivalent Connectivity (\code{metric = 'EC'}): Square root of the
+sum of products of capacity of all pairs of patches weighted by their
+interaction probability. This is the size of a single patch (maximally
+connected) that would provide the same probability of connectivity as the
+actual habitat pattern in the landscape (Saura et al., 2011).}
 \item{Integral Index of Connectivity (\code{metric = 'IIC'}): For the
 entire graph: product of patch areas divided by the number of links
 between them, the sum is divided by the square of the area of the study
@@ -84,6 +90,13 @@ them. It then maximizes \eqn{{e}^{-\alpha d_{ij}}} for patches i and j.
 To use patch capacity values different from the patch area, please use
 directly Graphab software.}
 
+\item{multihab}{A logical (default = FALSE) indicating whether the
+'multihabitat' mode is used when computing the metric. It only applies to
+the following metrics: 'EC', 'F', 'IF' and 'BC'. If TRUE, then the project
+must have been created with the option \code{nomerge=TRUE}. It then returns
+several columns with metric values including the decomposition of the
+computation according to the type of habitat of every patch.}
+
 \item{dist}{A numeric or integer value specifying the distance at which
 dispersal probability is equal to \code{prob}. This argument is mandatory
 for weighted metrics (PC, F, IF, BC, dPC, CCe, CF) but not used for others.
@@ -128,8 +141,8 @@ The function computes connectivity metrics on a graph from a
 link set in a Graphab project
 }
 \details{
-The metrics are described in Graphab 2.6 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
+The metrics are described in Graphab 2.8 manual:
+\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
 Graphab software makes possible the computation of other metrics.
 }
 \examples{

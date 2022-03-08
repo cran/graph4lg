@@ -14,8 +14,8 @@
 #' When 'proj_path = NULL', the project directory is equal to \code{getwd()}.
 #' @return A data.frame with the link properties (from, to, cost-distance,
 #' Euclidean distance)
-#' @details See more information in Graphab 2.6 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}.
+#' @details See more information in Graphab 2.8 manual:
+#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}.
 #' This function works if \code{link{get_graphab}} function works correctly.
 #' @export
 #' @author P. Savary
@@ -33,23 +33,22 @@ get_graphab_linkset <- function(proj_name,
   #########################################
   # Check for project directory path
   if(!is.null(proj_path)){
-    chg <- 1
-    wd1 <- getwd()
-    setwd(dir = proj_path)
+    if(!dir.exists(proj_path)){
+      stop(paste0(proj_path, " is not an existing directory or the path is ",
+                  "incorrectly specified."))
+    } else {
+      proj_path <- normalizePath(proj_path)
+    }
   } else {
-    chg <- 0
-    proj_path <- getwd()
+    proj_path <- normalizePath(getwd())
   }
 
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
-  } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(proj_name, ".xml") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
@@ -58,28 +57,21 @@ get_graphab_linkset <- function(proj_name,
   #########################################
   # Check for linkset class
   if(!inherits(linkset, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'linkset' must be a character string")
-  } else if (length(list.files(path = paste0("./", proj_name), pattern = "-links.csv")) == 0){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (length(list.files(path = paste0(proj_path, "/", proj_name),
+                               pattern = "-links.csv")) == 0){
     stop("There is not any linkset in the project you refer to.
          Please use graphab_link() before.")
-  } else if (!(paste0(linkset, "-links.csv") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(linkset, "-links.csv") %in% list.files(path = paste0(proj_path,
+                                                                           "/", proj_name)))){
     stop("The linkset you refer to does not exist.
            Please use graphab_link() before.")
   }
 
-  df <- foreign::read.dbf(file = paste0("./", proj_name, "/",
+  df <- foreign::read.dbf(file = paste0(proj_path, "/",
+                                        proj_name, "/",
                                         linkset, "-links.dbf"))
 
-  #########################################
-  if(chg == 1){
-    setwd(dir = wd1)
-  }
 
   return(df)
 }

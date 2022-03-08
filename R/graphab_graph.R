@@ -36,8 +36,8 @@
 #' value can speed up the computations. Too large values may not be compatible
 #' with your machine settings.
 #' @details By default, intra-patch distances are considered for metric
-#' calculation. See more information in Graphab 2.6 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
+#' calculation. See more information in Graphab 2.8 manual:
+#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
 #' @export
 #' @author P. Savary
 #' @examples
@@ -58,52 +58,48 @@ graphab_graph <- function(proj_name,         # character
   #########################################
   # Check for project directory path
   if(!is.null(proj_path)){
-    chg <- 1
-    wd1 <- getwd()
-    setwd(dir = proj_path)
+    if(!dir.exists(proj_path)){
+      stop(paste0(proj_path, " is not an existing directory or the path is ",
+                  "incorrectly specified."))
+    } else {
+      proj_path <- normalizePath(proj_path)
+    }
   } else {
-    chg <- 0
-    proj_path <- getwd()
+    proj_path <- normalizePath(getwd())
   }
 
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
-  } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(proj_name, ".xml") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
 
-  proj_end_path <- paste0(proj_name, "/", proj_name, ".xml")
+  proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
 
   #########################################
   # Check for linkset class
   if(!is.null(linkset)){
     if(!inherits(linkset, "character")){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'linkset' must be a character string")
-    } else if (!(paste0(linkset, "-links.csv") %in% list.files(path = paste0("./", proj_name)))){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
+    } else if (!(paste0(linkset, "-links.csv") %in% list.files(path = paste0(proj_path, "/", proj_name)))){
       stop("The linkset you refer to does not exist.
            Please use graphab_link() before.")
     }
-  } else if (length(list.files(path = paste0("./", proj_name), pattern = "-links.csv")) == 0){
+  } else if (length(list.files(path = paste0(proj_path,
+                                             "/", proj_name),
+                               pattern = "-links.csv")) == 0){
 
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("There is not any linkset in the project you refer to.
          Please use graphab_link() before.")
 
   } else {
 
-    ngraph <- length(list.files(path = paste0("./", proj_name), pattern = "-links.csv"))
+    ngraph <- length(list.files(path = paste0(proj_path, "/", proj_name),
+                                pattern = "-links.csv"))
     message(paste0(ngraph, " graph(s) will be created"))
   }
 
@@ -111,13 +107,9 @@ graphab_graph <- function(proj_name,         # character
   # Check for name
   if(!is.null(name)){
     if(!inherits(name, "character")){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'name' must be a character string")
     }
   } else if (ngraph > 1){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("You cannot specify a graph name when more than one graph is created")
   }
 
@@ -125,8 +117,6 @@ graphab_graph <- function(proj_name,         # character
   # Check for thr
   if(!is.null(thr)){
     if(!inherits(thr, c("numeric", "integer"))){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'thr' must be a numeric or an integer threshold value.")
     }
   }
@@ -134,8 +124,6 @@ graphab_graph <- function(proj_name,         # character
   #########################################
   # Check for cost_conv
   if(!is.logical(cost_conv)){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'cost_conv' must be a logical (TRUE or FALSE).")
   }
 
@@ -153,7 +141,7 @@ graphab_graph <- function(proj_name,         # character
 
   #########################################
   # Get graphab path
-  version <- "graphab-2.6.jar"
+  version <- "graphab-2.8.jar"
   path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
 
   #########################################
@@ -184,8 +172,6 @@ graphab_graph <- function(proj_name,         # character
     if(inherits(alloc_ram, c("integer", "numeric"))){
       cmd <- c(paste0("-Xmx", alloc_ram, "g"), cmd)
     } else {
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'alloc_ram' must be a numeric or an integer")
     }
   }
@@ -194,21 +180,30 @@ graphab_graph <- function(proj_name,         # character
   # Run the command line
   rs <- system2(java.path, args = cmd, stdout = TRUE)
 
-  #########################################
-  if(chg == 1){
-    setwd(dir = wd1)
-  }
 
   if(length(rs) == 1){
     if(rs == 1){
       message("An error occurred")
     } else {
-      message(paste0("Graph '", name, "' has been created in the project ",
-                     proj_name))
+      if(file.exists(paste0(proj_path, "/", proj_name, "/", name, "-voronoi.shp"))){
+        message(paste0("Graph '", name, "' has been created in the project ",
+                       proj_name))
+      } else {
+        message("The graph creation did not succeed.")
+      }
     }
   } else {
-    message(paste0("Graph '", name, "' has been created in the project ",
-                   proj_name))
+    if(file.exists(paste0(proj_path, "/", proj_name, "/", name, "-voronoi.shp"))){
+      message(paste0("Graph '", name, "' has been created in the project ",
+                     proj_name))
+    } else {
+      message("The graph creation did not succeed.")
+    }
   }
 
 }
+
+
+
+
+

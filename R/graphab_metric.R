@@ -19,6 +19,11 @@
 #' divided by the square of the area of the study zone.
 #' This ratio is the equivalent to the probability that two points randomly
 #' placed in the study area are connected.}
+#' \item{Equivalent Connectivity (\code{metric = 'EC'}): Square root of the
+#' sum of products of capacity of all pairs of patches weighted by their
+#' interaction probability. This is the size of a single patch (maximally
+#' connected) that would provide the same probability of connectivity as the
+#' actual habitat pattern in the landscape (Saura et al., 2011).}
 #' \item{Integral Index of Connectivity (\code{metric = 'IIC'}): For the
 #' entire graph: product of patch areas divided by the number of links
 #' between them, the sum is divided by the square of the area of the study
@@ -66,6 +71,12 @@
 #' them. It then maximizes \eqn{{e}^{-\alpha d_{ij}}} for patches i and j.
 #' To use patch capacity values different from the patch area, please use
 #' directly Graphab software.
+#' @param multihab A logical (default = FALSE) indicating whether the
+#' 'multihabitat' mode is used when computing the metric. It only applies to
+#' the following metrics: 'EC', 'F', 'IF' and 'BC'. If TRUE, then the project
+#' must have been created with the option \code{nomerge=TRUE}. It then returns
+#' several columns with metric values including the decomposition of the
+#' computation according to the type of habitat of every patch.
 #' @param dist A numeric or integer value specifying the distance at which
 #' dispersal probability is equal to \code{prob}. This argument is mandatory
 #' for weighted metrics (PC, F, IF, BC, dPC, CCe, CF) but not used for others.
@@ -96,8 +107,8 @@
 #' @return If \code{return_val=TRUE}, the function returns a \code{data.frame}
 #' with the computed metric values and the corresponding patch ID when the
 #' metric is local or delta metric, or the numeric value of the global metric.
-#' @details The metrics are described in Graphab 2.6 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
+#' @details The metrics are described in Graphab 2.8 manual:
+#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
 #' Graphab software makes possible the computation of other metrics.
 #' @export
 #' @author P. Savary
@@ -111,11 +122,10 @@
 #'                beta = 1)
 #' }
 
-
-
 graphab_metric <- function(proj_name, # character
                            graph, # cost or euclid
                            metric, # character
+                           multihab = FALSE, # logical
                            dist = NULL, # dist threshold
                            prob = 0.05, # dispersal probability
                            beta = 1, # area weight
@@ -127,42 +137,61 @@ graphab_metric <- function(proj_name, # character
   #########################################
   # Check for project directory path
   if(!is.null(proj_path)){
-    chg <- 1
-    wd1 <- getwd()
-    setwd(dir = proj_path)
+    if(!dir.exists(proj_path)){
+      stop(paste0(proj_path, " is not an existing directory or the path is ",
+                  "incorrectly specified."))
+    } else {
+      proj_path <- normalizePath(proj_path)
+    }
   } else {
-    chg <- 0
-    proj_path <- getwd()
+    proj_path <- normalizePath(getwd())
   }
 
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
-  } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(proj_name, ".xml") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
 
-  proj_end_path <- paste0(proj_name, "/", proj_name, ".xml")
+  proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
+
+
+  ### Check for multihab
+  if(!inherits(multihab, "logical")){
+    stop("'multihab' must be equal to either TRUE or FALSE.")
+  } else if (multihab){
+    # If multihab = TRUE, check merge
+
+    # Check whether the project is compatible: merge_res == TRUE
+    if(check_merge(proj_end_path)){
+      stop(paste0("The project must have been built without merging habitat ",
+                  "patches corresponding to different codes."))
+    }
+
+    # If multihab = TRUE, check that the metric is compatible
+    if(!any(metric %in% c("EC", "F", "IF", "BC"))){
+      stop(paste0("When 'multihab = TRUE', 'metric' must be equal to either ",
+                  "'EC', 'F', 'IF' or 'BC'."))
+    } else {
+      # If multihab = TRUE, transform the metric parameter
+      metric <- paste0(metric, "h")
+    }
+  }
 
   #########################################
   # Check for graph class
   if(!inherits(graph, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'graph' must be a character string")
-  } else if (!(paste0(graph, "-voronoi.shp") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(graph, "-voronoi.shp") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The graph you refer to does not exist")
-  } else if (length(list.files(path = paste0("./", proj_name), pattern = "-voronoi.shp")) == 0){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (length(list.files(path = paste0(proj_path,
+                                             "/", proj_name),
+                               pattern = "-voronoi.shp")) == 0){
     stop("There is not any graph in the project you refer to.
          Please use graphab_graph() before.")
   }
@@ -170,38 +199,31 @@ graphab_metric <- function(proj_name, # character
   #########################################
   # Check for metric and parameters
 
-  list_all_metrics <- c("PC", "IIC", "dPC", "F", "BC", "IF", "Dg", "CCe", "CF")
+  list_all_metrics <- c("PC", "EC", "ECh", "IIC", "dPC",
+                        "F", "BC", "IF", "Dg", "CCe", "CF",
+                        "Fh", "IFh", "BCh")
 
-  list_glob_metrics <- list_all_metrics[1:3]
-  list_loc_metrics <- list_all_metrics[4:length(list_all_metrics)]
+  list_glob_metrics <- list_all_metrics[1:5]
+  list_loc_metrics <- list_all_metrics[6:length(list_all_metrics)]
 
-  list_dist_metrics <- c("PC", "F", "BC", "IF", "dPC")
+  list_dist_metrics <- c("PC", "EC", "ECh",
+                         "F", "Fh",
+                         "BC", "BCh",
+                         "IF", "IFh", "dPC")
 
   if(metric %in% list_dist_metrics){
     if(is.null(dist)){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop(paste0("To compute ", metric, ", specify a distance associated to
                   a dispersal probability (default=0.05)"))
     } else if(!inherits(dist, c("numeric", "integer"))){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'dist' must be a numeric or integer value")
     } else if(!inherits(prob, c("numeric", "integer"))){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'prob' must be a numeric or integer value")
     } else if(!inherits(beta, c("numeric", "integer"))){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'beta' must be a numeric or integer value")
     } else if(beta < 0 || beta > 1){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'beta' must be between 0 and 1")
     } else if(prob < 0 || prob > 1){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'prob' must be between 0 and 1")
     }
   }
@@ -209,8 +231,6 @@ graphab_metric <- function(proj_name, # character
   ### Special case with dPC
   if(metric == "dPC"){
     if(cost_conv){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("Option 'cost_conv = TRUE' is not available with the metric dPC")
     }
   }
@@ -218,19 +238,13 @@ graphab_metric <- function(proj_name, # character
   # Special case of CF with beta
   if(metric == "CF"){
     if(beta < 0 || beta > 1){
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'beta' must be between 0 and 1")
     }
   }
 
   if(!inherits(metric, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'metric' must be a character string")
   } else if(!(metric %in% list_all_metrics)){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop(paste0("'metric' must be ", paste(list_all_metrics, collapse = " or ")))
   } else if(metric %in% list_loc_metrics){
     level <- "patch"
@@ -241,16 +255,12 @@ graphab_metric <- function(proj_name, # character
   #########################################
   # Check for cost_conv
   if(!is.logical(cost_conv)){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'cost_conv' must be a logical (TRUE or FALSE).")
   }
 
   #########################################
   # Check for return_val
   if(!is.logical(return_val)){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'return_val' must be a logical (TRUE or FALSE).")
   }
 
@@ -268,7 +278,7 @@ graphab_metric <- function(proj_name, # character
 
   #########################################
   # Get graphab path
-  version <- "graphab-2.6.jar"
+  version <- "graphab-2.8.jar"
   path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
 
   #########################################
@@ -311,8 +321,6 @@ graphab_metric <- function(proj_name, # character
     if(inherits(alloc_ram, c("integer", "numeric"))){
       cmd <- c(paste0("-Xmx", alloc_ram, "g"), cmd)
     } else {
-      # Before returning an error, get back to initial working dir
-      if(chg == 1){setwd(dir = wd1)}
       stop("'alloc_ram' must be a numeric or an integer")
     }
   }
@@ -336,26 +344,7 @@ graphab_metric <- function(proj_name, # character
   if(return_val){
     if(level == "graph"){
 
-      if(metric != "dPC"){
-
-        val <- as.numeric(stringr::str_split(rs[2], pattern = ":")[[1]][2])
-        vec_res <- c(paste0("Project : ", proj_name),
-                     paste0("Graph : ", graph),
-                     paste0("Metric : ", metric))
-
-        if(metric %in% list_dist_metrics){
-          vec_res <- c(vec_res,
-                       paste0("Dist : ", dist),
-                       paste0("Prob : ", prob),
-                       paste0("Beta : ", beta))
-        }
-
-        vec_res <- c(vec_res,
-                     paste0("Value : ", val))
-
-        #print(paste(vec_res, collapse = ", "))
-        res <- vec_res
-      } else if (metric == "dPC") {
+      if (metric == "dPC") {
 
         #   fdpc <- list.files(path = proj_name, pattern = "delta-dPC")
         #   file.info(paste0("./", proj_name, "/", fdpc))[, 'mtime']
@@ -363,9 +352,10 @@ graphab_metric <- function(proj_name, # character
         #                    name_txt))
 
         name_txt <- paste0("delta-dPC_d", dist, "_p", prob, "_", graph, ".txt")
-        res_dpc <- utils::read.table(file = paste0("./", proj_name, "/",
-                                            name_txt),
-                              header = TRUE)[-1, ]
+        res_dpc <- utils::read.table(file = paste0(proj_path, "/",
+                                                   proj_name, "/",
+                                                   name_txt),
+                                     header = TRUE)[-1, ]
 
         vec_res <- c(paste0("Project : ", proj_name),
                      paste0("Graph : ", graph),
@@ -376,40 +366,117 @@ graphab_metric <- function(proj_name, # character
 
         res <- list(vec_res, res_dpc)
 
+      } else if (metric %in% c("EC", "PC", "IIC", "ECh")) {
+
+        #   fdpc <- list.files(path = proj_name, pattern = "delta-dPC")
+        #   file.info(paste0("./", proj_name, "/", fdpc))[, 'mtime']
+        #   file.info(paste0("./", proj_name, "/",
+        #                    name_txt))
+
+        name_txt <- paste0(metric, ".txt")
+        res_val <- utils::read.table(file = paste0(proj_path, "/",
+                                                   proj_name, "/",
+                                                   name_txt),
+                                     header = TRUE)
+
+        if(metric == "ECh"){
+          colnames(res_val)[5:ncol(res_val)] <- paste0("EC_",
+                          stringr::str_sub(colnames(res_val)[5:ncol(res_val)],
+                                          2, -1))
+        }
+
+        vec_res <- c(paste0("Project : ", proj_name),
+                     paste0("Graph : ", graph),
+                     paste0("Metric : ", metric),
+                     paste0("Dist : ", dist),
+                     paste0("Prob : ", prob),
+                     paste0("Beta : ", beta))
+
+        res <- list(vec_res, res_val)
+
       }
 
     } else if (level == "patch"){
 
-      name_met <- gsub(stringr::str_split(rs[3], pattern = ":")[[1]][2],
-                       pattern = " ", replacement = "")
+      tab <- utils::read.csv(file = paste0(proj_path, "/",
+                                           proj_name, "/patches.csv"))
 
-      tab <- utils::read.csv(file = paste0(proj_name, "/patches.csv"))
-
-      df_res <- tab[, c(1,
-                        which(colnames(tab) == paste0(name_met, "_", graph)))]
-
-      vec_res <- c(paste0("Project : ", proj_name),
-                   paste0("Graph : ", graph),
-                   paste0("Metric : ", metric))
+      # name_met <- gsub(stringr::str_split(rs[3], pattern = ":")[[1]][2],
+      #                  pattern = " ", replacement = "")
 
       if(metric %in% list_dist_metrics){
-        vec_res <- c(vec_res,
-                     paste0("Dist : ", dist),
-                     paste0("Prob : ", prob),
-                     paste0("Beta : ", beta))
+
+        if(multihab == FALSE){
+
+            # name_met <- paste0(metric, "_d", dist,
+            #                    "_p", prob, "_beta", beta,
+            #                    "_", graph)
+            # df_res <- tab[, c(1, which(colnames(tab) == name_met))]
+
+            df_res <- tab[, c(1:3, ncol(tab))]
+
+            vec_res <- c(paste0("Project : ", proj_name),
+                         paste0("Graph : ", graph),
+                         paste0("Metric : ", metric),
+                         paste0("Dist : ", dist),
+                         paste0("Prob : ", prob),
+                         paste0("Beta : ", beta))
+
+        } else {
+
+          # Get habitat code
+          hab_code <- get_graphab_raster_codes(proj_name = proj_name,
+                                               mode = 'habitat',
+                                               proj_path = proj_path)
+          # Number of habitat types
+          nb_hab_type <- length(hab_code)
+
+          if (metric %in% c("Fh", "IFh")){
+
+            # df_res according to number of habitat types
+            df_res <- tab[, c(1:3, which(colnames(tab) == "Code"),
+                              (ncol(tab)- nb_hab_type + 1):ncol(tab))]
+
+            vec_res <- c(paste0("Project : ", proj_name),
+                         paste0("Graph : ", graph),
+                         paste0("Metric : ", metric),
+                         paste0("Dist : ", dist),
+                         paste0("Prob : ", prob),
+                         paste0("Beta : ", beta))
+
+          } else if(metric == "BCh"){
+
+            nb_combin <- (nb_hab_type * (nb_hab_type - 1)/2) + nb_hab_type
+            # df_res according to number of habitat types
+            df_res <- tab[, c(1:3, which(colnames(tab) == "Code"),
+                              (ncol(tab)- nb_combin + 1):ncol(tab))]
+
+            vec_res <- c(paste0("Project : ", proj_name),
+                         paste0("Graph : ", graph),
+                         paste0("Metric : ", metric),
+                         paste0("Dist : ", dist),
+                         paste0("Prob : ", prob),
+                         paste0("Beta : ", beta))
+
+          }
+
+        }
       } else if (metric == "CF"){
-        vec_res <- c(vec_res,
+
+        name_met <- paste0(metric, "_beta", beta,
+                           "_", graph)
+
+        df_res <- tab[, c(1:3, which(colnames(tab) == name_met))]
+
+        vec_res <- c(paste0("Project : ", proj_name),
+                     paste0("Graph : ", graph),
+                     paste0("Metric : ", metric),
                      paste0("Beta : ", beta))
       }
 
       res <- list(vec_res, df_res)
     }
     return(res)
-  }
-
-  #########################################
-  if(chg == 1){
-    setwd(dir = wd1)
   }
 
 }

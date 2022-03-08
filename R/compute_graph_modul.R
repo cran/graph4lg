@@ -79,7 +79,7 @@ compute_graph_modul <- function(graph,
 
   # Check nb_modul
   if(!is.null(nb_modul)){
-    if(!inherits(nb_modul, c("character", "integer"))){
+    if(!inherits(nb_modul, c("numeric", "integer"))){
       stop("When specified, 'nb_modul' must a numeric or integer value.")
     }
   }

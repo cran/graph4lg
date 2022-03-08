@@ -33,40 +33,34 @@ get_graphab_linkset_cost <- function(proj_name,
   #########################################
   # Check for project directory path
   if(!is.null(proj_path)){
-    chg <- 1
-    wd1 <- getwd()
-    setwd(dir = proj_path)
+    if(!dir.exists(proj_path)){
+      stop(paste0(proj_path, " is not an existing directory or the path is ",
+                  "incorrectly specified."))
+    } else {
+      proj_path <- normalizePath(proj_path)
+    }
   } else {
-    chg <- 0
-    proj_path <- getwd()
+    proj_path <- normalizePath(getwd())
   }
-
 
   #########################################
   # Check for proj_name class
   if(!inherits(proj_name, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'proj_name' must be a character string")
-  } else if (!(paste0(proj_name, ".xml") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
+  } else if (!(paste0(proj_name, ".xml") %in%
+               list.files(path = paste0(proj_path, "/", proj_name)))){
     stop("The project you refer to does not exist.
          Please use graphab_project() before.")
   }
 
-  proj_end_path <- paste0(proj_name, "/", proj_name, ".xml")
+  proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
 
 
   #########################################
   # Check for linkset class
   if(!inherits(linkset, "character")){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("'linkset' must be a character string")
   } else if (!(paste0(linkset, "-links.csv") %in% list.files(path = paste0("./", proj_name)))){
-    # Before returning an error, get back to initial working dir
-    if(chg == 1){setwd(dir = wd1)}
     stop("The linkset you refer to does not exist.
            Please use graphab_link() before.")
   }
@@ -97,10 +91,9 @@ get_graphab_linkset_cost <- function(proj_name,
     message(paste0("Linkset ", linkset, " is a Euclidean linkset without ",
                    "associated cost values"))
 
-    #########################################
-    if(chg == 1){
-      setwd(dir = wd1)
-    }
+    df_cost <- data.frame(code = NA,
+                          cost = NA)
+
 
   } else if(type_dist == "2"){
 
@@ -108,7 +101,8 @@ get_graphab_linkset_cost <- function(proj_name,
     # codes <- get_graphab_raster_codes(proj_name = proj_name,
     #                                   mode = "all")
     codes <- graph4lg::get_graphab_raster_codes(proj_name = proj_name,
-                                                 mode = "all")
+                                                mode = "all",
+                                                proj_path = proj_path)
 
     # Get the cost values
 
@@ -133,28 +127,24 @@ get_graphab_linkset_cost <- function(proj_name,
     cost_values <- as.numeric(cost_values)
 
     if(length(codes) != length(cost_values)){
-      cost_values <- cost_values[-which(cost_values == 0)]
+      # if(any(cost_values == 0)){
+      #   cost_values <- cost_values[-which(cost_values == 0)]
+      # }
       message("The number of cost values does not strictly correspond ",
               "to the number of code values. Cost values were probably ",
-              "given for absent code values. Cost values are ",
-              "returned without sure correspondence with codes.")
+              "given for absent code values.")
+      df_cost <- data.frame(code = NA,
+                            cost = NA)
+
+    } else {
+      # Create a data.frame to export
+      df_cost <- data.frame(code = codes,
+                            cost = cost_values)
     }
-
-
-    #########################################
-    if(chg == 1){
-      setwd(dir = wd1)
-    }
-
-    # Create a data.frame to export
-    df_cost <- data.frame(code = codes,
-                          cost = cost_values)
-
-    return(df_cost)
 
   }
 
-
+  return(df_cost)
 
 
 }

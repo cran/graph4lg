@@ -8,9 +8,11 @@ graphab_project(
   proj_name,
   raster,
   habitat,
+  nomerge = FALSE,
   minarea = 0,
   nodata = NULL,
   maxsize = NULL,
+  con8 = FALSE,
   alloc_ram = NULL,
   proj_path = NULL
 )
@@ -21,11 +23,15 @@ The project name is also the name of the project directory in which the
 file proj_name.xml will be created.}
 
 \item{raster}{A character string indicating the name of the .tif raster file
-or of its path. If the path is not specified, the raster must present in the
-current working directory. Raster cell values must be in INT2S encoding.}
+or of its path. If the path is not specified, the raster must be present in
+the current working directory. Raster cell values must be in INT2S encoding.}
 
 \item{habitat}{An integer or numeric value or vector indicating the
 code.s (cell value.s) of the habitat cells in the raster file.}
+
+\item{nomerge}{(optional, default=FALSE) A logical indicating whether
+contiguous patches corresponding to different pixel codes are merged
+(FALSE, default) or not merged (TRUE).}
 
 \item{minarea}{(optional, default=0) An integer or numeric value specifiying
 the minimum area in hectares for a habitat patch size to become a graph node.}
@@ -39,6 +45,10 @@ specifying the maximum side length of the rectangular full extent of each
 habitat patch in metric units. If this side length exceeds \code{maxsize} m,
 then several patches are created.
 (often corresponding to peripheric cells)}
+
+\item{con8}{(optional, default=FALSE) A logical indicating whether a
+neighborhood of 8 pixels (TRUE) is used for patch definition. By default,
+\code{con8=4}, corresponding to 4 pixel neighborhood.}
 
 \item{alloc_ram}{(optional, default = NULL) Integer or numeric value
 indicating RAM gigabytes allocated to the java process. Increasing this
@@ -57,8 +67,8 @@ which habitat patches can be delimited.
 \details{
 A habitat patch consists of the central pixel with its eight
 neighbors if they are of the same value (8-connexity) and the path
-geometry is not simplified. See more information in Graphab 2.6 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
+geometry is not simplified. See more information in Graphab 2.8 manual:
+\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
 }
 \examples{
 \dontrun{
@@ -71,5 +81,5 @@ graphab_project(proj_name = proj_name,
 }
 }
 \author{
-P. Savary
+P. Savary, T. Rudolph
 }

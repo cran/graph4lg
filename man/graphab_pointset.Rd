@@ -69,8 +69,8 @@ get corresponding connectivity metrics.
 \details{
 Point coordinates must be in the same coordinate reference system
 as the habitat patches (and initial raster layer). See more information in
-Graphab 2.6 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.6-en.pdf}
+Graphab 2.8 manual:
+\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
 }
 \examples{
 \dontrun{
