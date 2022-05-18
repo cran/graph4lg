@@ -38,6 +38,7 @@
 #' @export
 #' @author P. Savary
 #' @examples
+#' \dontrun{
 #' data(data_tuto)
 #' mat_w <- data_tuto[[1]]
 #' gp <- gen_graph_topo(mat_w = mat_w, topo = "gabriel")
@@ -49,6 +50,7 @@
 #'              layer = "test_fonct",
 #'              dir_path = tempdir(),
 #'              metrics = FALSE)
+#'  }
 
 
 

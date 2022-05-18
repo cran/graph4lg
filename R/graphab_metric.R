@@ -77,6 +77,8 @@
 #' must have been created with the option \code{nomerge=TRUE}. It then returns
 #' several columns with metric values including the decomposition of the
 #' computation according to the type of habitat of every patch.
+#' Be careful, this option is in development and we cannot guarantee the
+#' results are correct.
 #' @param dist A numeric or integer value specifying the distance at which
 #' dispersal probability is equal to \code{prob}. This argument is mandatory
 #' for weighted metrics (PC, F, IF, BC, dPC, CCe, CF) but not used for others.
@@ -110,6 +112,9 @@
 #' @details The metrics are described in Graphab 2.8 manual:
 #' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
 #' Graphab software makes possible the computation of other metrics.
+#' Be careful, when the same metric is computed several times, the option
+#' \code{return=TRUE} is not returning the right columns. In these cases,
+#' use \code{\link{get_graphab_metric}}.
 #' @export
 #' @author P. Savary
 #' @examples
@@ -171,6 +176,9 @@ graphab_metric <- function(proj_name, # character
       stop(paste0("The project must have been built without merging habitat ",
                   "patches corresponding to different codes."))
     }
+
+    message("Be careful, the multihab = TRUE option is in development.
+            We cannot guarantee the results are correct.")
 
     # If multihab = TRUE, check that the metric is compatible
     if(!any(metric %in% c("EC", "F", "IF", "BC"))){

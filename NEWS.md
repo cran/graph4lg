@@ -1,3 +1,18 @@
+# graph4lg 1.6.0
+
+-- Minor changes 
+- Update of Graphab software download URL
+- Copy of graphab-1.8.jar in the sub-directory plugins within graph4lg_jar for
+using the development versions of Graphab functions.
+- Add comments regarding development versions of Graphab functions and potential
+error when returning metric values already computed previously.
+
+
+# graph4lg 1.5.0
+
+-- Minor changes 
+- Update of pop_rare_gen_index() for allowing the shell/system command to run on both Linux or Windows OS
+
 # graph4lg 1.4.0
 
 -- Major changes: 

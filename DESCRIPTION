@@ -1,7 +1,7 @@
 Package: graph4lg
 Type: Package
 Title: Build Graphs for Landscape Genetics Analysis
-Version: 1.4.0
+Version: 1.6.0
 Authors@R: 
     c(person(given = "Paul",
              family = "Savary",
@@ -44,9 +44,9 @@ RdMacros: Rdpack
 RoxygenNote: 7.1.2
 VignetteBuilder: knitr, rmarkdown
 NeedsCompilation: no
-Packaged: 2022-03-07 21:47:24 UTC; paul
+Packaged: 2022-05-18 13:28:23 UTC; psavary
 Author: Paul Savary [aut, cre] (<https://orcid.org/0000-0002-2104-9941>),
   Gilles Vuidel [ctb] (<https://orcid.org/0000-0001-6330-6136>),
   Tyler Rudolph [ctb]
 Repository: CRAN
-Date/Publication: 2022-03-08 08:40:15 UTC
+Date/Publication: 2022-05-18 13:50:05 UTC

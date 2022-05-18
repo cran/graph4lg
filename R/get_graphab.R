@@ -46,12 +46,23 @@ get_graphab <- function(res = TRUE, return = FALSE){
 
     }
 
-    url <- "https://thema.univ-fcomte.fr/productions/download.php?name=graphab&version=2.6&username=Graph4lg&institution=R"
+    if(!dir.exists(paths = paste0(data_dir, "/graph4lg_jar/plugins"))){
+
+      dir.create(path = paste0(data_dir, "/graph4lg_jar/plugins"))
+
+    }
+
+    url <- "https://thema.univ-fcomte.fr/productions/download.php?name=graphab&version=2.8&username=Graph4lg&institution=R"
     destfile <- "/graph4lg_jar/graphab-2.8.jar"
+    destfile2 <- "/graph4lg_jar/plugins/graphab-2.8.jar"
 
     utils::download.file(url, paste0(data_dir, "/", destfile),
                   method = "auto",
                   mode = "wb")
+
+    file.copy(from = paste0(data_dir, "/", destfile),
+              to = paste0(data_dir, "/", destfile2),
+              overwrite = TRUE)
 
     graphab <- 1
 
@@ -73,6 +84,7 @@ get_graphab <- function(res = TRUE, return = FALSE){
   }
 
 }
+
 
 
 

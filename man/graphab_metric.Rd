@@ -95,7 +95,9 @@ directly Graphab software.}
 the following metrics: 'EC', 'F', 'IF' and 'BC'. If TRUE, then the project
 must have been created with the option \code{nomerge=TRUE}. It then returns
 several columns with metric values including the decomposition of the
-computation according to the type of habitat of every patch.}
+computation according to the type of habitat of every patch.
+Be careful, this option is in development and we cannot guarantee the
+results are correct.}
 
 \item{dist}{A numeric or integer value specifying the distance at which
 dispersal probability is equal to \code{prob}. This argument is mandatory
@@ -144,6 +146,9 @@ link set in a Graphab project
 The metrics are described in Graphab 2.8 manual:
 \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
 Graphab software makes possible the computation of other metrics.
+Be careful, when the same metric is computed several times, the option
+\code{return=TRUE} is not returning the right columns. In these cases,
+use \code{\link{get_graphab_metric}}.
 }
 \examples{
 \dontrun{

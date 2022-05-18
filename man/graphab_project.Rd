@@ -31,7 +31,9 @@ code.s (cell value.s) of the habitat cells in the raster file.}
 
 \item{nomerge}{(optional, default=FALSE) A logical indicating whether
 contiguous patches corresponding to different pixel codes are merged
-(FALSE, default) or not merged (TRUE).}
+(FALSE, default) or not merged (TRUE).
+Be careful, the \code{nomerge = TRUE} option is in development and we cannot
+guarantee the results are correct.}
 
 \item{minarea}{(optional, default=0) An integer or numeric value specifiying
 the minimum area in hectares for a habitat patch size to become a graph node.}

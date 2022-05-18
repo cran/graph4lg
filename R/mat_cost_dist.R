@@ -72,6 +72,7 @@
 #' @export
 #' @author P. Savary
 #' @examples
+#' \dontrun{
 #' x <- raster::raster(ncol=10, nrow=10, xmn=0, xmx=100, ymn=0, ymx=100)
 #' raster::values(x) <- sample(c(1,2,3,4), size = 100, replace = TRUE)
 #' pts <- data.frame(ID = 1:4,
@@ -82,6 +83,8 @@
 #' mat_cost_dist(raster = x,
 #'               pts = pts, cost = cost,
 #'               method = "gdistance")
+#' }
+
 
 
 mat_cost_dist <- function(raster,

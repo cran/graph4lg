@@ -14,6 +14,8 @@
 #' @param nomerge (optional, default=FALSE) A logical indicating whether
 #' contiguous patches corresponding to different pixel codes are merged
 #' (FALSE, default) or not merged (TRUE).
+#' Be careful, the \code{nomerge = TRUE} option is in development and we cannot
+#' guarantee the results are correct.
 #' @param minarea (optional, default=0) An integer or numeric value specifiying
 #' the minimum area in hectares for a habitat patch size to become a graph node.
 #' @param nodata (optional, default=NULL) An integer or numeric value
@@ -164,6 +166,10 @@ graphab_project <- function(proj_name,
 
   if(nomerge){
     cmd <- c(cmd, "nomerge")
+
+    message("Be careful, the nomerge = TRUE option is in development.
+            We cannot guarantee the results are correct.")
+
   }
 
   if(!is.null(nodata)){

@@ -15,7 +15,19 @@
 
 <title>1 - Landscape and genetic data processing with graph4lg</title>
 
-<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -25,6 +37,7 @@
   div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
   ul.task-list{list-style: none;}
     </style>
+
 
 
 <style type="text/css">
@@ -148,7 +161,187 @@ div.csl-indent {
 }
 </style>
 
-<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
 
 
 
@@ -160,8 +353,10 @@ div.csl-indent {
 
 
 
-<h1 class="title toc-ignore">1 - Landscape and genetic data processing with <code>graph4lg</code></h1>
-<h4 class="author">UMR ThéMA - UBFC-CNRS, UMR Biogéosciences - UBFC-CNRS, ARP-Astrance</h4>
+<h1 class="title toc-ignore">1 - Landscape and genetic data processing
+with <code>graph4lg</code></h1>
+<h4 class="author">UMR ThéMA - UBFC-CNRS, UMR Biogéosciences -
+UBFC-CNRS, ARP-Astrance</h4>
 <h4 class="date">Paul SAVARY</h4>
 
 
@@ -169,16 +364,19 @@ div.csl-indent {
 <ul>
 <li><a href="#introduction">Introduction</a>
 <ul>
-<li><a href="#data-used-in-this-tutorial">Data used in this tutorial</a></li>
+<li><a href="#data-used-in-this-tutorial">Data used in this
+tutorial</a></li>
 </ul></li>
-<li><a href="#genetic-data-loading-and-format-conversions">Genetic data loading and format conversions</a>
+<li><a href="#genetic-data-loading-and-format-conversions">Genetic data
+loading and format conversions</a>
 <ul>
 <li><a href="#genepop-to-genind">GENEPOP to genind</a></li>
 <li><a href="#genind-to-genepop">genind to GENEPOP</a></li>
 <li><a href="#structure-to-genind">STRUCTURE to genind</a></li>
 <li><a href="#gstud-to-genind">gstud to genind</a></li>
 </ul></li>
-<li><a href="#genetic-diversity-assessment">Genetic diversity assessment</a></li>
+<li><a href="#genetic-diversity-assessment">Genetic diversity
+assessment</a></li>
 <li><a href="#distance-calculations">Distance calculations</a>
 <ul>
 <li><a href="#genetic-distances">Genetic distances</a></li>
@@ -188,9 +386,12 @@ div.csl-indent {
 <li><a href="#processing-tools">Processing tools</a>
 <ul>
 <li><a href="#reorder-a-matrix">Reorder a matrix</a></li>
-<li><a href="#convert-euclidean-distances-into-cost-distances">Convert Euclidean distances into cost distances</a></li>
-<li><a href="#from-pairwise-matrix-to-data-frame">From pairwise matrix to data frame</a></li>
-<li><a href="#from-data-frame-to-pairwise-matrix">From data frame to pairwise matrix</a></li>
+<li><a href="#convert-euclidean-distances-into-cost-distances">Convert
+Euclidean distances into cost distances</a></li>
+<li><a href="#from-pairwise-matrix-to-data-frame">From pairwise matrix
+to data frame</a></li>
+<li><a href="#from-data-frame-to-pairwise-matrix">From data frame to
+pairwise matrix</a></li>
 </ul></li>
 <li><a href="#conclusion">Conclusion</a></li>
 <li><a href="#references">References</a></li>
@@ -199,42 +400,97 @@ div.csl-indent {
 
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>The rationale of <code>graph4lg</code> package in R is to make easier the construction and analysis of genetic and landscape graphs in landscape genetic studies (hence the name <code>graph4lg</code>, meaning Graphs for Landscape Genetics). This package provides users with tools for:</p>
+<p>The rationale of <code>graph4lg</code> package in R is to make easier
+the construction and analysis of genetic and landscape graphs in
+landscape genetic studies (hence the name <code>graph4lg</code>, meaning
+Graphs for Landscape Genetics). This package provides users with tools
+for:</p>
 <ul>
 <li>Landscape and genetic data processing</li>
 <li>Genetic graph construction and analysis</li>
 <li>Landscape graph construction and analysis</li>
 <li>Landscape and genetic graph comparisons</li>
 </ul>
-<p>Each one of the included tutorials focuses on one of these points. This first tutorial will focus on <strong>landscape and genetic data processing</strong>. It will describe the package functions allowing users to:</p>
+<p>Each one of the included tutorials focuses on one of these points.
+This first tutorial will focus on <strong>landscape and genetic data
+processing</strong>. It will describe the package functions allowing
+users to:</p>
 <ul>
 <li>Load genetic data and convert them in/from several formats</li>
 <li>Assess genetic diversity</li>
-<li>Compute distances: genetic distances, geographical distances, cost-distances</li>
+<li>Compute distances: genetic distances, geographical distances,
+cost-distances</li>
 <li>Convert data objects in R to make analyses easier</li>
 </ul>
 <div id="data-used-in-this-tutorial" class="section level2">
 <h2>Data used in this tutorial</h2>
-<p>The package already includes genetic and spatial simulated data sets allowing users to discover its different functionalities. The first data set (<code>data_simul</code>) was simulated with CDPOP <span class="citation">(Landguth and Cushman 2010)</span> on a simulated landscape. It consists of 1500 individuals from 50 populations genotyped at 20 microsatellite loci. Individuals dispersed less when the cost-distance between populations was large. A landscape graph was created with Graphab <span class="citation">(Foltête, Clauzel, and Vuidel 2012)</span> whose nodes were the 50 simulated populations and the links were weighted by cost-distance values between populations. The project created with Graphab was included into the package such that the landscape graphs and the cost-distance matrix can be easily imported into the R environment.</p>
-<p>The second data set (<code>data_ex</code>) was simulated as the first one but included only 10 populations. It is used to generate quick examples.</p>
+<p>The package already includes genetic and spatial simulated data sets
+allowing users to discover its different functionalities. The first data
+set (<code>data_simul</code>) was simulated with CDPOP <span class="citation">(Landguth and Cushman 2010)</span> on a simulated
+landscape. It consists of 1500 individuals from 50 populations genotyped
+at 20 microsatellite loci. Individuals dispersed less when the
+cost-distance between populations was large. A landscape graph was
+created with Graphab <span class="citation">(Foltête, Clauzel, and
+Vuidel 2012)</span> whose nodes were the 50 simulated populations and
+the links were weighted by cost-distance values between populations. The
+project created with Graphab was included into the package such that the
+landscape graphs and the cost-distance matrix can be easily imported
+into the R environment.</p>
+<p>The second data set (<code>data_ex</code>) was simulated as the first
+one but included only 10 populations. It is used to generate quick
+examples.</p>
 </div>
 </div>
 <div id="genetic-data-loading-and-format-conversions" class="section level1">
 <h1>Genetic data loading and format conversions</h1>
-<p>The first type of functions from this package allows users to <strong>process genetic data</strong>. These functions load genetic data in R environment and convert them when necessary.</p>
-<p>In order to make the package user-friendly and compatible with genetic data commonly used in landscape genetics, the functions <code>genepop_to_genind</code>, <code>structure_to_genind</code>, <code>gstud_to_genind</code> and <code>loci_to_genind</code> allow users to convert genetic data from formats used respectively in the <code>gstudio</code> <span class="citation">(Dyer 2009)</span> and <code>pegas</code> <span class="citation">(Paradis 2010)</span> packages in R and in STRUCTURE <span class="citation">(Pritchard, Stephens, and Donnelly 2000)</span> and GENEPOP <span class="citation">(Raymond 1995)</span> software into R objects with the class attribute <code>genind</code> from ADEGENET package <span class="citation">(Jombart 2008)</span>. The <strong>format <code>genind</code></strong> makes possible the use of time-efficient functions from <code>adegenet</code> package (coded in C). This package was developed and is regularly maintained by Thibaut Jombart <a href="https://thibautjombart.netlify.app/">(his website)</a>. The function <code>genind_to_genepop</code> enables to convert <code>genind</code> object into text files in format <code>genepop</code> in order to perform analyses with this commonly used R package and executable software. All these functions work with <strong>microsatellite data (with 2 or 3-digits allele coding)</strong>.</p>
-<p>The package is <strong>compatible with SNPs data</strong> as soon as they have been loaded into a <code>genind</code> object (see package <code>vcfR</code> for example).</p>
+<p>The first type of functions from this package allows users to
+<strong>process genetic data</strong>. These functions load genetic data
+in R environment and convert them when necessary.</p>
+<p>In order to make the package user-friendly and compatible with
+genetic data commonly used in landscape genetics, the functions
+<code>genepop_to_genind</code>, <code>structure_to_genind</code>,
+<code>gstud_to_genind</code> and <code>loci_to_genind</code> allow users
+to convert genetic data from formats used respectively in the
+<code>gstudio</code> <span class="citation">(Dyer 2009)</span> and
+<code>pegas</code> <span class="citation">(Paradis 2010)</span> packages
+in R and in STRUCTURE <span class="citation">(Pritchard, Stephens, and
+Donnelly 2000)</span> and GENEPOP <span class="citation">(Raymond
+1995)</span> software into R objects with the class attribute
+<code>genind</code> from ADEGENET package <span class="citation">(Jombart 2008)</span>. The <strong>format
+<code>genind</code></strong> makes possible the use of time-efficient
+functions from <code>adegenet</code> package (coded in C). This package
+was developed and is regularly maintained by Thibaut Jombart <a href="https://thibautjombart.netlify.app/">(his website)</a>. The
+function <code>genind_to_genepop</code> enables to convert
+<code>genind</code> object into text files in format
+<code>genepop</code> in order to perform analyses with this commonly
+used R package and executable software. All these functions work with
+<strong>microsatellite data (with 2 or 3-digits allele
+coding)</strong>.</p>
+<p>The package is <strong>compatible with SNPs data</strong> as soon as
+they have been loaded into a <code>genind</code> object (see package
+<code>vcfR</code> for example).</p>
 <div id="genepop-to-genind" class="section level2">
 <h2>GENEPOP to genind</h2>
-<p>The GENEPOP software <span class="citation">(Raymond 1995)</span> developed by M. Raymond and F. Rousset (Montpellier, France) can be used as an executable file, with or without graphical user interface, or as an R package. It is frequently used to compute F<sub>ST</sub> values and to test for Hardy-Weinberg equilibrium, linkage disequilibrium or genetic differentiation. Besides, when performing simulations with CDPOP <span class="citation">(Landguth and Cushman 2010)</span>, individual genotypes can be saved as GENEPOP files at the end of the simulation.</p>
-<p>The function <code>genepop_to_genind</code> loads a GENEPOP file (.txt extension) and converts it into a <code>genind</code> object. To use it, the path to the file, the total number and names of the loci and the population names must be indicated.</p>
+<p>The GENEPOP software <span class="citation">(Raymond 1995)</span>
+developed by M. Raymond and F. Rousset (Montpellier, France) can be used
+as an executable file, with or without graphical user interface, or as
+an R package. It is frequently used to compute F<sub>ST</sub> values and
+to test for Hardy-Weinberg equilibrium, linkage disequilibrium or
+genetic differentiation. Besides, when performing simulations with CDPOP
+<span class="citation">(Landguth and Cushman 2010)</span>, individual
+genotypes can be saved as GENEPOP files at the end of the
+simulation.</p>
+<p>The function <code>genepop_to_genind</code> loads a GENEPOP file
+(.txt extension) and converts it into a <code>genind</code> object. To
+use it, the path to the file, the total number and names of the loci and
+the population names must be indicated.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data_genind <span class="ot">&lt;-</span> <span class="fu">genepop_to_genind</span>(<span class="at">path =</span> <span class="fu">paste0</span>(<span class="fu">system.file</span>(<span class="st">&#39;extdata&#39;</span>, </span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                                                           <span class="at">package =</span> <span class="st">&#39;graph4lg&#39;</span>), </span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                                               <span class="st">&quot;/gpop_simul_10_g100_04_20.txt&quot;</span>),</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">n.loci =</span> <span class="dv">20</span>, <span class="at">pop_names =</span> <span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>))</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Registered S3 method overwritten by &#39;pegas&#39;:</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   method      from</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   print.amova ade4</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Registered S3 method overwritten by &#39;ade4&#39;:</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   method      from </span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   print.amova pegas</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>data_genind</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; /// GENIND OBJECT /////////</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -252,19 +508,35 @@ div.csl-indent {
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  // Optional content</span></span>
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    @pop: population of each individual (group size range: 20-20)</span></span></code></pre></div>
-<p>We get a <code>genind</code> object. It contains the genotypes of the 1500 individuals from the 50 populations created during the simulation (similar to the data set <code>data_ex_genind</code>).</p>
+<p>We get a <code>genind</code> object. It contains the genotypes of the
+1500 individuals from the 50 populations created during the simulation
+(similar to the data set <code>data_ex_genind</code>).</p>
 </div>
 <div id="genind-to-genepop" class="section level2">
 <h2>genind to GENEPOP</h2>
-<p>The <code>genind_to_genepop</code> function performs the reverse conversion, i.e. converts a <code>genind</code> object into a GENEPOP file. This file is created and saved in the working directory defined earlier.</p>
+<p>The <code>genind_to_genepop</code> function performs the reverse
+conversion, i.e. converts a <code>genind</code> object into a GENEPOP
+file. This file is created and saved in the working directory defined
+earlier.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">genind_to_genepop</span>(<span class="at">x =</span> data_genind, </span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">output =</span> <span class="st">&quot;data_gpop_test.txt&quot;</span>)</span></code></pre></div>
-<p>This function can for example create a GENEPOP file to test for between population genetic differentiation or to compute fixation indices with GENEPOP software.</p>
+<p>This function can for example create a GENEPOP file to test for
+between population genetic differentiation or to compute fixation
+indices with GENEPOP software.</p>
 </div>
 <div id="structure-to-genind" class="section level2">
 <h2>STRUCTURE to genind</h2>
-<p>STRUCTURE software <span class="citation">(Pritchard, Stephens, and Donnelly 2000)</span> is frequently used in population genetics and landscape genetics. It enables to create population clusters through a Bayesian approach aiming at minimising the deviation from Hardy-Weinberg equilibrium when gathering populations with one another. The input files have a particular structure. The function <code>structure_to_genind</code> converts this type of file into a <code>genind</code> object.</p>
-<p>To use the function, we need to indicate the path to the file, the names of the loci, the individual ID and the population names in the same order as in the original file.</p>
+<p>STRUCTURE software <span class="citation">(Pritchard, Stephens, and
+Donnelly 2000)</span> is frequently used in population genetics and
+landscape genetics. It enables to create population clusters through a
+Bayesian approach aiming at minimising the deviation from Hardy-Weinberg
+equilibrium when gathering populations with one another. The input files
+have a particular structure. The function
+<code>structure_to_genind</code> converts this type of file into a
+<code>genind</code> object.</p>
+<p>To use the function, we need to indicate the path to the file, the
+names of the loci, the individual ID and the population names in the
+same order as in the original file.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>loci_names <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;LOCI-&quot;</span>, <span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>))</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ind_names <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">200</span>)</span>
@@ -295,15 +567,23 @@ div.csl-indent {
 </div>
 <div id="gstud-to-genind" class="section level2">
 <h2>gstud to genind</h2>
-<p>Packages <code>gstudio</code> and <code>popgraph</code> developed by R. Dyer <span class="citation">(Dyer 2009)</span> use as input data R <code>data.frames</code> with columns of class <code>locus</code>. These <code>data.frame</code> objects constitute <code>gstud</code> objects. Given these packages are often used to create genetic graphs, we created a function to convert them into the <code>genind</code> format.</p>
-<p>A <code>gstud</code> object generally has the following structure (simulations with 10 populations as an example):</p>
+<p>Packages <code>gstudio</code> and <code>popgraph</code> developed by
+R. Dyer <span class="citation">(Dyer 2009)</span> use as input data R
+<code>data.frames</code> with columns of class <code>locus</code>. These
+<code>data.frame</code> objects constitute <code>gstud</code> objects.
+Given these packages are often used to create genetic graphs, we created
+a function to convert them into the <code>genind</code> format.</p>
+<p>A <code>gstud</code> object generally has the following structure
+(simulations with 10 populations as an example):</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data_ex_gstud)</span></code></pre></div>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["ID"],"name":[1],"type":["int"],"align":["right"]},{"label":["POP"],"name":[2],"type":["chr"],"align":["left"]},{"label":["LOCUS-1"],"name":[3],"type":["chr"],"align":["left"]},{"label":["LOCUS-2"],"name":[4],"type":["chr"],"align":["left"]},{"label":["LOCUS-3"],"name":[5],"type":["chr"],"align":["left"]},{"label":["LOCUS-4"],"name":[6],"type":["chr"],"align":["left"]},{"label":["LOCUS-5"],"name":[7],"type":["chr"],"align":["left"]},{"label":["LOCUS-6"],"name":[8],"type":["chr"],"align":["left"]},{"label":["LOCUS-7"],"name":[9],"type":["chr"],"align":["left"]},{"label":["LOCUS-8"],"name":[10],"type":["chr"],"align":["left"]},{"label":["LOCUS-9"],"name":[11],"type":["chr"],"align":["left"]},{"label":["LOCUS-10"],"name":[12],"type":["chr"],"align":["left"]},{"label":["LOCUS-11"],"name":[13],"type":["chr"],"align":["left"]},{"label":["LOCUS-12"],"name":[14],"type":["chr"],"align":["left"]},{"label":["LOCUS-13"],"name":[15],"type":["chr"],"align":["left"]},{"label":["LOCUS-14"],"name":[16],"type":["chr"],"align":["left"]},{"label":["LOCUS-15"],"name":[17],"type":["chr"],"align":["left"]},{"label":["LOCUS-16"],"name":[18],"type":["chr"],"align":["left"]},{"label":["LOCUS-17"],"name":[19],"type":["chr"],"align":["left"]},{"label":["LOCUS-18"],"name":[20],"type":["chr"],"align":["left"]},{"label":["LOCUS-19"],"name":[21],"type":["chr"],"align":["left"]},{"label":["LOCUS-20"],"name":[22],"type":["chr"],"align":["left"]}],"data":[{"1":"1","2":"1","3":"116:130","4":"104:104","5":"123:123","6":"103:103","7":"124:124","8":"106:113","9":"113:117","10":"101:101","11":"102:126","12":"114:114","13":"123:123","14":"104:120","15":"105:105","16":"103:122","17":"106:129","18":"115:115","19":"103:103","20":"122:122","21":"129:129","22":"109:130","_rn_":"23"},{"1":"2","2":"1","3":"116:116","4":"104:104","5":"123:123","6":"103:129","7":"124:124","8":"106:113","9":"113:113","10":"101:101","11":"126:126","12":"114:118","13":"123:123","14":"120:120","15":"104:105","16":"103:103","17":"116:116","18":"102:115","19":"103:103","20":"122:122","21":"109:129","22":"109:130","_rn_":"24"},{"1":"3","2":"1","3":"130:130","4":"104:104","5":"123:123","6":"103:103","7":"124:124","8":"106:113","9":"113:113","10":"101:101","11":"102:126","12":"118:118","13":"109:123","14":"120:120","15":"104:104","16":"103:103","17":"116:129","18":"102:102","19":"103:103","20":"122:122","21":"109:122","22":"109:109","_rn_":"25"},{"1":"4","2":"1","3":"116:116","4":"104:107","5":"123:123","6":"103:103","7":"124:124","8":"106:106","9":"117:117","10":"101:114","11":"102:126","12":"118:118","13":"123:123","14":"104:120","15":"105:105","16":"103:103","17":"116:129","18":"115:115","19":"103:103","20":"122:122","21":"122:129","22":"109:130","_rn_":"26"},{"1":"5","2":"1","3":"116:130","4":"104:107","5":"123:123","6":"103:103","7":"124:124","8":"106:106","9":"113:117","10":"101:114","11":"102:106","12":"114:114","13":"123:123","14":"104:120","15":"105:105","16":"103:122","17":"116:129","18":"102:115","19":"103:103","20":"122:122","21":"129:129","22":"109:130","_rn_":"27"},{"1":"6","2":"1","3":"116:116","4":"104:104","5":"123:123","6":"103:103","7":"124:124","8":"113:113","9":"109:113","10":"101:114","11":"124:126","12":"114:114","13":"123:123","14":"104:104","15":"105:105","16":"103:122","17":"106:106","18":"102:102","19":"103:103","20":"122:122","21":"122:129","22":"117:120","_rn_":"28"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
-<p>To convert it with the function <code>gstud_to_genind</code>, we indicate the name of the <code>data.frame</code> and of the columns containing population names and individual names:</p>
+<p>To convert it with the function <code>gstud_to_genind</code>, we
+indicate the name of the <code>data.frame</code> and of the columns
+containing population names and individual names:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gstud_to_genind</span>(<span class="at">x =</span> data_ex_gstud, <span class="at">pop_col =</span> <span class="st">&quot;POP&quot;</span>,</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">ind_col =</span> <span class="st">&quot;ID&quot;</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Individuals in &#39;x&#39; were not ordered, they have</span></span>
@@ -329,7 +609,9 @@ div.csl-indent {
 </div>
 <div id="genetic-diversity-assessment" class="section level1">
 <h1>Genetic diversity assessment</h1>
-<p>Once a genetic dataset has been loaded in the R environment, the function <code>pop_gen_index</code> computes some <strong>genetic diversity indices at the population level</strong>.</p>
+<p>Once a genetic dataset has been loaded in the R environment, the
+function <code>pop_gen_index</code> computes some <strong>genetic
+diversity indices at the population level</strong>.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>gen_div <span class="ot">&lt;-</span> <span class="fu">pop_gen_index</span>(data_ex_genind)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(gen_div)</span></code></pre></div>
 <div data-pagedtable="false">
@@ -337,25 +619,57 @@ div.csl-indent {
 {"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["ID"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Nb_ind"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["A"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Ho"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["He"],"name":[5],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"20","3":"2.40","4":"0.4000","5":"0.3833750","_rn_":"1"},{"1":"10","2":"20","3":"2.85","4":"0.4850","5":"0.4636250","_rn_":"10"},{"1":"2","2":"20","3":"2.90","4":"0.4250","5":"0.4434375","_rn_":"2"},{"1":"3","2":"20","3":"2.90","4":"0.4700","5":"0.4090625","_rn_":"3"},{"1":"4","2":"20","3":"2.95","4":"0.4675","5":"0.4261250","_rn_":"4"},{"1":"5","2":"20","3":"3.00","4":"0.3925","5":"0.4415625","_rn_":"5"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
-<p>By default, it computes all the available indices, i.e. the number of individuals (“Nb_ind”), the total allelic richness (“A”), the expected heterozygosity (“He”) and the observed heterozygosity (“Ho”).</p>
+<p>By default, it computes all the available indices, i.e. the number of
+individuals (“Nb_ind”), the total allelic richness (“A”), the expected
+heterozygosity (“He”) and the observed heterozygosity (“Ho”).</p>
 </div>
 <div id="distance-calculations" class="section level1">
 <h1>Distance calculations</h1>
-<p>In landscape genetics, apart from local population or landscape properties at the sampling site level, particular attention is given to <strong>between population/habitat patch distances</strong>. The package includes three functions to <strong>compute both genetic and landscape distances</strong>.</p>
+<p>In landscape genetics, apart from local population or landscape
+properties at the sampling site level, particular attention is given to
+<strong>between population/habitat patch distances</strong>. The package
+includes three functions to <strong>compute both genetic and landscape
+distances</strong>.</p>
 <div id="genetic-distances" class="section level2">
 <h2>Genetic distances</h2>
-<p>From a <code>genind</code> object, the function <code>mat_gen_dist</code> calculates several types of <strong>between population genetic distances</strong>:</p>
+<p>From a <code>genind</code> object, the function
+<code>mat_gen_dist</code> calculates several types of <strong>between
+population genetic distances</strong>:</p>
 <ul>
-<li><p>F<sub>ST</sub> <span class="citation">(Weir and Cockerham 1984)</span> or linearised F<sub>ST</sub> <span class="citation">(Rousset 1997)</span> (options ‘<code>dist=FST</code>’ and ‘<code>dist=FST_lin</code>’).</p></li>
-<li><p>G’<sub>ST</sub> <span class="citation">(Hedrick 2005)</span> (option ‘<code>dist=GST</code>’).</p></li>
-<li><p>D<sub>Jost</sub> <span class="citation">(Jost 2008)</span> (option ‘<code>dist=D</code>’).</p></li>
-<li><p>D<sub>PS</sub> (1 - proportion of shared alleles) <span class="citation">Murphy, Dyer, and Cushman (2015)</span> (option ‘<code>dist=DPS</code>’).</p></li>
-<li><p>Euclidean genetic distance <span class="citation">(Excoffier, Smouse, and Quattro 1992)</span> (option ‘<code>dist=basic</code>’).</p></li>
-<li><p>Euclidean genetic distance with a weighting depending on allelic frequencies giving more weight to rare alleles <span class="citation">(Fortuna et al. 2009)</span> (option ‘<code>dist=weight</code>’).</p></li>
-<li><p>Euclidean genetic distance computed after a PCA of the matrix of allelic frequencies by population. The axes considered to compute the Euclidean distance are the non-collinear principal components (total number of alleles - number of loci) <span class="citation">Shirk, Landguth, and Cushman (2017)</span> (option ‘<code>dist=PCA</code>’).</p></li>
-<li><p>Euclidean genetic distance computed in the same way as with the function <code>popgraph</code> from <code>popgraph</code> package, i.e. after a PCA and two SVD, among other computation steps (option ‘<code>dist=PG</code>’). This distance differs from the conditional genetic distance (cGD) computed from a population graph by summing genetic distances along shortest paths.</p></li>
+<li><p>F<sub>ST</sub> <span class="citation">(Weir and Cockerham
+1984)</span> or linearised F<sub>ST</sub> <span class="citation">(Rousset 1997)</span> (options ‘<code>dist=FST</code>’
+and ‘<code>dist=FST_lin</code>’).</p></li>
+<li><p>G’<sub>ST</sub> <span class="citation">(Hedrick 2005)</span>
+(option ‘<code>dist=GST</code>’).</p></li>
+<li><p>D<sub>Jost</sub> <span class="citation">(Jost 2008)</span>
+(option ‘<code>dist=D</code>’).</p></li>
+<li><p>D<sub>PS</sub> (1 - proportion of shared alleles) <span class="citation">Murphy, Dyer, and Cushman (2015)</span> (option
+‘<code>dist=DPS</code>’).</p></li>
+<li><p>Euclidean genetic distance <span class="citation">(Excoffier,
+Smouse, and Quattro 1992)</span> (option
+‘<code>dist=basic</code>’).</p></li>
+<li><p>Euclidean genetic distance with a weighting depending on allelic
+frequencies giving more weight to rare alleles <span class="citation">(Fortuna et al. 2009)</span> (option
+‘<code>dist=weight</code>’).</p></li>
+<li><p>Euclidean genetic distance computed after a PCA of the matrix of
+allelic frequencies by population. The axes considered to compute the
+Euclidean distance are the non-collinear principal components (total
+number of alleles - number of loci) <span class="citation">Shirk,
+Landguth, and Cushman (2017)</span> (option
+‘<code>dist=PCA</code>’).</p></li>
+<li><p>Euclidean genetic distance computed in the same way as with the
+function <code>popgraph</code> from <code>popgraph</code> package,
+i.e. after a PCA and two SVD, among other computation steps (option
+‘<code>dist=PG</code>’). This distance differs from the conditional
+genetic distance (cGD) computed from a population graph by summing
+genetic distances along shortest paths.</p></li>
 </ul>
-<p>To do these calculations with the function <code>mat_gen_dist</code>, we just have to indicate the name of the <code>genind</code> object which includes the genetic data of the individuals as well as the populations to which each of them belongs. The other argument of the function is the type of genetic distance to compute. Here are two examples:</p>
+<p>To do these calculations with the function <code>mat_gen_dist</code>,
+we just have to indicate the name of the <code>genind</code> object
+which includes the genetic data of the individuals as well as the
+populations to which each of them belongs. The other argument of the
+function is the type of genetic distance to compute. Here are two
+examples:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mat_dps <span class="ot">&lt;-</span> <span class="fu">mat_gen_dist</span>(<span class="at">x =</span> data_genind, <span class="at">dist =</span> <span class="st">&quot;DPS&quot;</span>)</span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>mat_dps[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;            1        10        11        12        13</span></span>
@@ -375,17 +689,31 @@ div.csl-indent {
 </div>
 <div id="geographical-distances" class="section level2">
 <h2>Geographical distances</h2>
-<p>The package also calculates <strong>Euclidean geographical distances</strong> between populations with the function <code>mat_geo_dist</code>. It takes as arguments:</p>
+<p>The package also calculates <strong>Euclidean geographical
+distances</strong> between populations with the function
+<code>mat_geo_dist</code>. It takes as arguments:</p>
 <ul>
-<li><code>data</code>: A <code>data.frame</code> with 3 columns corresponding to point ID, longitude (x) and latitude (y) whose column names are specified in other arguments below. It can also be a <code>SpatialPointsDataFrame</code> created in R or by importing a shapefile layer.</li>
+<li><code>data</code>: A <code>data.frame</code> with 3 columns
+corresponding to point ID, longitude (x) and latitude (y) whose column
+names are specified in other arguments below. It can also be a
+<code>SpatialPointsDataFrame</code> created in R or by importing a
+shapefile layer.</li>
 <li><code>ID</code>: population or point ID</li>
 <li><code>x</code>: population or point longitude</li>
 <li><code>y</code>: population or point latitude</li>
-<li><code>crds_type</code>: “proj” or “polar.” Indicates whether coordinates are from a projected (“proj”) or a polar (“polar”) coordinate reference system.</li>
-<li><code>gc_formula</code>: if coordinates are polar, then it specifies the formula to use. By default, the Vicenty formula is used.</li>
+<li><code>crds_type</code>: “proj” or “polar”. Indicates whether
+coordinates are from a projected (“proj”) or a polar (“polar”)
+coordinate reference system.</li>
+<li><code>gc_formula</code>: if coordinates are polar, then it specifies
+the formula to use. By default, the Vicenty formula is used.</li>
 </ul>
-<p>When geographical coordinates are given in a <strong>projected coordinate reference system (metric)</strong>, Pythagoras’s theorem is used to compute the distances. Conversely, when they are given in a <strong>polar CRS (degrees)</strong>, Great Circle distances are computed. A warning message is displayed in every case.</p>
-<p>Example with the 50 point projected coordinates included in the <code>pts_pop_simul</code> data set:</p>
+<p>When geographical coordinates are given in a <strong>projected
+coordinate reference system (metric)</strong>, Pythagoras’s theorem is
+used to compute the distances. Conversely, when they are given in a
+<strong>polar CRS (degrees)</strong>, Great Circle distances are
+computed. A warning message is displayed in every case.</p>
+<p>Example with the 50 point projected coordinates included in the
+<code>pts_pop_simul</code> data set:</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pts_pop_simul)</span></code></pre></div>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
@@ -427,22 +755,42 @@ div.csl-indent {
 </div>
 <div id="cost-distances" class="section level2">
 <h2>Cost-distances</h2>
-<p>Because straight line Euclidean distances cannot accurately reflect how species move in landscapes, methods have been developed to better represent how they move by incorporating information about the resistance of landscape features to their movements. Among them, the computation of <strong>least-cost paths</strong> and of their <strong>cumulated cost-distances along these paths</strong> is a very popular approach.</p>
-<p>The function <code>mat_cost_dist</code> makes possible the computation of <strong>cost-distances between a set of points on a raster with discrete cell values</strong> corresponding to land use types. Each land use type is given a cost reflecting its resistance to movement. A high value means that the cell is difficult to cross for an individual.</p>
+<p>Because straight line Euclidean distances cannot accurately reflect
+how species move in landscapes, methods have been developed to better
+represent how they move by incorporating information about the
+resistance of landscape features to their movements. Among them, the
+computation of <strong>least-cost paths</strong> and of their
+<strong>cumulated cost-distances along these paths</strong> is a very
+popular approach.</p>
+<p>The function <code>mat_cost_dist</code> makes possible the
+computation of <strong>cost-distances between a set of points on a
+raster with discrete cell values</strong> corresponding to land use
+types. Each land use type is given a cost reflecting its resistance to
+movement. A high value means that the cell is difficult to cross for an
+individual.</p>
 <p>The <code>raster</code> input can be either:</p>
 <ul>
-<li>the path (<code>character string</code>) to a raster file in format .tif or .asc,</li>
-<li>a <code>RasterLayer</code> object already loaded in R environment.</li>
+<li>the path (<code>character string</code>) to a raster file in format
+.tif or .asc,</li>
+<li>a <code>RasterLayer</code> object already loaded in R
+environment.</li>
 </ul>
 <p>The point (<code>pts</code>) input can be either:</p>
 <ul>
 <li>the path (<code>character string</code>) to a .csv file,</li>
 <li>a <code>data.frame</code> already loaded in R environment</li>
-<li>a <code>SpatialPointsDataFrame</code> created in R or by importing a shapefile layer.</li>
+<li>a <code>SpatialPointsDataFrame</code> created in R or by importing a
+shapefile layer.</li>
 </ul>
-<p>In all cases, this object must have three data columns indicating the point ID, x (longitude) and y (latitude) in a projected coordinate reference system.</p>
-<p>To do the computation, we need to create a <code>data.frame</code> with two columns (<code>code</code> and <code>cost</code>) specifying the cost associated with every raster cell value.</p>
-<p>By default, the computation is performed with <code>costDistance</code> function from <code>gdistance</code> package (<code>method = &quot;gdistance&quot;</code>). For example :</p>
+<p>In all cases, this object must have three data columns indicating the
+point ID, x (longitude) and y (latitude) in a projected coordinate
+reference system.</p>
+<p>To do the computation, we need to create a <code>data.frame</code>
+with two columns (<code>code</code> and <code>cost</code>) specifying
+the cost associated with every raster cell value.</p>
+<p>By default, the computation is performed with
+<code>costDistance</code> function from <code>gdistance</code> package
+(<code>method = &quot;gdistance&quot;</code>). For example :</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> raster<span class="sc">::</span><span class="fu">raster</span>(<span class="at">ncol=</span><span class="dv">10</span>, <span class="at">nrow=</span><span class="dv">10</span>, <span class="at">xmn=</span><span class="dv">0</span>, <span class="at">xmx=</span><span class="dv">100</span>, <span class="at">ymn=</span><span class="dv">0</span>, <span class="at">ymx=</span><span class="dv">100</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>raster<span class="sc">::</span><span class="fu">values</span>(x) <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>), <span class="at">size =</span> <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>pts <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">ID =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,</span>
@@ -455,32 +803,73 @@ div.csl-indent {
 <span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>              <span class="at">method =</span> <span class="st">&quot;gdistance&quot;</span>)</span>
 <span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mat_cd)</span>
 <span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          1        2        3        4</span></span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1   0.0000 116.3909   0.0000 116.3909</span></span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 116.3909   0.0000 116.3909   0.0000</span></span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3   0.0000 116.3909   0.0000 116.3909</span></span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 116.3909   0.0000 116.3909   0.0000</span></span></code></pre></div>
-<p><code>gdistance</code> cannot perform the computation anymore when the raster size and the number of points increase. Using another coding language than R is a way to overcome this limitation. That is why the function <code>mat_cost_dist</code> includes <strong>another method for computing cost distances</strong>. It relies upon the .jar file <code>costdist-0.3.jar</code> (Java language), developed by Gilles Vuidel (UMR TheMA, Besancon, France). It is automatically downloaded by the user at the first use of the function <code>mat_cost_dist</code> with the argument <code>method = &quot;java&quot;</code>, provided Java is installed in the user’s machine. This program makes possible the <strong>parallelisation of the computation</strong>. The argument <code>parallel.java</code> takes values between 1 and the number of cores in the user’s machine - 1, thereby setting the number of cores used for the computation.</p>
-<p>For example, when using <code>method=&quot;java&quot;</code>, the command should be:</p>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  0.00000 45.66295  0.00000 45.66295</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 45.66295  0.00000 45.66295  0.00000</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  0.00000 45.66295  0.00000 45.66295</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 45.66295  0.00000 45.66295  0.00000</span></span></code></pre></div>
+<p><code>gdistance</code> cannot perform the computation anymore when
+the raster size and the number of points increase. Using another coding
+language than R is a way to overcome this limitation. That is why the
+function <code>mat_cost_dist</code> includes <strong>another method for
+computing cost distances</strong>. It relies upon the .jar file
+<code>costdist-0.3.jar</code> (Java language), developed by Gilles
+Vuidel (UMR TheMA, Besancon, France). It is automatically downloaded by
+the user at the first use of the function <code>mat_cost_dist</code>
+with the argument <code>method = &quot;java&quot;</code>, provided Java is
+installed in the user’s machine. This program makes possible the
+<strong>parallelisation of the computation</strong>. The argument
+<code>parallel.java</code> takes values between 1 and the number of
+cores in the user’s machine - 1, thereby setting the number of cores
+used for the computation.</p>
+<p>For example, when using <code>method=&quot;java&quot;</code>, the command
+should be:</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mat_cost_dist</span>(<span class="at">raster =</span> x,</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">pts =</span> pts, <span class="at">cost =</span> cost,</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">method =</span> <span class="st">&quot;java&quot;</span>,</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">parallel.java =</span> <span class="dv">2</span>)</span></code></pre></div>
-<p>When <code>method=&quot;java&quot;</code>, least cost paths progress in 8 directions from one cell, whereas it can be controlled when <code>method = &quot;gdistance&quot;</code> with the argument <code>direction=4</code> (or 8 or 16).</p>
-<p><strong>When choosing which method?</strong> Using <code>method=&quot;java&quot;</code> becomes more and more interesting as the raster size and the number of points increase. In the previous example (raster: 10 <span class="math inline">\(\times\)</span> 10 cells, 4 points), using <code>method=&quot;gdistance&quot;</code> is the fastest option (0.67 s. vs 2.56 s.). With a raster of 100 <span class="math inline">\(\times\)</span> 100 cells and 4 points, both methods are equivalent (2 s.). With a raster of 1000 <span class="math inline">\(\times\)</span> 1000 cells and 4 points, <code>method=&quot;java&quot;</code> is by far the fastest (120 s. vs 8 s.).</p>
-<p>Besides, <strong>depending on the input data types</strong>, computation times can vary:</p>
+<p>When <code>method=&quot;java&quot;</code>, least cost paths progress in 8
+directions from one cell, whereas it can be controlled when
+<code>method = &quot;gdistance&quot;</code> with the argument
+<code>direction=4</code> (or 8 or 16).</p>
+<p><strong>When choosing which method?</strong> Using
+<code>method=&quot;java&quot;</code> becomes more and more interesting as the
+raster size and the number of points increase. In the previous example
+(raster: 10 <span class="math inline">\(\times\)</span> 10 cells, 4
+points), using <code>method=&quot;gdistance&quot;</code> is the fastest option
+(0.67 s. vs 2.56 s.). With a raster of 100 <span class="math inline">\(\times\)</span> 100 cells and 4 points, both
+methods are equivalent (2 s.). With a raster of 1000 <span class="math inline">\(\times\)</span> 1000 cells and 4 points,
+<code>method=&quot;java&quot;</code> is by far the fastest (120 s. vs 8 s.).</p>
+<p>Besides, <strong>depending on the input data types</strong>,
+computation times can vary:</p>
 <ul>
-<li>When using <code>method=&quot;java&quot;</code>, the best option is to provide a .asc raster file and a .csv point file.</li>
-<li>When using <code>method=&quot;gdistance&quot;</code>, the best option is to provide a <code>RasterLayer</code> object in R and a <code>SpatialPointsDataFrame</code> object in R.</li>
+<li>When using <code>method=&quot;java&quot;</code>, the best option is to provide
+a .asc raster file and a .csv point file.</li>
+<li>When using <code>method=&quot;gdistance&quot;</code>, the best option is to
+provide a <code>RasterLayer</code> object in R and a
+<code>SpatialPointsDataFrame</code> object in R.</li>
 </ul>
 </div>
 </div>
 <div id="processing-tools" class="section level1">
 <h1>Processing tools</h1>
-<p>The functions presented in the last sections create objects in R, such as <code>data.frame</code> and <code>matrix</code>. The package includes functions to process these objects, ordering them, comparing them and converting them.</p>
+<p>The functions presented in the last sections create objects in R,
+such as <code>data.frame</code> and <code>matrix</code>. The package
+includes functions to process these objects, ordering them, comparing
+them and converting them.</p>
 <div id="reorder-a-matrix" class="section level2">
 <h2>Reorder a matrix</h2>
-<p>In landscape genetics, when comparing two matrices of distances between the same sets of elements (e.g. doing a Mantel test to assess isolation by distance patterns), the two matrices must be ordered the same way. The function <code>reorder_mat</code> reorders a symmetric matrix according to a specified order of its row/column names.</p>
-<p>For example, when computing a geographical distance from a <code>data.frame</code> in which the <code>ID</code> column contains integer values, the resulting distance matrix is ordered in the increasing order of these ID (1, 2, 3, …., 10). If the same IDs are character strings, the resulting distance matrix will be ordered in alphabetical order (“1,” “10,” “2,” “3,” …, “9”). In the following example, we illustrate how to reorder a matrix in such a case.</p>
+<p>In landscape genetics, when comparing two matrices of distances
+between the same sets of elements (e.g. doing a Mantel test to assess
+isolation by distance patterns), the two matrices must be ordered the
+same way. The function <code>reorder_mat</code> reorders a symmetric
+matrix according to a specified order of its row/column names.</p>
+<p>For example, when computing a geographical distance from a
+<code>data.frame</code> in which the <code>ID</code> column contains
+integer values, the resulting distance matrix is ordered in the
+increasing order of these ID (1, 2, 3, …., 10). If the same IDs are
+character strings, the resulting distance matrix will be ordered in
+alphabetical order (“1”, “10”, “2”, “3”, …, “9”). In the following
+example, we illustrate how to reorder a matrix in such a case.</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>mat_g1 <span class="ot">&lt;-</span> <span class="fu">mat_geo_dist</span>(pts_pop_ex, </span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>                       <span class="at">ID =</span> <span class="st">&quot;ID&quot;</span>, <span class="at">x =</span> <span class="st">&quot;x&quot;</span>, <span class="at">y =</span> <span class="st">&quot;y&quot;</span>, </span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">crds_type =</span> <span class="st">&quot;proj&quot;</span>)</span>
@@ -527,10 +916,29 @@ div.csl-indent {
 </div>
 <div id="convert-euclidean-distances-into-cost-distances" class="section level2">
 <h2>Convert Euclidean distances into cost distances</h2>
-<p>Cost-distances are expressed in cost units arbitrarily defined based on the cost values assigned to every land cover type when creating resistance surfaces. However, species dispersal distances are usually known as distances expressed in metric units. When we know that the probability that a species covers 10 km is 5 %, we can ask what is the equivalent of this distance in cost distance units according to the assumed cost value scenario. It can be useful in order to prune a landscape graph with a given distance threshold or simply to get an idea of the order of magnitude of cost-distance values.</p>
-<p>To that purpose, a <strong>regression</strong> of the <strong>between population cost-distance</strong> values against the corresponding <strong>geographical distances</strong> can be performed. It estimates the relationship between both types of distance. Then, the resulting parameter estimates enable to convert a geographical distance into its cost-distance equivalent according to the cost scenario.</p>
-<p>The function <code>convert_cd</code> performs the linear regression or log-log linear regression between the geographical distance matrix and the cost-distance matrix, in the same way as <span class="citation">Tournant et al. (2013)</span> and as performed by Graphab software.</p>
-<p>Below, we estimate the relationship between geographical distance and cost-distance between the populations used to perform the gene-flow simulation. We convert 10 km into cost-distance units. The function also plots the relationship between these distances.</p>
+<p>Cost-distances are expressed in cost units arbitrarily defined based
+on the cost values assigned to every land cover type when creating
+resistance surfaces. However, species dispersal distances are usually
+known as distances expressed in metric units. When we know that the
+probability that a species covers 10 km is 5 %, we can ask what is the
+equivalent of this distance in cost distance units according to the
+assumed cost value scenario. It can be useful in order to prune a
+landscape graph with a given distance threshold or simply to get an idea
+of the order of magnitude of cost-distance values.</p>
+<p>To that purpose, a <strong>regression</strong> of the <strong>between
+population cost-distance</strong> values against the corresponding
+<strong>geographical distances</strong> can be performed. It estimates
+the relationship between both types of distance. Then, the resulting
+parameter estimates enable to convert a geographical distance into its
+cost-distance equivalent according to the cost scenario.</p>
+<p>The function <code>convert_cd</code> performs the linear regression
+or log-log linear regression between the geographical distance matrix
+and the cost-distance matrix, in the same way as <span class="citation">Tournant et al. (2013)</span> and as performed by
+Graphab software.</p>
+<p>Below, we estimate the relationship between geographical distance and
+cost-distance between the populations used to perform the gene-flow
+simulation. We convert 10 km into cost-distance units. The function also
+plots the relationship between these distances.</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>mat_ld <span class="ot">&lt;-</span> <span class="fu">reorder_mat</span>(mat_ld, <span class="at">order =</span> <span class="fu">row.names</span>(mat_geo))</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>convert_res <span class="ot">&lt;-</span> <span class="fu">convert_cd</span>(<span class="at">mat_euc =</span> mat_geo, <span class="at">mat_ld =</span> mat_ld, </span>
@@ -550,15 +958,30 @@ div.csl-indent {
 <span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          0.6870757 </span></span>
 <span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $Plot</span></span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
-<p>In this case, we can see that 10 km are equivalent to 1.606 cost-distance units. The log-log linear model estimates the relationship between geographical distance (GD) and cost-distance (CD) such that: <span class="math inline">\(log(CD)=-2.2512+1.0458 \times log(GD)\)</span>. The determination coefficient <span class="math inline">\(R^2\)</span> associated to this linear model is 0.69.</p>
-<p>A figure is returned as the fourth element of <code>convert_res</code>. The black dot represented on this figure refers to the 10 km value on the regression line characterising the relationship between cost-distance and geographical distance.</p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>In this case, we can see that 10 km are equivalent to 1.606
+cost-distance units. The log-log linear model estimates the relationship
+between geographical distance (GD) and cost-distance (CD) such that:
+<span class="math inline">\(log(CD)=-2.2512+1.0458 \times
+log(GD)\)</span>. The determination coefficient <span class="math inline">\(R^2\)</span> associated to this linear model is
+0.69.</p>
+<p>A figure is returned as the fourth element of
+<code>convert_res</code>. The black dot represented on this figure
+refers to the 10 km value on the regression line characterising the
+relationship between cost-distance and geographical distance.</p>
 </div>
 <div id="from-pairwise-matrix-to-data-frame" class="section level2">
 <h2>From pairwise matrix to data frame</h2>
-<p>Distance values can be stored in two main ways. First, they can be stored in pairwise distance matrices. The distance between point <span class="math inline">\(i\)</span> and point <span class="math inline">\(j\)</span> is the value at the <span class="math inline">\(i_{th}\)</span> row and the <span class="math inline">\(j_{th}\)</span> column, and also at the <span class="math inline">\(j_{th}\)</span> row and the <span class="math inline">\(i_{th}\)</span> column. Such a matrix is the required input of analyses such as Mantel tests and can be used to create graphs when considered as an adjacency matrix.</p>
-<p>However, it is quite a <em>heavy</em> object and these values can be stored in smaller objects called edge lists, which are basically tables with three columns: from, to, distance.</p>
-<p>The function <code>pw_mat_to_df</code> converts a pairwise <code>matrix</code> into an edge list stored in a <code>data.frame</code> object.</p>
+<p>Distance values can be stored in two main ways. First, they can be
+stored in pairwise distance matrices. The distance between point <span class="math inline">\(i\)</span> and point <span class="math inline">\(j\)</span> is the value at the <span class="math inline">\(i_{th}\)</span> row and the <span class="math inline">\(j_{th}\)</span> column, and also at the <span class="math inline">\(j_{th}\)</span> row and the <span class="math inline">\(i_{th}\)</span> column. Such a matrix is the
+required input of analyses such as Mantel tests and can be used to
+create graphs when considered as an adjacency matrix.</p>
+<p>However, it is quite a <em>heavy</em> object and these values can be
+stored in smaller objects called edge lists, which are basically tables
+with three columns: from, to, distance.</p>
+<p>The function <code>pw_mat_to_df</code> converts a pairwise
+<code>matrix</code> into an edge list stored in a
+<code>data.frame</code> object.</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>df_dist <span class="ot">&lt;-</span> <span class="fu">pw_mat_to_df</span>(<span class="at">pw_mat =</span> mat_geo)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df_dist)</span></code></pre></div>
 <div data-pagedtable="false">
@@ -566,11 +989,15 @@ div.csl-indent {
 {"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["id_1"],"name":[1],"type":["chr"],"align":["left"]},{"label":["id_2"],"name":[2],"type":["chr"],"align":["left"]},{"label":["id_link"],"name":[3],"type":["chr"],"align":["left"]},{"label":["value"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"2","3":"1_2","4":"3140.064","_rn_":"1_2"},{"1":"1","2":"3","3":"1_3","4":"18555.862","_rn_":"1_3"},{"1":"2","2":"3","3":"2_3","4":"15417.522","_rn_":"2_3"},{"1":"1","2":"4","3":"1_4","4":"7605.919","_rn_":"1_4"},{"1":"2","2":"4","3":"2_4","4":"10278.619","_rn_":"2_4"},{"1":"3","2":"4","3":"3_4","4":"25128.669","_rn_":"3_4"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
-<p>The resulting object <code>df_dist</code> is a <code>data.frame</code> with 4 columns: <code>id_1</code>, <code>id_2</code>, <code>id_link</code> and <code>value</code>.</p>
+<p>The resulting object <code>df_dist</code> is a
+<code>data.frame</code> with 4 columns: <code>id_1</code>,
+<code>id_2</code>, <code>id_link</code> and <code>value</code>.</p>
 </div>
 <div id="from-data-frame-to-pairwise-matrix" class="section level2">
 <h2>From data frame to pairwise matrix</h2>
-<p>Conversely, the function <code>df_to_pw_mat</code> converts an edge list stored in a <code>data.frame</code> object into a pairwise <code>matrix</code>.</p>
+<p>Conversely, the function <code>df_to_pw_mat</code> converts an edge
+list stored in a <code>data.frame</code> object into a pairwise
+<code>matrix</code>.</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>mat_dist <span class="ot">&lt;-</span> <span class="fu">df_to_pw_mat</span>(<span class="at">data =</span> df_dist, </span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">from =</span> <span class="st">&quot;id_1&quot;</span>, <span class="at">to =</span> <span class="st">&quot;id_2&quot;</span>, <span class="at">value =</span> <span class="st">&quot;value&quot;</span>)</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>mat_dist[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
@@ -584,64 +1011,108 @@ div.csl-indent {
 </div>
 <div id="conclusion" class="section level1">
 <h1>Conclusion</h1>
-<p>In the next tutorial, we present <strong>how to construct and analyse genetic graphs with <code>graph4lg</code>.</strong></p>
+<p>In the next tutorial, we present <strong>how to construct and analyse
+genetic graphs with <code>graph4lg</code>.</strong></p>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1 class="unnumbered">References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-bowcock1994high" class="csl-entry">
-Bowcock, Anne M, A Ruiz-Linares, James Tomfohrde, Eric Minch, Judith R Kidd, and L Luca Cavalli-Sforza. 1994. <span>“High Resolution of Human Evolutionary Trees with Polymorphic Microsatellites.”</span> <em>Nature</em> 368 (6470): 455–57.
+Bowcock, Anne M, A Ruiz-Linares, James Tomfohrde, Eric Minch, Judith R
+Kidd, and L Luca Cavalli-Sforza. 1994. <span>“High Resolution of Human
+Evolutionary Trees with Polymorphic Microsatellites.”</span>
+<em>Nature</em> 368 (6470): 455–57.
 </div>
 <div id="ref-dyer2009geneticstudio" class="csl-entry">
-Dyer, Rodney J. 2009. <span>“GeneticStudio: A Suite of Programs for Spatial Analysis of Genetic-Marker Data.”</span> <em>Molecular Ecology Resources</em> 9 (1): 110–13.
+Dyer, Rodney J. 2009. <span>“GeneticStudio: A Suite of Programs for
+Spatial Analysis of Genetic-Marker Data.”</span> <em>Molecular Ecology
+Resources</em> 9 (1): 110–13.
 </div>
 <div id="ref-excoffier1992analysis" class="csl-entry">
-Excoffier, Laurent, Peter E Smouse, and Joseph M Quattro. 1992. <span>“Analysis of Molecular Variance Inferred from Metric Distances Among DNA Haplotypes: Application to Human Mitochondrial DNA Restriction Data.”</span> <em>Genetics</em> 131 (2): 479–91.
+Excoffier, Laurent, Peter E Smouse, and Joseph M Quattro. 1992.
+<span>“Analysis of Molecular Variance Inferred from Metric Distances
+Among DNA Haplotypes: Application to Human Mitochondrial DNA Restriction
+Data.”</span> <em>Genetics</em> 131 (2): 479–91.
 </div>
 <div id="ref-foltete2012software" class="csl-entry">
-Foltête, Jean-Christophe, Céline Clauzel, and Gilles Vuidel. 2012. <span>“A Software Tool Dedicated to the Modelling of Landscape Networks.”</span> <em>Environmental Modelling &amp; Software</em> 38: 316–27.
+Foltête, Jean-Christophe, Céline Clauzel, and Gilles Vuidel. 2012.
+<span>“A Software Tool Dedicated to the Modelling of Landscape
+Networks.”</span> <em>Environmental Modelling &amp; Software</em> 38:
+316–27.
 </div>
 <div id="ref-fortuna2009networks" class="csl-entry">
-Fortuna, Miguel A, Rafael G Albaladejo, Laura Fernández, Abelardo Aparicio, and Jordi Bascompte. 2009. <span>“Networks of Spatial Genetic Variation Across Species.”</span> <em>Proceedings of the National Academy of Sciences</em> 106 (45): 19044–49.
+Fortuna, Miguel A, Rafael G Albaladejo, Laura Fernández, Abelardo
+Aparicio, and Jordi Bascompte. 2009. <span>“Networks of Spatial Genetic
+Variation Across Species.”</span> <em>Proceedings of the National
+Academy of Sciences</em> 106 (45): 19044–49.
 </div>
 <div id="ref-hedrick2005standardized" class="csl-entry">
-Hedrick, Philip W. 2005. <span>“A Standardized Genetic Differentiation Measure.”</span> <em>Evolution</em> 59 (8): 1633–38.
+Hedrick, Philip W. 2005. <span>“A Standardized Genetic Differentiation
+Measure.”</span> <em>Evolution</em> 59 (8): 1633–38.
 </div>
 <div id="ref-jombart2008adegenet" class="csl-entry">
-Jombart, Thibaut. 2008. <span>“Adegenet: A r Package for the Multivariate Analysis of Genetic Markers.”</span> <em>Bioinformatics</em> 24 (11): 1403–5.
+Jombart, Thibaut. 2008. <span>“Adegenet: A r Package for the
+Multivariate Analysis of Genetic Markers.”</span>
+<em>Bioinformatics</em> 24 (11): 1403–5.
 </div>
 <div id="ref-jost2008gst" class="csl-entry">
-Jost, Lou. 2008. <span>“GST and Its Relatives Do Not Measure Differentiation.”</span> <em>Molecular Ecology</em> 17 (18): 4015–26.
+Jost, Lou. 2008. <span>“GST and Its Relatives Do Not Measure
+Differentiation.”</span> <em>Molecular Ecology</em> 17 (18): 4015–26.
 </div>
 <div id="ref-landguth2010cdpop" class="csl-entry">
-Landguth, Erin L, and SA Cushman. 2010. <span>“CDPOP: A Spatially Explicit Cost Distance Population Genetics Program.”</span> <em>Molecular Ecology Resources</em> 10 (1): 156–61.
+Landguth, Erin L, and SA Cushman. 2010. <span>“CDPOP: A Spatially
+Explicit Cost Distance Population Genetics Program.”</span>
+<em>Molecular Ecology Resources</em> 10 (1): 156–61.
 </div>
 <div id="ref-murphy_graph_2015" class="csl-entry">
-Murphy, Melanie, Rodney Dyer, and Samuel A. Cushman. 2015. <span>“Graph Theory and Network Models in Landscape Genetics.”</span> In <em>Landscape Genetics: Concepts, Methods, Applications</em>, edited by Niko Balkenhol, Samuel Cushman, Andrew Storfer, and Lisette Waits, 1st ed., 165–80. John Wiley &amp; Sons.
+Murphy, Melanie, Rodney Dyer, and Samuel A. Cushman. 2015. <span>“Graph
+Theory and Network Models in Landscape Genetics.”</span> In
+<em>Landscape Genetics: Concepts, Methods, Applications</em>, edited by
+Niko Balkenhol, Samuel Cushman, Andrew Storfer, and Lisette Waits, 1st
+ed., 165–80. John Wiley &amp; Sons.
 </div>
 <div id="ref-paradis2010pegas" class="csl-entry">
-Paradis, Emmanuel. 2010. <span>“Pegas: An r Package for Population Genetics with an Integrated–Modular Approach.”</span> <em>Bioinformatics</em> 26 (3): 419–20.
+Paradis, Emmanuel. 2010. <span>“Pegas: An r Package for Population
+Genetics with an Integrated–Modular Approach.”</span>
+<em>Bioinformatics</em> 26 (3): 419–20.
 </div>
 <div id="ref-paschou2014maritime" class="csl-entry">
-Paschou, Peristera, Petros Drineas, Evangelia Yannaki, Anna Razou, Katerina Kanaki, Fotis Tsetsos, Shanmukha Sampath Padmanabhuni, et al. 2014. <span>“Maritime Route of Colonization of Europe.”</span> <em>Proceedings of the National Academy of Sciences</em>.
+Paschou, Peristera, Petros Drineas, Evangelia Yannaki, Anna Razou,
+Katerina Kanaki, Fotis Tsetsos, Shanmukha Sampath Padmanabhuni, et al.
+2014. <span>“Maritime Route of Colonization of Europe.”</span>
+<em>Proceedings of the National Academy of Sciences</em>.
 </div>
 <div id="ref-pritchard2000inference" class="csl-entry">
-Pritchard, Jonathan K, Matthew Stephens, and Peter Donnelly. 2000. <span>“Inference of Population Structure Using Multilocus Genotype Data.”</span> <em>Genetics</em> 155 (2): 945–59.
+Pritchard, Jonathan K, Matthew Stephens, and Peter Donnelly. 2000.
+<span>“Inference of Population Structure Using Multilocus Genotype
+Data.”</span> <em>Genetics</em> 155 (2): 945–59.
 </div>
 <div id="ref-raymond1995genepop" class="csl-entry">
-Raymond, Michel. 1995. <span>“GENEPOP: Population Genetics Software for Exact Tests and Ecumenism. Vers. 1.2.”</span> <em>Journal of Heredity</em> 86: 248–49.
+Raymond, Michel. 1995. <span>“GENEPOP: Population Genetics Software for
+Exact Tests and Ecumenism. Vers. 1.2.”</span> <em>Journal of
+Heredity</em> 86: 248–49.
 </div>
 <div id="ref-rousset1997genetic" class="csl-entry">
-Rousset, François. 1997. <span>“Genetic Differentiation and Estimation of Gene Flow from f-Statistics Under Isolation by Distance.”</span> <em>Genetics</em> 145 (4): 1219–28.
+Rousset, François. 1997. <span>“Genetic Differentiation and Estimation
+of Gene Flow from f-Statistics Under Isolation by Distance.”</span>
+<em>Genetics</em> 145 (4): 1219–28.
 </div>
 <div id="ref-shirk2017comparison" class="csl-entry">
-Shirk, AJ, EL Landguth, and SA Cushman. 2017. <span>“A Comparison of Indiviudal-Based Genetic Distance Metrics for Landscape Genetics.”</span> <em>Molecular Ecology</em> 17 (6).
+Shirk, AJ, EL Landguth, and SA Cushman. 2017. <span>“A Comparison of
+Indiviudal-Based Genetic Distance Metrics for Landscape
+Genetics.”</span> <em>Molecular Ecology</em> 17 (6).
 </div>
 <div id="ref-tournant2013evaluating" class="csl-entry">
-Tournant, Pierline, Eve Afonso, Sébastien Roué, Patrick Giraudoux, and Jean-Christophe Foltête. 2013. <span>“Evaluating the Effect of Habitat Connectivity on the Distribution of Lesser Horseshoe Bat Maternity Roosts Using Landscape Graphs.”</span> <em>Biological Conservation</em> 164: 39–49.
+Tournant, Pierline, Eve Afonso, Sébastien Roué, Patrick Giraudoux, and
+Jean-Christophe Foltête. 2013. <span>“Evaluating the Effect of Habitat
+Connectivity on the Distribution of Lesser Horseshoe Bat Maternity
+Roosts Using Landscape Graphs.”</span> <em>Biological Conservation</em>
+164: 39–49.
 </div>
 <div id="ref-weir1984estimating" class="csl-entry">
-Weir, Bruce S, and C Clark Cockerham. 1984. <span>“Estimating f-Statistics for the Analysis of Population Structure.”</span> <em>Evolution</em> 38 (6): 1358–70.
+Weir, Bruce S, and C Clark Cockerham. 1984. <span>“Estimating
+f-Statistics for the Analysis of Population Structure.”</span>
+<em>Evolution</em> 38 (6): 1358–70.
 </div>
 </div>
 </div>

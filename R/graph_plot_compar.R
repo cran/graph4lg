@@ -51,9 +51,9 @@ graph_plot_compar <- function(x, y,
   ####################################################
 
   # Check whether x and y are graphs
-  if(class(x) != "igraph"){
+  if(!inherits(x, "igraph")){
     stop("'x' must be a graph object of class 'igraph'.")
-  } else if (class(y) != "igraph"){
+  } else if (!inherits(y, "igraph")){
     stop("'y' must be a graph object of class 'igraph'.")
   }
 

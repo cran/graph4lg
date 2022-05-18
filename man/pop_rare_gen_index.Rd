@@ -4,7 +4,7 @@
 \alias{pop_rare_gen_index}
 \title{Compute population-level rarefied genetic indices with ADZE software}
 \usage{
-pop_rare_gen_index(x, max_g = NULL, pop_names = NULL)
+pop_rare_gen_index(x, max_g = NULL, pop_names = NULL, OS = "linux")
 }
 \arguments{
 \item{x}{An object of class \code{genind}
@@ -22,6 +22,9 @@ argument, populations are given the names they have initially in the
 'genind' object (which is sometimes only a number). The order of the
 population names must match with their order in the 'genind' object.
 The function does not reorder them. Users must be careful.}
+
+\item{OS}{A character string indicating whether you use a Linux ('linux')
+or Windows ('win') operating system.}
 }
 \value{
 An object of class \code{data.frame} whose rows
@@ -31,7 +34,7 @@ the population names (ID). The order of the columns depends on the
 vector 'indices'.
 }
 \description{
-The function computes population-level rarefied genetic indices 
+The function computes population-level rarefied genetic indices
 from an object of class \code{genind} with the ADZE software.
 }
 \author{

@@ -61,6 +61,7 @@ The function enables to export a spatial graph to
 shapefile layers.
 }
 \examples{
+\dontrun{
 data(data_tuto)
 mat_w <- data_tuto[[1]]
 gp <- gen_graph_topo(mat_w = mat_w, topo = "gabriel")
@@ -72,6 +73,7 @@ graph_to_shp(graph = gp, crds = pts_pop_simul, mode = "both",
              layer = "test_fonct",
              dir_path = tempdir(),
              metrics = FALSE)
+ }
 }
 \author{
 P. Savary
