@@ -28,9 +28,9 @@
 #' Euclidean genetic distance between populations in the multidimensional
 #' space defined by all the independent principal components.}
 #' \item{If 'dist = 'GST'', then the genetic distance used is the
-#' G'ST (Hedrick, 2005)}
+#' G'ST (Hedrick, 2005)}. See graph4lg <= 1.6.0 only, because it used diveRsity
 #' \item{If 'dist = 'D'', then the genetic distance used is
-#' Jost's D (Jost, 2008)}
+#' Jost's D (Jost, 2008)}. See graph4lg <= 1.6.0 only, because it used diveRsity
 #' }
 #' @param null_val (optional) Logical. Should negative and null FST, FST_lin,
 #' GST or D values be replaced by half the minimum positive value?
@@ -281,9 +281,13 @@ mat_gen_dist <- function(x,
     #x@pop <- x@pop[order(as.character(x@pop))]
 
     # Use of the function 'mat_pw_gst()'
-    D <- mat_pw_gst(x = x)
-    # Negative values are converted into 0
-    D[D < 0] <- 0
+    # D <- mat_pw_gst(x = x)
+    # # Negative values are converted into 0
+    # D[D < 0] <- 0
+
+    message("GST is not computed with the CRAN version anymore
+            since diveRsity package was archived. You can install
+            an archived version of diveRsity and use graph4lg <= 1.6.0")
 
   } else if (dist == "D"){
 
@@ -291,9 +295,13 @@ mat_gen_dist <- function(x,
     #x@pop <- x@pop[order(as.character(x@pop))]
 
     # Use of the function 'mat_pw_d_j()'
-    D <- mat_pw_d_j(x = x)
+    #D <- mat_pw_d_j(x = x)
     # Negative values are converted into 0
-    D[D < 0] <- 0
+    #D[D < 0] <- 0
+
+    message("Jost's D is not computed with the CRAN version anymore
+            since diveRsity package was archived. You can install
+            an archived version of diveRsity and use graph4lg <= 1.6.0")
 
   } else if (dist == "FST_lin"){
 

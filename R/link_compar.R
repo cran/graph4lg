@@ -214,7 +214,12 @@ link_compar <- function(proj_name,         # character
 
     inter_ls <- suppressWarnings(sf::st_intersection(sf::st_as_sf(ls1_bi),
                                                      sf::st_as_sf(ls2_bi)))
-    inter_area <- sf::st_area(inter_ls)
+    if(nrow(inter_ls) != 0){
+      inter_area <- sf::st_area(inter_ls)
+    } else {
+      inter_area <- 0
+    }
+
     ls1_area <- sf::st_area(sf::st_as_sf(ls1_bi))
     ls2_area <- sf::st_area(sf::st_as_sf(ls2_bi))
 
@@ -229,7 +234,6 @@ link_compar <- function(proj_name,         # character
                                area_overlap = as.numeric(inter_area)))
 
   }
-
 
   correl <- stats::cor(df_res$cost_dist_1, df_res$cost_dist_2)
 

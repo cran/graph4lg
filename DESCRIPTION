@@ -1,7 +1,7 @@
 Package: graph4lg
 Type: Package
 Title: Build Graphs for Landscape Genetics Analysis
-Version: 1.6.0
+Version: 1.8.0
 Authors@R: 
     c(person(given = "Paul",
              family = "Savary",
@@ -14,6 +14,9 @@ Authors@R:
              comment = c(ORCID = "0000-0001-6330-6136")),
       person(given = "Tyler",
              family = "Rudolph",
+             role = "ctb"),
+      person(given = "Alexandrine",
+             family = "Daniel",
              role = "ctb"))
 Maintainer: Paul Savary <psavary@protonmail.com>
 Description: Build graphs for landscape genetics analysis. This set of 
@@ -37,16 +40,17 @@ Encoding: UTF-8
 LazyData: true
 Imports: adegenet, ggplot2, stringr, igraph, stats, spatstat.geom,
         spatstat.linnet, Matrix, vegan, utils, methods, pegas, MASS,
-        tidyr, sp, sf, diveRsity, rappdirs, gdistance, raster, foreign,
+        tidyr, sp, sf, hierfstat, rappdirs, gdistance, raster, foreign,
         ecodist, Rdpack
 Suggests: knitr, rmarkdown
 RdMacros: Rdpack
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 VignetteBuilder: knitr, rmarkdown
 NeedsCompilation: no
-Packaged: 2022-05-18 13:28:23 UTC; psavary
+Packaged: 2023-01-30 00:23:37 UTC; paul
 Author: Paul Savary [aut, cre] (<https://orcid.org/0000-0002-2104-9941>),
   Gilles Vuidel [ctb] (<https://orcid.org/0000-0001-6330-6136>),
-  Tyler Rudolph [ctb]
+  Tyler Rudolph [ctb],
+  Alexandrine Daniel [ctb]
 Repository: CRAN
-Date/Publication: 2022-05-18 13:50:05 UTC
+Date/Publication: 2023-01-30 14:00:05 UTC

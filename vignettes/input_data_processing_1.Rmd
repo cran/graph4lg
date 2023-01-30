@@ -162,9 +162,9 @@ From a `genind` object, the function `mat_gen_dist` calculates several types of 
 
 + F~ST~ [@weir1984estimating] or linearised F~ST~ [@rousset1997genetic] (options '`dist=FST`' and '`dist=FST_lin`').
 
-+ G'~ST~ [@hedrick2005standardized] (option '`dist=GST`').
++ G'~ST~ [@hedrick2005standardized] (option '`dist=GST`') (graph4lg <= 1.6.0).
 
-+ D~Jost~ [@jost2008gst] (option '`dist=D`').
++ D~Jost~ [@jost2008gst] (option '`dist=D`') (graph4lg <= 1.6.0).
 
 + D~PS~ (1 - proportion of shared alleles) [@bowcock1994high, @murphy_graph_2015] (option '`dist=DPS`').
 

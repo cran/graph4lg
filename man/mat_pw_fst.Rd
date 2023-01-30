@@ -4,15 +4,10 @@
 \alias{mat_pw_fst}
 \title{Compute a pairwise FST matrix between populations}
 \usage{
-mat_pw_fst(x, pop_names = NULL)
+mat_pw_fst(x)
 }
 \arguments{
-\item{x}{An object of class \code{genind}, or the
-character string indicating the path of the GENEPOP file.}
-
-\item{pop_names}{(optional) A vector of class \code{character} of the same
-length as the number of populations (row and column number in the returned
-matrix). It contains the name of the populations.}
+\item{x}{An object of class \code{genind}}
 }
 \value{
 A pairwise \code{matrix} of FST with as many rows and columns as
@@ -20,41 +15,26 @@ there are populations in the input data.
 }
 \description{
 The function computes the pairwise FST matrix between
-populations from an object of class \code{genind} or
-directly from a GENEPOP file.
+populations from an object of class \code{genind}
 }
 \details{
 The formula used is that of Weir et Cockerham (1984).
-This functions uses directly the function \code{diffCalc}
-from \pkg{diveRsity}.
-See \url{https://genepop.curtin.edu.au:443/help_input.html} for details on the
-GENEPOP file format and see Raymond (1995) for detail about GENEPOP software.
+This functions uses directly the function \code{pairwise.WCfst}
+from \pkg{hierfstat}.
 }
 \section{Warnings}{
 
-The order of populations matters :
-\itemize{
-\item If \code{x} is an object of class \code{genind}, individuals are
-re-ordered by populations and populations are ordered in alphabetic order.
-\item If \code{x} is the path to a GENEPOP file, population order
-in \code{pop_names} must be the same as in the GENEPOP file.
-}
 Negative values are converted into 0
 }
 
 \examples{
+\dontrun{
 data("data_ex_genind")
-mat_d_j <- mat_pw_d_j(data_ex_genind)
-path_in <- system.file('extdata', 'gpop_simul_10_g100_04_20.txt',
-                       package = 'graph4lg')
-file_n <- file.path(tempdir(), "gpop_simul_10_g100_04_20.txt")
-file.copy(path_in, file_n, overwrite = TRUE)
-mat_pw_fst(x = file_n, pop_names = as.character(order(as.character(1:10))))
-file.remove(file_n)
+mat_fst <- mat_pw_fst(data_ex_genind)
+}
 }
 \references{
 \insertRef{weir1984estimating}{graph4lg}
-\insertRef{raymond1995genepop}{graph4lg}
 }
 \author{
 P. Savary

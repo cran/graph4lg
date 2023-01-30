@@ -33,9 +33,9 @@ PCA of the matrix of allelic frequencies by population. It is a
 Euclidean genetic distance between populations in the multidimensional
 space defined by all the independent principal components.}
 \item{If 'dist = 'GST'', then the genetic distance used is the
-G'ST (Hedrick, 2005)}
+G'ST (Hedrick, 2005)}. See graph4lg <= 1.6.0 only, because it used diveRsity
 \item{If 'dist = 'D'', then the genetic distance used is
-Jost's D (Jost, 2008)}
+Jost's D (Jost, 2008)}. See graph4lg <= 1.6.0 only, because it used diveRsity
 }}
 
 \item{null_val}{(optional) Logical. Should negative and null FST, FST_lin,

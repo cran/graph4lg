@@ -1,3 +1,13 @@
+# graph4lg 1.8.0
+
+-- Major changes 
+- Removal of diveRsity dependency
+- Removal of mat_pw_gst and mat_pw_d_jost
+- Update of mat_gen_dist to depend on hierfstat package
+- Creation of graphab_interpol function
+-- Minor changes
+- Bug fixed in link_compar
+
 # graph4lg 1.6.0
 
 -- Minor changes 

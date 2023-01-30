@@ -260,7 +260,7 @@ sample_raster <- function(raster,
     # ------ Sample in polygons
 
     # Convert raster to polygon, dissolved neighboring same values
-    r_poly <- raster::rasterToPolygons(r_clump, dissolve = T)
+    r_poly <- raster::rasterToPolygons(r_clump, dissolve = TRUE)
 
     # We copy it for further use.
     # Row numbers of the polygons in initial r_poly will be polygon IDs later on
@@ -442,13 +442,20 @@ sample_raster <- function(raster,
       val_mat <- val_mat[order(val_mat)]
       val_min <- unique(val_mat[which(val_mat < dist_min)])
 
-      id_min <- c()
-      for(n in 1:length(val_min)){
-        pn <- data.frame(which(mat_rast == val_min[n], arr.ind = TRUE))[1, ]
-        id_min <- c(id_min, row.names(pn))
+      if(0 %in% val_min){
+        df_samp <- df_samp[-which(duplicated(df_samp$x, df_samp$y)), ]
+        val_min <- val_min[-which(val_min == 0)]
       }
 
-      df_samp <- df_samp[-which(df_samp$ID %in% id_min), ]
+      if(length(val_min) > 0){
+        id_min <- c()
+        for(n in 1:length(val_min)){
+          pn <- data.frame(which(mat_rast == val_min[n], arr.ind = TRUE))[1, ]
+          id_min <- c(id_min, row.names(pn))
+        }
+
+        df_samp <- df_samp[-which(df_samp$ID %in% id_min), ]
+      }
     }
 
     # t is the number of points selected
