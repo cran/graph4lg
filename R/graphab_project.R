@@ -9,26 +9,12 @@
 #' @param raster A character string indicating the name of the .tif raster file
 #' or of its path. If the path is not specified, the raster must be present in
 #' the current working directory. Raster cell values must be in INT2S encoding.
-#' @param habitat An integer or numeric value or vector indicating the
-#' code.s (cell value.s) of the habitat cells in the raster file.
-#' @param nomerge (optional, default=FALSE) A logical indicating whether
-#' contiguous patches corresponding to different pixel codes are merged
-#' (FALSE, default) or not merged (TRUE).
-#' Be careful, the \code{nomerge = TRUE} option is in development and we cannot
-#' guarantee the results are correct.
-#' @param minarea (optional, default=0) An integer or numeric value specifiying
-#' the minimum area in hectares for a habitat patch size to become a graph node.
 #' @param nodata (optional, default=NULL) An integer or numeric value
 #' specifying the code in the raster file associated with nodata value
 #' (often corresponding to peripheric cells)
-#' @param maxsize (optional, default=NULL) An integer or numeric value
-#' specifying the maximum side length of the rectangular full extent of each
-#' habitat patch in metric units. If this side length exceeds \code{maxsize} m,
-#' then several patches are created.
-#' (often corresponding to peripheric cells)
-#' @param con8 (optional, default=FALSE) A logical indicating whether a
-#' neighborhood of 8 pixels (TRUE) is used for patch definition. By default,
-#' \code{con8=4}, corresponding to 4 pixel neighborhood.
+#' @param parallel.java An integer indicating how many computer cores are used
+#' to run the .jar file. By default, \code{parallel.java = NULL}, and java sets
+#' it according to local settings.
 #' @param alloc_ram (optional, default = NULL) Integer or numeric value
 #' indicating RAM gigabytes allocated to the java process. Increasing this
 #' value can speed up the computations. Too large values may not be compatible
@@ -39,29 +25,26 @@
 #' When 'proj_path = NULL', the project directory is equal to \code{getwd()}.
 #' @details A habitat patch consists of the central pixel with its eight
 #' neighbors if they are of the same value (8-connexity) and the path
-#' geometry is not simplified. See more information in Graphab 2.8 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+#' geometry is not simplified. See more information in Graphab 3.0 manual:
+#' \url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 #' @export
 #' @author P. Savary, T. Rudolph
+#' @references \insertRef{foltete2012software}{graph4lg}
+#' \insertRef{foltete2021graphab}{graph4lg}
+#' \insertRef{savary2024multiple}{graph4lg}
 #' @examples
 #' \dontrun{
-#' proj_name <- "grphb_ex"
-#' raster <- "rast_ex.tif"
-#' habitat <- 5
+#' proj_name <- "graphab_example"
+#' raster <- "rast_simul50.tif"
 #' graphab_project(proj_name = proj_name,
-#'                raster = raster,
-#'                habitat = habitat)
+#'                raster = raster)
 #' }
 
 
 graphab_project <- function(proj_name,
                             raster,
-                            habitat,
-                            nomerge = FALSE,
-                            minarea = 0,
                             nodata = NULL,
-                            maxsize = NULL,
-                            con8 = FALSE,
+                            parallel.java = NULL,
                             alloc_ram = NULL,
                             proj_path = NULL){
 
@@ -80,6 +63,17 @@ graphab_project <- function(proj_name,
     }
   } else {
     proj_path <- normalizePath(getwd())
+  }
+
+  #######################################
+  # Add '' to proj_path for cases with spaces in paths
+  if(all(stringr::str_sub(proj_path, 1, 1) != "'",
+         stringr::str_sub(proj_path, 1, 1) != "'",
+         stringr::str_detect(string = proj_path,
+                             pattern = " "))){
+    proj_path_cmd <- paste0("'", proj_path, "'")
+  } else {
+    proj_path_cmd <- proj_path
   }
 
   #########################################
@@ -101,42 +95,23 @@ graphab_project <- function(proj_name,
                 " must be an existing .tif raster file."))
   }
 
-  #########################################
-  # Check for habitat class
-  if(!inherits(habitat, c("numeric", "integer"))){
-    stop("'habitat' must be an integer indicating the habitat code")
+  #######################################
+  # Add '' to raster for cases with spaces in paths not transformed before
+  if(all(stringr::str_sub(raster, 1, 1) != "'",
+         stringr::str_sub(raster, 1, 1) != "'",
+         stringr::str_detect(string = raster,
+                             pattern = " "))){
+    raster_cmd <- paste0("'", raster, "'")
+  } else {
+    raster_cmd <- raster
   }
 
   #########################################
-  # Check for nomerge argument
-  if(!inherits(nomerge, c("logical"))){
-    stop(paste0("'nomerge' must be a logical indicating whether ",
-                "contiguous patches are not merged."))
-  }
-
-  #########################################
-  # Check for minarea class
-  if(!inherits(minarea, c("numeric", "integer"))){
-    stop("'minarea' must be an integer indicating minimum patch size")
-  }
-
-
-  #########################################
-  # Check for maxsize
-  if(!is.null(maxsize)){
-    if(!inherits(maxsize, c("numeric", "integer"))){
-      stop(paste0("'maxsize' must be an integer indicating maximum side length",
-                  " of the rectangular extent of every habitat patch"))
+  # Check for parallel.java
+  if(!is.null(parallel.java)){
+    if(!inherits(parallel.java, c("numeric", "integer"))){
+      stop("'parallel.java' must be a numeric or integer value.")
     }
-
-  }
-
-  #########################################
-  # Check for con8 class
-  if(!inherits(con8, c("logical"))){
-    stop(paste0("'con8' must be a logical indicating whether a neighboorhood of ",
-                " 8 pixels is used for patch definition (if TRUE). ",
-                "Default=FALSE: 4 pixel neighboorhood."))
   }
 
   #########################################
@@ -153,40 +128,25 @@ graphab_project <- function(proj_name,
 
   #########################################
   # Get graphab path
-  version <- "graphab-2.8.jar"
-  path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
-
+  version <- "graphab-3.0.jar"
+  path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg2_jar/", version)
 
   #########################################
   # Command line
 
-  cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab,
-           "--create", proj_name, raster,
-           paste0("habitat=", paste(habitat, collapse = ",")))
+  cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab)
 
-  if(nomerge){
-    cmd <- c(cmd, "nomerge")
-
-    message("Be careful, the nomerge = TRUE option is in development.
-            We cannot guarantee the results are correct.")
-
+  if(!is.null(parallel.java)){
+    cmd <- c(cmd, "-proc ", as.character(parallel.java))
   }
+
+  cmd <- c(cmd, "--create", proj_name, raster_cmd)
 
   if(!is.null(nodata)){
     cmd <- c(cmd, paste0("nodata=", nodata))
   }
 
-  cmd <- c(cmd, paste0("minarea=", minarea))
-
-  if(!is.null(maxsize)){
-    cmd <- c(cmd, paste0("maxsize=", maxsize))
-  }
-
-  if(con8){
-    cmd <- c(cmd, "con8")
-  }
-
-  cmd <- c(cmd, paste0("dir=", proj_path))
+  cmd <- c(cmd, paste0("dir=", proj_path_cmd))
 
   if(!is.null(alloc_ram)){
     if(inherits(alloc_ram, c("integer", "numeric"))){
@@ -195,19 +155,6 @@ graphab_project <- function(proj_name,
       stop("'alloc_ram' must be a numeric or an integer")
     }
   }
-
-  # setwd(dir = proj_path)
-  # tryCatch({
-  #   #########################################
-  #   # Run the command line
-  #   rs <- system2(java.path, args = cmd, stdout = TRUE)
-  # },
-  # error = {
-  #   rs <- NA
-  # },
-  # finally = {
-  #   setwd(dir = wd1)
-  # })
 
   #########################################
   # Run the command line

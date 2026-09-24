@@ -36,7 +36,7 @@
 #' @author P. Savary
 #' @examples
 #' \dontrun{
-#' link_compar(proj_name = "grphb_ex",
+#' link_compar(proj_name = "graphab_example",
 #'               linkset1 = "lcp1",
 #'               linkset2 = "lcp2"
 #'               buffer_width = 200)
@@ -75,13 +75,17 @@ link_compar <- function(proj_name,         # character
 
   proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
 
+  ## Check project version
+  check_graphab_version(proj_path = proj_end_path)
+
   #########################################
   # Check for linkset1 class
   if(!inherits(linkset1, "character")){
     stop("'linkset1' must be a character string specifying the name of the
          first link set involved in the comparison.")
-  } else if (!(paste0(linkset1, "-links.csv") %in%
-               list.files(path = paste0(proj_path, "/", proj_name)))){
+  } else if (!(check_graphab_object(proj_path = proj_end_path,
+                                    object_type = "linkset",
+                                    name = linkset1))){
     stop("The linkset you refer to does not exist.
            Please use graphab_link() before.")
   }
@@ -91,8 +95,9 @@ link_compar <- function(proj_name,         # character
   if(!inherits(linkset2, "character")){
     stop("'linkset2' must be a character string specifying the name of the
          second link set involved in the comparison.")
-  } else if (!(paste0(linkset2, "-links.csv") %in%
-               list.files(path = paste0(proj_path, "/", proj_name)))){
+  } else if (!(check_graphab_object(proj_path = proj_end_path,
+                                    object_type = "linkset",
+                                    name = linkset2))){
     stop("The linkset you refer to does not exist.
            Please use graphab_link() before.")
   }
@@ -103,7 +108,6 @@ link_compar <- function(proj_name,         # character
     stop("'buffer_width' must be a numeric or integer value")
   }
 
-
   #########################################
   # Check for min_length
   if(!is.null(min_length)){
@@ -112,87 +116,70 @@ link_compar <- function(proj_name,         # character
     }
   }
 
-
   ###########################################
   # Open layers corresponding to linksets
 
-  ls1 <- suppressWarnings(sf::as_Spatial(sf::st_read(dsn = paste0(proj_path,
-                                                                  "/", proj_name),
-                                                     layer = paste0(linkset1,
-                                                                    "-links"))))
+  ## Link all the project files
+  proj_files <- list.files(path = paste0(proj_path, "/", proj_name),
+                           recursive = TRUE, full.names = TRUE)
 
-  ls2 <- suppressWarnings(sf::as_Spatial(sf::st_read(dsn = paste0(proj_path,
-                                                                  "/", proj_name),
-                                                     layer = paste0(linkset2,
-                                                                    "-links"))))
+  ## Find the files which matches the linksets' .pgkg file name
+  linkset1_file <- proj_files[which(!is.na(
+    stringr::str_match(string = proj_files,
+                       pattern = paste0("/", linkset1, "-links.gpkg"))))]
+
+  linkset2_file <- proj_files[which(!is.na(
+    stringr::str_match(string = proj_files,
+                       pattern = paste0("/", linkset2, "-links.gpkg"))))]
+
+  ## Load the data from the linkset files
+  ls1 <- suppressWarnings(
+    sf::read_sf(linkset1_file,
+                as_tibble = FALSE))
+
+  ls2 <- suppressWarnings(
+    sf::read_sf(linkset2_file,
+                as_tibble = FALSE))
 
 
   ###########################################
   # Filter to limit the number of links by removing short links
 
   if(!is.null(min_length)){
-    ls1 <- ls1[which(ls1$DistM >= min_length), ]
-    ls2 <- ls2[which(ls2$DistM >= min_length), ]
+    ls1 <- ls1[which(ls1$distm >= min_length), ]
+    ls2 <- ls2[which(ls2$distm >= min_length), ]
+
+    ## Previous steps can cause differences between the number of links
+    if(nrow(ls1) != nrow(ls2)){
+      message(paste0("After the filtering based on 'min_length', linkset1' ",
+                     "and 'linkset2' had different numbers of links and only ",
+                     "shared links were conserved."))
+
+      shared_id <- ls1$Id[ls1$Id %in% ls2$Id]
+
+      ls1 <- ls1[which(ls1$Id %in% shared_id), ]
+      ls2 <- ls2[which(ls2$Id %in% shared_id), ]
+    }
   }
 
   ###########################################
   # Check that they share the same links
-
-  if(nrow(ls1) != nrow(ls2)){
-    stop("'linkset1' and 'linkset2' must have the same number of links.")
-  } else if(!(all(ls1$Id %in% ls2$Id))){
+  if(!(all(ls1$Id %in% ls2$Id))){
     stop("'linkset1' and 'linkset2' must have the same link IDs.")
   }
-
 
   ###########################################
   # Add buffer
   print(paste0("The buffer width on each side of the links has been set to ",
                buffer_width, " m."))
 
-  ls1_b <- raster::buffer(ls1, width = buffer_width, dissolve = FALSE)
-  ls2_b <- raster::buffer(ls2, width = buffer_width, dissolve = FALSE)
+  ls1_b <- sf::st_buffer(ls1,
+                         dist = buffer_width)
+  ls2_b <- sf::st_buffer(ls2,
+                         dist = buffer_width)
 
-
-  data1 <- ls1_b@data
-  data2 <- ls2_b@data
-
-  #########################################################################
-  #########################################################################
-
-  # ids <- ls1_b$Id
-  #
-  # spat_over <- function(id){
-  #   ls1_bi <- ls1_b[which(data1$Id == id), ]
-  #   ls2_bi <- ls2_b[which(data2$Id == id), ]
-  #
-  #   area_1 <- sf::st_area(sf::st_as_sf(ls1_bi))
-  #   area_2 <- sf::st_area(sf::st_as_sf(ls2_bi))
-  #
-  #   inter_ls <- suppressWarnings(sf::st_intersection(sf::st_as_sf(ls1_bi),
-  #                                                    sf::st_as_sf(ls2_bi)))
-  #   inter_area <- sf::st_area(inter_ls)
-  #
-  #   return(list(area_1, area_2,
-  #               inter_area,
-  #               ls1_bi$Dist, ls2_bi$Dist,
-  #               ls1_bi$DistM, ls2_bi$DistM))
-  #
-  # }
-  # res_lap <- lapply(ids, FUN = spat_over)
-  #
-  # df_res <- data.frame(id_link = ids,
-  #                      area_1 = unlist(lapply(res_lap, "[", 1)),
-  #                      area_2 = unlist(lapply(res_lap, "[", 2)),
-  #                      cost_dist_1 = unlist(lapply(res_lap, "[", 4)),
-  #                      cost_dist_2 = unlist(lapply(res_lap, "[", 5)),
-  #                      euc_dist_1 = unlist(lapply(res_lap, "[", 6)),
-  #                      euc_dist_2 = unlist(lapply(res_lap, "[", 7)),
-  #                      area_overlap = unlist(lapply(res_lap, "[", 3)))
-
-  #########################################################################
-  #########################################################################
-
+  data1 <- sf::st_drop_geometry(ls1[, -which(colnames(ls1) == "the_geom")])
+  data2 <- sf::st_drop_geometry(ls2[, -which(colnames(ls2) == "the_geom")])
 
   df_res <- data.frame(id_link = NA,
                        area_1 = NA,
@@ -204,7 +191,6 @@ link_compar <- function(proj_name,         # character
                        area_overlap = NA)
   df_res <- df_res[-1, ]
 
-
   for(i in 1:nrow(ls1_b)){
 
     id <- data1[i, 'Id']
@@ -212,25 +198,25 @@ link_compar <- function(proj_name,         # character
     ls1_bi <- ls1_b[which(data1$Id == id), ]
     ls2_bi <- ls2_b[which(data2$Id == id), ]
 
-    inter_ls <- suppressWarnings(sf::st_intersection(sf::st_as_sf(ls1_bi),
-                                                     sf::st_as_sf(ls2_bi)))
+    inter_ls <- suppressWarnings(sf::st_intersection(ls1_bi,
+                                                     ls2_bi))
     if(nrow(inter_ls) != 0){
       inter_area <- sf::st_area(inter_ls)
     } else {
       inter_area <- 0
     }
 
-    ls1_area <- sf::st_area(sf::st_as_sf(ls1_bi))
-    ls2_area <- sf::st_area(sf::st_as_sf(ls2_bi))
+    ls1_area <- sf::st_area(ls1_bi)
+    ls2_area <- sf::st_area(ls2_bi)
 
     df_res <- rbind(df_res,
                     data.frame(id_link = id,
                                area_1 = as.numeric(ls1_area),
                                area_2 = as.numeric(ls2_area),
-                               cost_dist_1 = ls1_bi$Dist,
-                               cost_dist_2 = ls2_bi$Dist,
-                               euc_dist_1 = ls1_bi$DistM,
-                               euc_dist_2 = ls2_bi$DistM,
+                               cost_dist_1 = ls1_bi$dist,
+                               cost_dist_2 = ls2_bi$dist,
+                               euc_dist_1 = ls1_bi$distm,
+                               euc_dist_2 = ls2_bi$distm,
                                area_overlap = as.numeric(inter_area)))
 
   }

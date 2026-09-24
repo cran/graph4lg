@@ -2,36 +2,63 @@
 % Please edit documentation in R/get_graphab_metric.R
 \name{get_graphab_metric}
 \alias{get_graphab_metric}
-\title{Get metrics computed at the node in the Graphab project}
+\title{Get metrics computed at the patch/node level in the Graphab project}
 \usage{
-get_graphab_metric(proj_name, proj_path = NULL)
+get_graphab_metric(
+  proj_name,
+  habitat = NULL,
+  graph = NULL,
+  metric = NULL,
+  proj_path = NULL
+)
 }
 \arguments{
 \item{proj_name}{A character string indicating the Graphab project name.
 The project name is also the name of the project directory in which the
 file proj_name.xml is.}
 
+\item{habitat}{(default=NULL) A character string indicating the
+name of the habitat type for which the metric values should be returned.
+If NULL, there is no selection on the habitat type.}
+
+\item{graph}{(default=NULL) A character string indicating the
+name of the graph for which the metric values should be returned.
+If NULL, there is no selection on the graph name.}
+
+\item{metric}{(default=NULL) A character string indicating the
+name of the metric for which the values should be returned.
+If NULL, there is no selection on the metric name.}
+
 \item{proj_path}{(optional) A character string indicating the path to the
 directory that contains the project directory. It should be used when the
 project directory is not in the current working directory. Default is NULL.
-When 'proj_path = NULL', the project directory is equal to \code{getwd()}.}
+When \code{proj_path = NULL}, the project directory is equal
+to \code{getwd()}.}
 }
 \value{
-A data.frame with metrics computed at the patch level.
+A data.frame or list of data.frames with the values of metrics
+computed at the patch/node level for a given habitat type or a given graph.
+The data.frame indicate the type of habitat to which each node/patch
+corresponds, and the name of the metric includes that of the graph on which
+it was computed.
 }
 \description{
-The function gets the metrics computed at the node-level in
-the Graphab project
+The function gets the values of metrics computed at the
+patch/node level in the Graphab project.
 }
 \details{
-The imported metrics describe the patches and have been computed
-from the different graphs created in the Graphab project.
-See more information in Graphab 2.8 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+Only local metrics computed for patches/nodes, for a given habitat
+type and from one or several graphs can be returned. Global metrics are not
+allowed. When the name of a metric is given, only the values of this metric
+are returned. At least one of the parameters \code{habitat}, \code{habitat},
+or \code{metric} must not be NULL.
+See more information in Graphab 3.0 manual:
+\url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 }
 \examples{
 \dontrun{
-get_graphab_metric(proj_name = "grphb_ex")
+get_graphab_metric(proj_name = "graphab_example",
+                   habitat = "forest")
 }
 }
 \author{

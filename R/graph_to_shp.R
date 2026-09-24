@@ -35,6 +35,11 @@
 #' the layers to be created.
 #' @return Create shapefile layers in the directory specified with the parameter
 #' 'dir_path'.
+#' @details Note that exporting shapefile layers can limit the number of digits
+#' you can include in numeric fields, as well as the length of column names.
+#' Column names are renamed to allow the export but the number of digits can
+#' generate errors. You are strongly encouraged to use \code{graph_to_gpkg()} in
+#' the latter case.
 #' @export
 #' @author P. Savary
 #' @examples
@@ -57,6 +62,10 @@
 graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
                          layer, dir_path,
                          metrics = FALSE){
+
+  warning(paste0("This function will soon be deprecated. ",
+                 "In the future, only graph_to_gpkg() will be ",
+                 "conserved to export graph objects as geopackages."))
 
   # Check whether 'graph' is a graph object of class igraph
   if(!inherits(graph, "igraph")){
@@ -167,21 +176,20 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
       l_sf[[i]] <- sf::st_linestring(as.matrix(rbind(begin.coord[i, ],
                                                      end.coord[i,])))
     }
-    # Create simple feature geometry list column
-    l_sfc <- sf::st_sfc(l_sf, crs = crds_crs)
-
-    # Convert to `sp` object
-    lines_sp <- suppressWarnings(methods::as(l_sfc, "Spatial"))
 
     # Create a data.frame with edge attributes
-    edge_att <- graph_df
-    row.names(edge_att) <- paste( "ID",
-                                  as.character(1:nrow(edge_att)), sep ="" )
+    link_lay <- graph_df
+    row.names(link_lay) <- paste( "ID",
+                                  as.character(1:nrow(link_lay)), sep ="" )
 
-    #lines_sp@lines
-    # Create a spatial lines data.frame
-    link_lay <- suppressWarnings(sp::SpatialLinesDataFrame(lines_sp, edge_att))
+    # Add the linestrings as geom attribute
+    link_lay$geom <- sf::st_sfc(l_sf)
 
+    # Makes it an sf spatial feature
+    link_lay <- sf::st_as_sf(link_lay)
+
+    # Set the coordinates system
+    sf::st_crs(link_lay) <- crds_crs
 
     if(paste0("link_", layer, ".shp") %in% list.files(dir_path)){
 
@@ -192,11 +200,12 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
     } else {
 
       # Export the shapefile layer
-      sf::st_write(obj = sf::st_as_sf(link_lay),
+      sf::st_write(obj = link_lay,
                    dsn = dir_path,
                    layer = paste0("link_", layer),
                    driver = "ESRI Shapefile",
-                   delete_layer = TRUE)
+                   delete_layer = TRUE,
+                   quiet = TRUE)
 
       message(paste0("Layer link_", layer, ".shp was saved in the ",
                      "following directory: ", dir_path))
@@ -259,20 +268,33 @@ graph_to_shp <- function(graph, crds, mode = "both", crds_crs,
 
     } else {
 
+      # Check column names are not longer than 10 characters
+      if(any(unlist(lapply(colnames(node_lay),
+                          FUN = nchar)) >= 10)){
+        # Get ID of column names longer than 10 characters
+        id_to_rename <- which(unlist(lapply(colnames(node_lay),
+                                      FUN = nchar)) >= 10)
+        # number of fields to rename
+        nb_to_rename <- length(id_to_rename)
+
+        colnames(node_lay)[id_to_rename] <- paste0(
+          stringr::str_sub(colnames(node_lay)[id_to_rename], 1, 6),
+          "_", 1:nb_to_rename)
+
+        warning(paste0("Some field names were > 10 characters and had to ",
+                       "be renamed. To avoid this, use graph_to_gpkg()."))
+      }
+
       # Export the shapefile layer
       sf::st_write(obj = node_lay,
                    dsn = dir_path,
                    layer = paste0("node_", layer),
                    driver = "ESRI Shapefile",
-                   delete_layer = TRUE)
+                   delete_layer = TRUE,
+                   quiet = TRUE)
 
       message(paste0("Layer node_", layer, ".shp was saved in the ",
                      "following directory: ", dir_path))
     }
-
-
-
   }
-
-
 }

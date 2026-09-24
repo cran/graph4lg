@@ -1,3 +1,27 @@
+# graph4lg 2.0.0
+
+-- Major changes 
+- Update of the Graphab software version: 2.8.5 --> 3.0.0
+- Update of all the functions using Graphab
+- Addition of new Graphab functions: graphab_habitat(), graphab_merge_graph(),
+graphab_show(), check_graphab_object(), graphab_metapatch()
+- Major changes on graphab_project_desc()
+- Inclusion of the argument 'parallel.java' in all Graphab functions to allow
+for parallel computing with all Graphab functions.
+- Removal of the 'foreign' and 'sp' dependencies 
+- Update of the vignettes
+- Edits of genind_to_genepop() to make it compatible with more SNP data formats
+
+-- Minor changes
+- Update of the download links with new university domain: umlp.fr
+- Update all functions using ggplot2 and keeping deprecated arguments, such
+as 'linewidth', 'aes_string'
+- Creation of graph_to_gpkg() as a future alternative to graph_to_shp()
+- Removal of all the calls to the 'raster' package but for "gdistance" option
+in mat_cost_dist()
+- Change from costdist-0.4.1.jar to costdist-0.5.jar
+- Update of some data used in the vignettes
+
 # graph4lg 1.8.0
 
 -- Major changes 

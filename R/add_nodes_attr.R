@@ -61,7 +61,7 @@ add_nodes_attr <- function(graph,
   # Check whether graph is a graph of class igraph
   if(!inherits(graph, "igraph")){
     stop("'graph' must be an object of class 'igraph'.")
-  # and check if nodes have names
+    # and check if nodes have names
   } else if (is.null(igraph::V(graph)$name)){
     stop("'graph' must have nodes' names.")
   }
@@ -76,7 +76,7 @@ add_nodes_attr <- function(graph,
     } else if (!(index %in% names(data))){
       stop("'index' must be the name of a column of 'data'.")
     }
-  # Check whether input, dir_path and layer are compatible
+    # Check whether input, dir_path and layer are compatible
   } else if (input == "shp"){
 
     if(any(c(is.null(dir_path),
@@ -90,8 +90,11 @@ add_nodes_attr <- function(graph,
     } else {
       # If 'dir_path' and 'layer' are well defined, open the GIS layer
       sink("aux")
-      data <- suppressWarnings(sf::as_Spatial(sf::st_read(dsn = dir_path,
-                                                          layer = layer)))
+      data <- suppressWarnings(
+        sf::as_Spatial(
+          sf::read_sf(dsn = dir_path,
+                      layer = layer,
+                      as_tibble = FALSE)))
       #data <- rgdal::readOGR(dsn = dir_path, layer = layer)
       sink(NULL)
       # Get the attribute table of the layer as a data.frame
@@ -127,11 +130,11 @@ add_nodes_attr <- function(graph,
     # get the set of corresponding variables
     if(length(include) > 1){
       attrib <- attrib[which(attrib %in% include)]
-    # If include = "all", attrib is not modified
+      # If include = "all", attrib is not modified
     } else if (include == "all"){
       NULL
-    # If include has one element, different from "all", attrib is reduced
-    # to this element.
+      # If include has one element, different from "all", attrib is reduced
+      # to this element.
     } else {
       attrib <- attrib[which(attrib %in% include)]
     }

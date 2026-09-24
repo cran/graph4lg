@@ -15,12 +15,12 @@ mat_geo_dist(
 }
 \arguments{
 \item{data}{An object of class :\itemize{
-\item \code{data.frame} with 3 columns: 2 columns with the point spatial
+\item A \code{data.frame} with 3 columns: 2 columns with the point spatial
 coordinates and another column with point IDs
-\item \code{SpatialPointsDataFrame} }}
+\item An \code{sf} point spatial feature layer}}
 
-\item{ID}{(if \code{data} is of class \code{data.frame}) A character string
-indicating the name of the column of \code{data} with the point IDs}
+\item{ID}{(if \code{data} is of class \code{data.frame} or 'sf') A character
+string indicating the name of the column of \code{data} with the point IDs.}
 
 \item{x}{(if \code{data} is of class \code{data.frame}) A character string
 indicating the name of the column of \code{data} with the point longitude}

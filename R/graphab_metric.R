@@ -71,14 +71,16 @@
 #' them. It then maximizes \eqn{{e}^{-\alpha d_{ij}}} for patches i and j.
 #' To use patch capacity values different from the patch area, please use
 #' directly Graphab software.
-#' @param multihab A logical (default = FALSE) indicating whether the
-#' 'multihabitat' mode is used when computing the metric. It only applies to
-#' the following metrics: 'EC', 'F', 'IF' and 'BC'. If TRUE, then the project
-#' must have been created with the option \code{nomerge=TRUE}. It then returns
-#' several columns with metric values including the decomposition of the
-#' computation according to the type of habitat of every patch.
-#' Be careful, this option is in development and we cannot guarantee the
-#' results are correct.
+#' @param multihab (optional, default = NULL) A character string indicating
+#' whether the metric value should be decomposed across the different habitat
+#' types and their pairwise combinations. If `multihab='all'`, all the
+#' pairwise combinations are considered, including the within-habitat case.
+#' If `multihab='inter'`, only the inter-habitat types combinations are
+#' considered. Note that this argument is only required if the graph on which
+#' you compute the metrics is based on several habitat types.
+#' @param resfile (optional, default = NULL) A character string giving the
+#' name of the text file storing the results of the computation. Must be
+#' of the form 'file.txt'.
 #' @param dist A numeric or integer value specifying the distance at which
 #' dispersal probability is equal to \code{prob}. This argument is mandatory
 #' for weighted metrics (PC, F, IF, BC, dPC, CCe, CF) but not used for others.
@@ -97,11 +99,14 @@
 #' using a log-log linear regression. See also \code{\link{convert_cd}}
 #' function.
 #' @param return_val Logical (default = TRUE) indicating whether metric values
-#' are returned in R (TRUE) or only stored in the patch attribute layer (FALSE)
+#' are returned in R (TRUE) or only stored in the patch attribute layers (FALSE)
 #' @param proj_path (optional) A character string indicating the path to the
 #' directory that contains the project directory. It should be used when the
 #' project directory is not in the current working directory. Default is NULL.
 #' When 'proj_path = NULL', the project directory is equal to \code{getwd()}.
+#' @param parallel.java An integer indicating how many computer cores are used
+#' to run the .jar file. By default, \code{parallel.java = NULL}, and java sets
+#' it according to local settings.
 #' @param alloc_ram (optional, default = NULL) Integer or numeric value
 #' indicating RAM gigabytes allocated to the java process. Increasing this
 #' value can speed up the computations. Too large values may not be compatible
@@ -109,34 +114,43 @@
 #' @return If \code{return_val=TRUE}, the function returns a \code{data.frame}
 #' with the computed metric values and the corresponding patch ID when the
 #' metric is local or delta metric, or the numeric value of the global metric.
-#' @details The metrics are described in Graphab 2.8 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+#' If the metric is computed on a graph whose nodes belong to different habitat
+#' categories, the returned table includes several habitat categories.
+#' @details The metrics are described in Graphab 3.0 manual:
+#' \url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 #' Graphab software makes possible the computation of other metrics.
 #' Be careful, when the same metric is computed several times, the option
 #' \code{return=TRUE} is not returning the right columns. In these cases,
 #' use \code{\link{get_graphab_metric}}.
 #' @export
 #' @author P. Savary
+#' @references \insertRef{foltete2012software}{graph4lg}
+#' \insertRef{foltete2021graphab}{graph4lg}
+#' \insertRef{savary2024multiple}{graph4lg}
 #' @examples
 #' \dontrun{
-#' graphab_metric(proj_name = "grphb_ex",
-#'                graph = "graph",
-#'                metric = "PC",
+#' graphab_metric(proj_name = "graphab_example",
+#'                graph = "graph_forest",
+#'                metric = "F",
+#'                multihab = "all",
 #'                dist = 1000,
 #'                prob = 0.05,
-#'                beta = 1)
+#'                beta = 1,
+#'                cost_conv = TRUE)
 #' }
 
 graphab_metric <- function(proj_name, # character
                            graph, # cost or euclid
                            metric, # character
-                           multihab = FALSE, # logical
+                           multihab = NULL, # NULL, 'all' or 'inter'
+                           resfile = NULL,
                            dist = NULL, # dist threshold
                            prob = 0.05, # dispersal probability
                            beta = 1, # area weight
                            cost_conv = FALSE, # FALSE (default) or true
-                           return_val = TRUE, #
+                           return_val = TRUE, # return the metric values
                            proj_path = NULL, # if null getwd() otherwise a character path
+                           parallel.java = NULL,
                            alloc_ram = NULL){
 
   #########################################
@@ -162,62 +176,75 @@ graphab_metric <- function(proj_name, # character
          Please use graphab_project() before.")
   }
 
+  ## Create proj_end_path proj_path/proj_name/proj_name.xml
   proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
 
-
-  ### Check for multihab
-  if(!inherits(multihab, "logical")){
-    stop("'multihab' must be equal to either TRUE or FALSE.")
-  } else if (multihab){
-    # If multihab = TRUE, check merge
-
-    # Check whether the project is compatible: merge_res == TRUE
-    if(check_merge(proj_end_path)){
-      stop(paste0("The project must have been built without merging habitat ",
-                  "patches corresponding to different codes."))
-    }
-
-    message("Be careful, the multihab = TRUE option is in development.
-            We cannot guarantee the results are correct.")
-
-    # If multihab = TRUE, check that the metric is compatible
-    if(!any(metric %in% c("EC", "F", "IF", "BC"))){
-      stop(paste0("When 'multihab = TRUE', 'metric' must be equal to either ",
-                  "'EC', 'F', 'IF' or 'BC'."))
-    } else {
-      # If multihab = TRUE, transform the metric parameter
-      metric <- paste0(metric, "h")
-    }
+  #######################################
+  # Add '' to proj_path for cases with spaces in paths
+  if(all(stringr::str_sub(proj_end_path, 1, 1) != "'",
+         stringr::str_sub(proj_end_path, 1, 1) != "'",
+         stringr::str_detect(string = proj_end_path,
+                             pattern = " "))){
+    proj_end_path_cmd <- paste0("'", proj_end_path, "'")
+  } else {
+    proj_end_path_cmd <- proj_end_path
   }
+
+  ## Check project version
+  check_graphab_version(proj_path = proj_end_path)
+
+  ## List existing metrics
+  graphab_objects <- graphab_show(proj_path = proj_end_path)
+  old_metrics <- graphab_objects[["Metrics"]]
 
   #########################################
   # Check for graph class
   if(!inherits(graph, "character")){
     stop("'graph' must be a character string")
-  } else if (!(paste0(graph, "-voronoi.shp") %in%
-               list.files(path = paste0(proj_path, "/", proj_name)))){
-    stop("The graph you refer to does not exist")
-  } else if (length(list.files(path = paste0(proj_path,
-                                             "/", proj_name),
-                               pattern = "-voronoi.shp")) == 0){
-    stop("There is not any graph in the project you refer to.
-         Please use graphab_graph() before.")
+  } else if (!check_graphab_object(proj_path = proj_end_path,
+                                   object_type = "graph",
+                                   name = graph)){
+    stop("The graph you refer to does not exist.
+           Please use graphab_graph() to create it.")
+  }
+
+  ### Check for multihab
+  if(!is.null(multihab)){
+    if(!inherits(multihab, "character")){
+      stop("'multihab' must be a character string")
+    }
+  }
+
+  ### Check for resfile
+  if(!is.null(resfile)){
+
+    if(!inherits(resfile, "character")){
+      stop("'resfile' must be a character string")
+    } else if(stringr::str_sub(resfile, -4, -1) != ".txt") {
+      stop("'resfile' must be a text file name such as 'file.txt'.")
+    }
+
+    ## Check whether resfile already exists
+    if(file.exists(paste0(proj_path, "/", proj_name,
+                          "/", resfile))){
+      warning(paste0("The file '", resfile, "' already exists and ",
+                     "will be overwritten."))
+    }
+
   }
 
   #########################################
   # Check for metric and parameters
 
-  list_all_metrics <- c("PC", "EC", "ECh", "IIC", "dPC",
-                        "F", "BC", "IF", "Dg", "CCe", "CF",
-                        "Fh", "IFh", "BCh")
+  list_all_metrics <- c("PC", "EC", "IIC", "dPC",
+                        "F", "BC", "IF", "Dg", "CCe", "CF")
 
-  list_glob_metrics <- list_all_metrics[1:5]
-  list_loc_metrics <- list_all_metrics[6:length(list_all_metrics)]
+  list_glob_metrics <- list_all_metrics[1:4]
+  list_loc_metrics <- list_all_metrics[5:length(list_all_metrics)]
 
-  list_dist_metrics <- c("PC", "EC", "ECh",
-                         "F", "Fh",
-                         "BC", "BCh",
-                         "IF", "IFh", "dPC")
+  list_dist_metrics <- c("PC", "EC",
+                         "F", "BC",
+                         "IF", "dPC")
 
   if(metric %in% list_dist_metrics){
     if(is.null(dist)){
@@ -243,6 +270,14 @@ graphab_metric <- function(proj_name, # character
     }
   }
 
+  ### Metrics not available with multiple habitats
+  if(metric %in% c("dPC", "IIC", "PC",
+                   "CF", "Dg", "CCe")){
+    if(!is.null(multihab)){
+      stop("The metric is not available in the multiple habitat mode.")
+    }
+  }
+
   # Special case of CF with beta
   if(metric == "CF"){
     if(beta < 0 || beta > 1){
@@ -253,7 +288,8 @@ graphab_metric <- function(proj_name, # character
   if(!inherits(metric, "character")){
     stop("'metric' must be a character string")
   } else if(!(metric %in% list_all_metrics)){
-    stop(paste0("'metric' must be ", paste(list_all_metrics, collapse = " or ")))
+    stop(paste0("'metric' must be ", paste(list_all_metrics,
+                                           collapse = " or ")))
   } else if(metric %in% list_loc_metrics){
     level <- "patch"
   } else if(metric %in% list_glob_metrics){
@@ -273,6 +309,14 @@ graphab_metric <- function(proj_name, # character
   }
 
   #########################################
+  # Check for parallel.java
+  if(!is.null(parallel.java)){
+    if(!inherits(parallel.java, c("numeric", "integer"))){
+      stop("'parallel.java' must be a numeric or integer value.")
+    }
+  }
+
+  #########################################
   # Check for Graphab
   gr <- get_graphab(res = FALSE, return = TRUE)
 
@@ -286,20 +330,34 @@ graphab_metric <- function(proj_name, # character
 
   #########################################
   # Get graphab path
-  version <- "graphab-2.8.jar"
-  path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
+  version <- "graphab-3.0.jar"
+  path_to_graphab <- paste0(rappdirs::user_data_dir(),
+                            "/graph4lg2_jar/", version)
 
   #########################################
   # Command line
 
-  cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab,
-           "--project", proj_end_path,
+  cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab)
+
+  if(!is.null(parallel.java)){
+    cmd <- c(cmd, "-proc ", as.character(parallel.java))
+  }
+
+  cmd <- c(cmd,
+           "--project", proj_end_path_cmd,
            "--usegraph", graph)
 
   if(level == "graph"){
     cmd <- c(cmd, "--gmetric", metric)
+    if(!is.null(resfile)){
+      cmd <- c(cmd, paste0("resfile=", resfile))
+    }
   } else if (level == "patch"){
     cmd <- c(cmd, "--lmetric", metric)
+  }
+
+  if(!is.null(multihab)){
+    cmd <- c(cmd, paste0("mh=", multihab))
   }
 
   if(metric %in% list_dist_metrics){
@@ -321,8 +379,8 @@ graphab_metric <- function(proj_name, # character
   }
 
   if(metric == "dPC"){
-    cmd[8] <- "--delta"
-    cmd[13] <- "obj=patch"
+    cmd[which(cmd == "dPC")] <- "PC"
+    cmd <- c(cmd, "--delta", "obj=patch")
   }
 
   if(!is.null(alloc_ram)){
@@ -340,151 +398,185 @@ graphab_metric <- function(proj_name, # character
   if(length(rs) == 1){
     if(rs == 1){
       message("An error occurred")
-    } else {
-      message(paste0("Metric '", metric, "' has been computed in the project ",
-                     proj_name))
     }
-  } else {
-    message(paste0("Metric '", metric, "' has been computed in the project ",
-                   proj_name))
   }
 
+
+  ## Check whether a new metric exists
+  graphab_objects <- graphab_show(proj_path = proj_end_path)
+  new_metrics <- graphab_objects[["Metrics"]]
+
+  if(length(new_metrics) == length(old_metrics)){
+
+    warning("An error occurred or the metric already existed.")
+
+    if(return_val){
+      if(any(level == "patch",
+             metric == "dPC")){
+       stop(paste0("You cannot return the value of an already existing metric ",
+                   "with this function. Please use 'get_graphab_metric()."))
+      } else if(level == "graph"){
+        new_metric <- paste0(metric, "_", graph) # to generate an output
+      }
+    }
+
+  } else {
+    new_metric <- new_metrics[!(new_metrics %in% old_metrics)]
+    name_new_metric <- stringr::str_sub(new_metric,
+                                        1,
+                                        nchar(new_metric) - nchar(graph) - 1)
+    message(paste0("Metric '", new_metric,
+                   "' has been computed in the project '",
+                   proj_name, "'."))
+
+  }
+
+  ## Get the metric value
   if(return_val){
-    if(level == "graph"){
 
-      if (metric == "dPC") {
+    if(level == "patch"){
 
-        #   fdpc <- list.files(path = proj_name, pattern = "delta-dPC")
-        #   file.info(paste0("./", proj_name, "/", fdpc))[, 'mtime']
-        #   file.info(paste0("./", proj_name, "/",
-        #                    name_txt))
+      # Check the habitats
+      existing_hab <- graphab_objects[["Habitats"]]
+      split_hab <- stringr::str_split(existing_hab, " - ")
 
-        name_txt <- paste0("delta-dPC_d", dist, "_p", prob, "_", graph, ".txt")
-        res_dpc <- utils::read.table(file = paste0(proj_path, "/",
-                                                   proj_name, "/",
-                                                   name_txt),
-                                     header = TRUE)[-1, ]
+      hab_codes <- unlist(lapply(split_hab, "[", 1))
+      hab_names <- unlist(lapply(split_hab, "[", 2))
 
-        vec_res <- c(paste0("Project : ", proj_name),
-                     paste0("Graph : ", graph),
-                     paste0("Metric : ", metric),
-                     paste0("Dist : ", dist),
-                     paste0("Prob : ", prob),
-                     paste0("Beta : ", beta))
+      # Open all the 'patches' layer and search for the new metric values
+      list_hab_df <- list()
+      for(i in 1:length(hab_names)){
 
-        res <- list(vec_res, res_dpc)
+        # Get colnames of the relevant layer
+        col_hab_i <- colnames(
+            suppressWarnings(sf::read_sf(
+              paste0(proj_path, "/", proj_name, "/",
+                     hab_names[i], "/patches.gpkg"),
+              query = "SELECT * FROM patches LIMIT 0",
+              as_tibble = FALSE)))
 
-      } else if (metric %in% c("EC", "PC", "IIC", "ECh")) {
+        detect_test <- c(stringr::str_detect(string = col_hab_i,
+                                             pattern = graph) &
+                           stringr::str_detect(string = col_hab_i,
+                                               pattern = name_new_metric))
 
-        #   fdpc <- list.files(path = proj_name, pattern = "delta-dPC")
-        #   file.info(paste0("./", proj_name, "/", fdpc))[, 'mtime']
-        #   file.info(paste0("./", proj_name, "/",
-        #                    name_txt))
+        if(any(detect_test)){
 
-        name_txt <- paste0(metric, ".txt")
-        res_val <- utils::read.table(file = paste0(proj_path, "/",
-                                                   proj_name, "/",
-                                                   name_txt),
-                                     header = TRUE)
+          hab_i <- suppressWarnings(sf::st_drop_geometry(sf::read_sf(
+              paste0(proj_path, "/", proj_name, "/",
+                     hab_names[i], "/patches.gpkg"),
+              as_tibble = FALSE)))
 
-        if(metric == "ECh"){
-          colnames(res_val)[5:ncol(res_val)] <- paste0("EC_",
-                          stringr::str_sub(colnames(res_val)[5:ncol(res_val)],
-                                          2, -1))
+          hab_i <- hab_i[, which(colnames(hab_i) %in%
+                                   c("idhab", "Id", "area",
+                                     "perim", "capacity",
+                                     col_hab_i[which(detect_test)]))]
+
+          hab_i$habitat <- hab_names[i]
+
+          hab_i <- hab_i[, c("habitat", "idhab", "Id",
+                             "area", "perim", "capacity",
+                             col_hab_i[which(detect_test)])]
+
+          colnames(hab_i) <- c("habitat", "id_habitat", "id_patch",
+                               "area", "perim", "capacity",
+                               col_hab_i[which(detect_test)])
+
+          list_hab_df[[i]] <- hab_i
         }
-
-        vec_res <- c(paste0("Project : ", proj_name),
-                     paste0("Graph : ", graph),
-                     paste0("Metric : ", metric),
-                     paste0("Dist : ", dist),
-                     paste0("Prob : ", prob),
-                     paste0("Beta : ", beta))
-
-        res <- list(vec_res, res_val)
-
       }
+      # Keep only the non-NULL list elements
+      list_hab_df <- list_hab_df[!(unlist(lapply(list_hab_df, is.null)))]
+      # Stack the table keeping their habitat name
+      res <- do.call("rbind", list_hab_df)
 
-    } else if (level == "patch"){
+    } else if(level == "graph"){
 
-      tab <- utils::read.csv(file = paste0(proj_path, "/",
-                                           proj_name, "/patches.csv"))
+      if(metric == "dPC"){
 
-      # name_met <- gsub(stringr::str_split(rs[3], pattern = ":")[[1]][2],
-      #                  pattern = " ", replacement = "")
+        new_metric1 <- new_metric[1]
+        name_new_metric1 <- name_new_metric[1]
 
-      if(metric %in% list_dist_metrics){
+        # Check the habitats
+        existing_hab <- graphab_objects[["Habitats"]]
+        split_hab <- stringr::str_split(existing_hab, " - ")
 
-        if(multihab == FALSE){
+        hab_codes <- unlist(lapply(split_hab, "[", 1))
+        hab_names <- unlist(lapply(split_hab, "[", 2))
 
-            # name_met <- paste0(metric, "_d", dist,
-            #                    "_p", prob, "_beta", beta,
-            #                    "_", graph)
-            # df_res <- tab[, c(1, which(colnames(tab) == name_met))]
+        # Open all the 'patches' layer and search for the new metric values
+        list_hab_df <- list()
+        for(i in 1:length(hab_names)){
 
-            df_res <- tab[, c(1:3, ncol(tab))]
+          # Get colnames of the relevant layer
+          col_hab_i <- colnames(
+              suppressWarnings(sf::read_sf(
+                paste0(proj_path, "/", proj_name, "/",
+                       hab_names[i], "/patches.gpkg"),
+                query = "SELECT * FROM patches LIMIT 0",
+                as_tibble = FALSE)))
 
-            vec_res <- c(paste0("Project : ", proj_name),
-                         paste0("Graph : ", graph),
-                         paste0("Metric : ", metric),
-                         paste0("Dist : ", dist),
-                         paste0("Prob : ", prob),
-                         paste0("Beta : ", beta))
+          detect_test <- c(stringr::str_detect(string = col_hab_i,
+                                               pattern = graph) &
+                             stringr::str_detect(string = col_hab_i,
+                                                 pattern = name_new_metric1))
 
-        } else {
+          if(any(detect_test)){
 
-          # Get habitat code
-          hab_code <- get_graphab_raster_codes(proj_name = proj_name,
-                                               mode = 'habitat',
-                                               proj_path = proj_path)
-          # Number of habitat types
-          nb_hab_type <- length(hab_code)
+            hab_i <- suppressWarnings(sf::st_drop_geometry(sf::read_sf(
+                paste0(proj_path, "/", proj_name, "/",
+                       hab_names[i], "/patches.gpkg"),
+                as_tibble = FALSE)))
 
-          if (metric %in% c("Fh", "IFh")){
+            hab_i <- hab_i[, which(colnames(hab_i) %in%
+                                     c("idhab", "Id", "area",
+                                       "perim", "capacity",
+                                       col_hab_i[which(detect_test)]))]
 
-            # df_res according to number of habitat types
-            df_res <- tab[, c(1:3, which(colnames(tab) == "Code"),
-                              (ncol(tab)- nb_hab_type + 1):ncol(tab))]
+            hab_i$habitat <- hab_names[i]
 
-            vec_res <- c(paste0("Project : ", proj_name),
-                         paste0("Graph : ", graph),
-                         paste0("Metric : ", metric),
-                         paste0("Dist : ", dist),
-                         paste0("Prob : ", prob),
-                         paste0("Beta : ", beta))
+            hab_i <- hab_i[, c("habitat", "idhab", "Id",
+                               "area", "perim", "capacity",
+                               col_hab_i[which(detect_test)])]
 
-          } else if(metric == "BCh"){
+            colnames(hab_i) <- c("habitat", "id_habitat", "id_patch",
+                                 "area", "perim", "capacity",
+                                 col_hab_i[which(detect_test)])
 
-            nb_combin <- (nb_hab_type * (nb_hab_type - 1)/2) + nb_hab_type
-            # df_res according to number of habitat types
-            df_res <- tab[, c(1:3, which(colnames(tab) == "Code"),
-                              (ncol(tab)- nb_combin + 1):ncol(tab))]
-
-            vec_res <- c(paste0("Project : ", proj_name),
-                         paste0("Graph : ", graph),
-                         paste0("Metric : ", metric),
-                         paste0("Dist : ", dist),
-                         paste0("Prob : ", prob),
-                         paste0("Beta : ", beta))
-
+            list_hab_df[[i]] <- hab_i
           }
-
         }
-      } else if (metric == "CF"){
 
-        name_met <- paste0(metric, "_beta", beta,
-                           "_", graph)
+        # Keep only the non-NULL list elements
+        list_hab_df <- list_hab_df[!(unlist(lapply(list_hab_df, is.null)))]
+        # Stack the table keeping their habitat name
+        res <- do.call("rbind", list_hab_df)
 
-        df_res <- tab[, c(1:3, which(colnames(tab) == name_met))]
+      } else {
 
-        vec_res <- c(paste0("Project : ", proj_name),
-                     paste0("Graph : ", graph),
-                     paste0("Metric : ", metric),
-                     paste0("Beta : ", beta))
+        if(!is.null(resfile)){
+          # If resfile is specified, open the text file
+          res_val <- utils::read.table(file = paste0(proj_path, "/",
+                                                     proj_name, "/",
+                                                     resfile),
+                                       header = TRUE)
+          # List of metric name and values
+          res <- list(new_metric,
+                      res_val)
+          names(res) <- c("Metric name", "Metric value table")
+        } else {
+          # If resfile is NULL, the text file is named as the metric
+          res_val <- utils::read.table(file = paste0(proj_path, "/",
+                                                     proj_name, "/",
+                                                     metric, ".txt"),
+                                       header = TRUE)
+          # List of metric name and values
+          res <- list(new_metric,
+                      res_val)
+          names(res) <- c("Metric name", "Metric value table")
+        }
       }
-
-      res <- list(vec_res, df_res)
     }
     return(res)
   }
-
 }

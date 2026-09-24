@@ -4,60 +4,37 @@
 \alias{graphab_project_desc}
 \title{Describe the objects of a Graphab project}
 \usage{
-graphab_project_desc(
-  proj_name,
-  mode = "patches",
-  linkset = NULL,
-  proj_path = NULL,
-  fig = FALSE,
-  return_val = TRUE
-)
+graphab_project_desc(proj_name, proj_path = NULL)
 }
 \arguments{
 \item{proj_name}{A character string indicating the Graphab project name.
 The project name is also the name of the project directory in which the
-file proj_name.xml is.}
-
-\item{mode}{A character string indicating the objects of the project that
-are described. It must be either:\itemize{
-\item{\code{mode='patches'}(default): The habitat patches are described
-with synthetic descriptors (code, number, mean capacity, median capacity,
-capacity harmonic mean, capacity Gini coefficient) and a histogram of
-capacity distribution.}
-\item{\code{mode='linkset'}: The links of a link set are described
-with synthetic descriptors (codes, costs, number, mean cost distance,
-median cost distance, cost distance harmonic mean, cost distance Gini
-coefficient) and a histogram of cost distance distribution.}
-\item{\code{mode='both'}: Both the patches and links of a linkset are
-described}
-}}
-
-\item{linkset}{A character string indicating the name of the link set
-whose properties are imported. The link set has been created with Graphab
-or using \code{\link{graphab_link}} function.}
+file proj_name.xml has been created.}
 
 \item{proj_path}{(optional) A character string indicating the path to the
 directory that contains the project directory. It should be used when the
 project directory is not in the current working directory. Default is NULL.
 When 'proj_path = NULL', the project directory is equal to \code{getwd()}.}
-
-\item{fig}{Logical (default = FALSE) indicating whether to plot a figure of
-the resulting spatial graph. The figure is plotted using function
-\code{\link{plot_graph_lg}}. The plotting can be long if the graph has many
-nodes and links.}
-
-\item{return_val}{Logical (default = TRUE) indicating whether the project
-features are returned as a list (TRUE) or only displayed in the
-R console (FALSE).}
+}
+\value{
+It returns a large list describing the objects in several categories,
+including:\itemize{
+\item{Source raster: the values of the source raster file.}
+\item{Habitats: the list of created habitats, their code, their name,
+their type (raster, vector), and, if raster, their code in the raster.}
+\item{Linksets: the list of created linksets and their type. If computed
+in cost distance units, a table of costs or the name of the external cost
+raster file is returned.}
+\item{Graphs: the list of graphs that have been created.}
+\item{Metrics: the list of computed metrics and their associated graphs.}
+}
 }
 \description{
 The function describes the objects of a Graphab project
 }
 \examples{
 \dontrun{
-graphab_project_desc(proj_name = "grphb_ex",
-                     mode = "patches",
-                     fig = FALSE)
+graphab_project_desc(proj_name = "graphab_example")
 }
 }
 \author{

@@ -8,7 +8,7 @@ library(graph4lg)
 library(igraph)
 
 
-## ---- echo = TRUE, eval = TRUE------------------------------------------------
+## ----echo = TRUE, eval = TRUE-------------------------------------------------
 data("data_tuto")
 
 mat_dps <- data_tuto[[1]]
@@ -18,9 +18,9 @@ dmc <- data_tuto[[4]]
 land_graph <- data_tuto[[5]]
 mat_ld <- data_tuto[[6]]
 
-## ---- echo = TRUE, eval = FALSE-----------------------------------------------
-#  dmc <- dist_max_corr(mat_gd = mat_dps, mat_ld = mat_ld,
-#                       interv = 500, pts_col = "black")
+## ----echo = TRUE, eval = FALSE------------------------------------------------
+# dmc <- dist_max_corr(mat_gd = mat_dps, mat_ld = mat_ld,
+#                      interv = 500, pts_col = "black")
 
 ## -----------------------------------------------------------------------------
 # DMC value
@@ -30,7 +30,7 @@ dmc[[2]]
 # Threshold distances tested
 dmc[[3]]
 
-## ---- eval = TRUE, echo = FALSE-----------------------------------------------
+## ----eval = TRUE, echo = FALSE------------------------------------------------
 
 vec_t <- c(500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000,
            6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 10230.05)
@@ -96,24 +96,24 @@ graph_k3 <- gen_graph_topo(mat_w = mat_dps, mat_topo = mat_dps,
 graph_comp <- gen_graph_topo(mat_w = mat_dps, mat_topo = mat_dps,
                              topo = "comp")
 
-## ---- echo = FALSE------------------------------------------------------------
+## ----echo = FALSE-------------------------------------------------------------
 g_plan <- graph_plan(crds = pts_pop_simul,
                      ID = "ID", x = "x", y = "y",
                      weight = TRUE)
 g_plan
 
-## ---- eval = FALSE, echo = TRUE-----------------------------------------------
-#  graph_ci <- gen_graph_indep(x = data_genind,
-#                              dist = "PCA",
-#                              cov = "sq",
-#                              adj = "holm")
+## ----eval = FALSE, echo = TRUE------------------------------------------------
+# graph_ci <- gen_graph_indep(x = data_genind,
+#                             dist = "PCA",
+#                             cov = "sq",
+#                             adj = "holm")
 
 ## -----------------------------------------------------------------------------
 graph_ci
 
 ## -----------------------------------------------------------------------------
 df_metric <- compute_node_metric(graph = graph_percol)
-head(df_metric)
+print(head(df_metric))
 
 ## -----------------------------------------------------------------------------
 graph_percol <- add_nodes_attr(graph = graph_percol,
@@ -122,20 +122,20 @@ graph_percol <- add_nodes_attr(graph = graph_percol,
                                include = "all")
 graph_percol
 
-## ---- eval = FALSE, echo = TRUE-----------------------------------------------
-#  graph_percol <- add_nodes_attr(graph_percol,
-#                               input = "shp",
-#                               dir_path = system.file('extdata', package = 'graph4lg'),
-#                               layer = "patches",
-#                               index = "Id",
-#                               include = "Area")
+## ----eval = FALSE, echo = TRUE------------------------------------------------
+# graph_percol <- add_nodes_attr(graph_percol,
+#                              input = "shp",
+#                              dir_path = system.file('extdata', package = 'graph4lg'),
+#                              layer = "patches",
+#                              index = "Id",
+#                              include = "Area")
 
 ## -----------------------------------------------------------------------------
 df_modul <- compute_graph_modul(graph = graph_percol, 
                     algo = "fast_greedy",
                     node_inter = "distance")
 
-head(df_modul)
+print(head(df_modul))
 # Unique values of module ID
 unique(df_modul$module)
 
@@ -152,7 +152,7 @@ p <- plot_graph_lg(graph = graph_mst,
                    link_width = "inv_w")
 p
 
-## ---- eval = TRUE, echo = TRUE------------------------------------------------
+## ----eval = TRUE, echo = TRUE-------------------------------------------------
 # Compute the metrics
 df_metric_mst <- compute_node_metric(graph = graph_mst)
 
@@ -203,12 +203,12 @@ scatter_dist_g(mat_y = mat_dps ,
 p <- plot_w_hist(graph = graph_gab_gen)
 p
 
-## ---- eval = FALSE, echo = TRUE-----------------------------------------------
-#  graph_to_shp(graph = graph_mst,
-#               crds = pts_pop_simul,
-#               mode = "both",
-#               layer = "test_shp_mst",
-#               dir_path = "wd",
-#               metrics = TRUE,
-#               crds_crs = 2154)
+## ----eval = FALSE, echo = TRUE------------------------------------------------
+# graph_to_gpkg(graph = graph_mst,
+#              crds = pts_pop_simul,
+#              mode = "both",
+#              layer = "test_shp_mst",
+#              dir_path = "wd",
+#              metrics = TRUE,
+#              crds_crs = 2154)
 

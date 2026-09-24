@@ -12,6 +12,7 @@ graphab_corridor(
   format = "raster",
   cost_conv = FALSE,
   proj_path = NULL,
+  parallel.java = NULL,
   alloc_ram = NULL
 )
 }
@@ -43,6 +44,10 @@ directory that contains the project directory. It should be used when the
 project directory is not in the current working directory. Default is NULL.
 When 'proj_path = NULL', the project directory is equal to \code{getwd()}.}
 
+\item{parallel.java}{An integer indicating how many computer cores are used
+to run the .jar file. By default, \code{parallel.java = NULL}, and java sets
+it according to local settings.}
+
 \item{alloc_ram}{(optional, default = NULL) Integer or numeric value
 indicating RAM gigabytes allocated to the java process. Increasing this
 value can speed up the computations. Too large values may not be compatible
@@ -53,19 +58,24 @@ The function computes corridors around the least-cost paths
 which have been computed in the Graphab project.
 }
 \details{
-See more information in Graphab 2.8 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+See more information in Graphab 3.0 manual:
+\url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 Be careful, when capacity has been changed. The last changes are taken into
 account for subsequent calculations in a project.
 }
 \examples{
 \dontrun{
-graphab_corridor(proj_name = "grphb_ex",
-                 graph = "graph",
+graphab_corridor(proj_name = "graphab_example",
+                 graph = "graph_forest",
                  maxcost = 1000,
                  format = "raster",
                  cost_conv = FALSE)
 }
+}
+\references{
+\insertRef{foltete2012software}{graph4lg}
+\insertRef{foltete2021graphab}{graph4lg}
+\insertRef{savary2024multiple}{graph4lg}
 }
 \author{
 P. Savary

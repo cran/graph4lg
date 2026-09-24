@@ -9,11 +9,10 @@ get_graphab_linkset_cost(proj_name, linkset, proj_path = NULL)
 \arguments{
 \item{proj_name}{A character string indicating the Graphab project name.
 The project name is also the name of the project directory in which the
-file proj_name.xml will be created.}
+file proj_name.xml has been created.}
 
-\item{linkset}{(optional, default=NULL) A character string indicating the
-name of the link set used to create the graph. Link sets can be created
-with \code{\link{graphab_link}}.}
+\item{linkset}{A character string indicating the name of the link set used
+to create the graph. Link sets can be created with \code{\link{graphab_link}}.}
 
 \item{proj_path}{(optional) A character string indicating the path to the
 directory that contains the project directory. It should be used when the
@@ -25,14 +24,14 @@ The function returns a data.frame with the cost values corresponding
 to every raster code value.
 }
 \description{
-The function extracts the cost values associated with a
+The function extracts the cost parameters associated with a
 linkset in a Graphab project
 }
 \examples{
 \dontrun{
-proj_name <- "grphb_ex"
+proj_name <- "graphab_example"
 get_graphab_linkset_cost(proj_name = proj_name,
-               linkset = "lkst1")
+               linkset = "forest_link_planar")
 }
 }
 \author{

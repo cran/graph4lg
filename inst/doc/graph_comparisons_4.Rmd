@@ -1,6 +1,6 @@
 ---
 title: "4 - Landscape and genetic graph comparison with `graph4lg`"
-author: "UMR ThéMA - UBFC-CNRS, UMR Biogéosciences - UBFC-CNRS, ARP-Astrance"
+author: "UMR 6049 ThéMA - CNRS - Univ. Marie et Louis Pasteur, Besançon, France"
 date: "Paul SAVARY"
 output:
   html_vignette:
@@ -31,7 +31,7 @@ library(igraph)
 
 # Introduction
 
-The rationale of `graph4lg` package in R is to make easier the construction and analysis of genetic and landscape graphs in landscape genetic studies (hence the name `graph4lg`, meaning Graphs for Landscape Genetics). This package provides users with tools for:
+The rationale of the `graph4lg` package in R is to make the construction and analysis of genetic and landscape graphs easier for landscape genetic studies (hence the name `graph4lg`, meaning Graphs for Landscape Genetics). This package provides users with tools for:
 
 * Landscape and genetic data processing
 * Genetic graph construction and analysis
@@ -39,16 +39,16 @@ The rationale of `graph4lg` package in R is to make easier the construction and 
 * Landscape and genetic graph comparisons
 
 
-Each one of the included tutorials focuses on one of these points. This fourth and last tutorial will then focus on **landscape and genetic graph comparison**. It will describe the package functions allowing users to:
+Each one of the included vignettes focuses on one of these points. This fourth and last vignette will focus on **landscape and genetic graph comparisons**. It will describe the package functions allowing users to:
 
 * Compare node metrics
 * Compare graph links
 * Compare graph modules
 
 
-## Data used in this tutorial
+## Data used in this vignette
 
-The package already includes genetic and spatial simulated data sets allowing users to discover its different functionalities. The first data set (`data_simul`) was simulated with CDPOP [@landguth2010cdpop] on a simulated landscape. It consists of 1500 individuals from 50 populations genotyped at 20 microsatellite loci. Individuals dispersed less when the cost-distance between populations was large. A landscape graph was created with Graphab [@foltete2012software] whose nodes were the 50 simulated populations and the links were weighted by cost-distance values between populations. The project created with Graphab was included into the package such that the landscape graphs and the cost-distance matrix can be easily imported into the R environment.
+The package already includes genetic and spatial simulated data sets allowing users to discover its different functionalities. The first data set (`data_simul`) was simulated with CDPOP [@landguth2010cdpop] on a simulated landscape. It consists of 1500 individuals from 50 populations genotyped at 20 microsatellite loci. Individuals dispersed less when the cost-distance between populations was large. A landscape graph was created with Graphab [@foltete2012software; foltete2021graphab] whose nodes were the 50 simulated populations and the links were weighted by cost-distance values between populations. The project created with Graphab was included into the package such that the landscape graphs and the cost-distance matrix can be easily imported into the R environment.
 
 The second data set (`data_ex`) was simulated as the first one but included only 10 populations. It is used to generate quick examples.
 
@@ -67,7 +67,7 @@ mat_ld <- data_tuto[[6]]
 
 We will also use Graphab projects already created for the vignettes.
 
-In landscape genetics, the analysis of the link between landscape and genetic data can be performed at **several scales**. Indeed, **node-, link-, neighbourhood-** and **boundary-based analyses** are distinguished [@wagner2013conceptual]. Similarly, we can compare **landscape and genetic graphs** at these different scales, in particular when they share the same nodes. We present **how to implement these comparisons using `graph4lg`**. To see how to create landscape and genetic graphs with `graph4lg`, we invite users to read the second and third tutorials included in this package.
+In landscape genetics, the analysis of the relationship between landscape and genetic data can be performed at **several scales**. Indeed, **node-, link-, neighbourhood-** and **boundary-based analyses** are distinguished [@wagner2013conceptual]. Similarly, we can compare **landscape and genetic graphs** at these different scales, in particular when they share the same nodes. We present **how to implement these comparisons using `graph4lg`**. To see how to create landscape and genetic graphs with `graph4lg`, we invite users to read the second and third tutorials included in this package.
 
 
 # Comparing node metrics
@@ -78,9 +78,9 @@ When using this approach, two graphs are similar if the **correlation coefficien
 
 The function `graph_node_compar` computes these correlations to **compare two graphs at the node level**. It takes as arguments:
 
-* `x`: A graph object of class `igraph`, i.e. the name of the first graph involved in the comparison. Its nodes must have the same names as in graph `y`.
-* `y`: A graph object of class `igraph`, i.e. the name of the second graph involved in the comparison, sharing its nodes with graph `x`.
-* `metrics`: A two-element character vector specifying the names of the node attributes from graphs `x` and `y` respectively, whose values will be used to assess their correlation. If these metrics are not within the node attributes, graph-theoretic metrics can be computed among:
+* `x`: A graph object of class `igraph`, i.e., the name of the first graph involved in the comparison. Its nodes must have the same names as in graph `y`.
+* `y`: A graph object of class `igraph`, i.e., the name of the second graph involved in the comparison, sharing its nodes with graph `x`.
+* `metrics`: A two-element character vector specifying the names of the node attributes from graphs `x` and `y` respectively, whose values will be used to assess their correlation. If these metrics are not within the node attributes, graph-theoretic metrics can be computed, such as:
 
     + Degree (`"deg"`), 
     + Closeness centrality (`"close"`), 
@@ -98,7 +98,7 @@ The function `graph_node_compar` computes these correlations to **compare two gr
 * `weight`: If new metrics are computed (see above), a logical (`TRUE` or `FALSE`) indicating whether the links are weighted during the calculation of the betweenness and closeness centrality indices. Link weights are interpreted as distances when computing the shortest paths.
 * `test`: A logical (`TRUE` or `FALSE`) which indicates whether a significance test is performed
 
-In order to include node attributes in the correlation, users can use compute them and associate them with graph nodes with `add_nodes_attr` function (described in tutorial 2).
+In order to include node attributes in the correlation, users can use compute them and associate them with graph nodes with `add_nodes_attr` function (described in vignette 2).
 
 In the following example, we will import a landscape graph made of the habitat patches occupied by the 50 populations used in a gene flow simulation with CDPOP (`pts_pop_simul` and `data_simul_genind` data set). A genetic graph will be created from the simulated genetic data set. We will then compare two metrics computed at the node-level in these graphs.
 
@@ -112,14 +112,14 @@ land_graph <- gen_graph_topo(mat_w = mat_ld,
 # Plot the histogram of its link weights
 plot_w_hist(graph = land_graph)
 ```
-Using the function `plot_w_hist`, we see that its link weights almost follow a normal distribution with values ranging from 0 to 10.000 cost-distance units.
+Using the function `plot_w_hist`, we see that its link weights almost follow a normal distribution with values ranging from 0 to 10,000 cost-distance units.
 
 
-We will compute the mean of the inverse weight of every link connected to its nodes. This metric `miw` is akin to the Flux metric computed in Graphab. It takes high values if a patch is well connected and close to other patches. We use the function `compute_node_metric`
+We will compute the mean of the inverse weight of every link connected to its nodes. This metric `miw` is akin to the Flux metric computed in Graphab. It takes high values if a patch is well connected and close to other patches. We use the function `compute_node_metric`:
 
 ```{r}
 miw_lg <- compute_node_metric(graph = land_graph, metrics = "miw")
-head(miw_lg)
+print(head(miw_lg))
 ```
 
 We include the values of this metric as a graph node attribute with the function `add_nodes_attr`:
@@ -130,7 +130,7 @@ land_graph <- add_nodes_attr(graph = land_graph,
                              index = "ID")
 ```
 
-We now create a genetic graph from the simulated data set. To that purpose, we first compute a genetic distance matrix using the D~PS~ genetic distance.
+We now create a genetic graph from the simulated data set. For that purpose, we first compute a genetic distance matrix using the D~PS~ genetic distance.
 
 ```{r, eval = FALSE}
 mat_dps <- mat_gen_dist(x = data_simul_genind, dist = "DPS")
@@ -171,7 +171,7 @@ graph_node_compar(x = land_graph, y = gen_comp_graph,
                   weight = TRUE, test = TRUE)
 ```
 
-The two metrics are **highly correlated**, meaning that if a habitat patch is well connected, the population occupying this patch is less different from the other populations from a genetic point of view than if the habitat patch is not connected well. This is quite an expected result given that gene flow was largely driven by cost-distances between populations during the genetic simulations.
+The two metrics are **highly correlated**, meaning that if a habitat patch is well connected, the population occupying this patch is less different from the other populations from a genetic point of view than if the habitat patch is not well connected. This is quite an expected result given that gene flow was largely driven by cost-distances between populations during the genetic simulations.
 
 
 Using complete graphs, visual representations are unclear because of link overlap. Building a Gabriel graph is a way to simplify graph topology. Gabriel graphs links will be computed from the Euclidean geographical distances between populations.
@@ -210,7 +210,7 @@ plot_graph_lg(graph = gen_gab_graph,
 Another way to compare genetic and landscape graphs is to **compare their links**, thereby focusing on their **topology**. Two graphs are similar if the conserved links of one graph are the same ones as those conserved in the other. We included two functions allowing such comparisons. 
 
 
-The function `graph_topo_compar` **compares the topologies of two graphs sharing the same nodes**. To do that, it creates a contingency table whose modalities are "Presence of a link" and "Absence of a link". We consider the topology of one graph to represent the "reality" of the dispersal flows that the other one is supposed to reproduce. In the (double entry) contingency table, when there is a 10 in the cell "Presence of a link" $\times$ "Presence of a link", it means that 10 links between the same population pairs are present in the two graphs compared. The 10 value corresponds to the number of true positives (TP). The three other values of the table are the number of false positives (FP), true negatives (TN) and false negatives (FN). From this table, we can compute several **metrics often used to evaluate the performance of classification methods**: the Matthews' correlation coefficient [@matthews1975comparison], the Kappa index, the False Discovery Rate, the Accuracy, the Sensitivity, the Specificity and the Precision.
+The `graph_topo_compar` function **compares the topologies of two graphs sharing the same nodes**. To do that, it creates a contingency table whose modalities are "Presence of a link" and "Absence of a link". We consider the topology of one graph to represent the "reality" of the dispersal flows that the other one is supposed to reproduce. In the (double entry) contingency table, when there is a 10 in the cell "Presence of a link" $\times$ "Presence of a link", this means that 10 links between the same population pairs are present in the two compared graphs. The 10 value corresponds to the number of true positives (TP). The three other values of the table are the number of false positives (FP), true negatives (TN) and false negatives (FN). From this table, we can compute several **metrics often used to evaluate the performance of classification methods**: the Matthews' correlation coefficient [@matthews1975comparison], the Kappa index, the False Discovery Rate, the Accuracy, the Sensitivity, the Specificity and the Precision.
 
 The function takes as arguments:
 
@@ -247,13 +247,13 @@ graph_topo_compar(obs_graph = land_graph_thr,
 ```
 
 
-We get a Matthews' correlation coefficient of 0.54. This coefficient takes a value of 0 when the matches between topologies are no more frequent than by simple chance. It reaches 1 when the topologies are identical.
+We get a Matthews' correlation coefficient of 0.54. This coefficient takes a value of 0 when the matches between topologies are no more frequent than by chance alone. It reaches 1 when the topologies are identical.
 
-Besides, we can **compare the topologies** of two graphs sharing the same nodes **visually**. To that purpose, their links are displayed on a map with a **color depending on their presence in both graphs or in only one of them**. The function `graph_plot_compar` can be used. It takes as arguments:
+Besides, we can **visually compare the topologies** of two graphs sharing the same nodes. For that purpose, their links are displayed on a map with a **color depending on their presence in both graphs or in only one of them**. The `graph_plot_compar` function can be used. It takes as arguments:
 
-* `x`: A graph object of class `igraph`, i.e. the name of the first graph involved in the comparison. Its nodes must have the same names as in graph `y`.
-* `y`: A graph object of class `igraph`, i.e. the name of the second graph involved in the comparison, sharing its nodes with graph `x`.
-* `crds`: A `data.frame` with the spatial coordinates of the graph nodes (both `x` and `y`). It must have three columns: ID, x and y.
+* `x`: A graph object of class `igraph`, i.e., the name of the first graph involved in the comparison. Its nodes must have the same names as in graph `y`.
+* `y`: A graph object of class `igraph`, i.e., the name of the second graph involved in the comparison, sharing its nodes with graph `x`.
+* `crds`: A `data.frame` with the spatial coordinates of the graph nodes (both `x` and `y`). It must have three columns: ID, x, and y.
 
 For example:
 ```{r}
@@ -267,12 +267,12 @@ This representation clearly indicates where are the shared and unshared links.
 
 # Comparing graph modules
 
-Finally, two graphs have similar topological and connectivity properties if their modules match, i.e. if two nodes classified together in the same module when the partition in modules is computed from one graph are also classified together in the same module when the partition is computed from the other graph. 
+Finally, two graphs have similar topological and connectivity properties if their modules match, i.e., if two nodes classified together in the same module when the partition in modules is computed from one graph are also classified together in the same module when the partition is computed from the other graph. 
 
-The function `graph_modul_compar` **compares the nodes partitions into modules**. To do that, it computes the **Adjusted Rand Index (ARI)** [@hubert1985comparing], a standardised index which counts the number of node pairs classified in the same module in both graphs. The function also performs the nodes partition into modules by using the modularity calculations available in `igraph` package. We can specify the algorithm used to compute the modularity, the link weighting, the number of modules, among others. It takes as arguments:
+The `graph_modul_compar` function **compares the nodes' partitions into modules**. To do that, it computes the **Adjusted Rand Index (ARI)** [@hubert1985comparing], a standardised index which counts the number of node pairs classified in the same module in both graphs. The function also performs the nodes partition into modules by using the modularity calculations available in `igraph` package. We can specify the algorithm used to compute the modularity, the link weighting scheme, the number of modules, among others. It takes as arguments:
 
-* `x`: A graph object of class `igraph`, i.e. the name of the first graph involved in the comparison. Its nodes must have the same names as in graph `y`.
-* `y`: A graph object of class `igraph`, i.e. the name of the second graph involved in the comparison, sharing its nodes with graph `x`.
+* `x`: A graph object of class `igraph`, i.e., the name of the first graph involved in the comparison. Its nodes must have the same names as in graph `y`.
+* `y`: A graph object of class `igraph`, i.e., the name of the second graph involved in the comparison, sharing its nodes with graph `x`.
 * `mode`: The type of input data, which can be `"graph"` or `data.frame` or `vector` (see help file `?graph_modul_compar` for more details).
 * `nb_modul`: A numeric or integer value or a numeric vector with 2 elements indicating the number of modules to create in both graphs. By default, this number is the number of modules maximising modularity index.
 * `algo`: A character string indicating the algorithm used to create the modules with `igraph`, among: `"fast_greedy"` (default), `"walktrap"`, `"louvain"`, `"optimal"`.
@@ -283,7 +283,7 @@ The function `graph_modul_compar` **compares the nodes partitions into modules**
     + `'none'`: Links are not weighted for the computation, which is only based on graph topology.
     
 
-Two different weightings can be used to create the modules of the two graphs:
+Two different weighting schemes can be used to create the modules of the two graphs:
 
 * If `node_inter` is a character string, then the same link weighting is used for both graphs.
 * If `node_inter` is a character vector of length 2, then the link weighting used by the algorithm to create the modules of graphs `x` and `y` is determined by the first and second elements of `node_inter`, respectively.
@@ -332,12 +332,8 @@ plot_graph_lg(graph = gen_gab_graph,
               crds = pts_pop_simul,
               module = "module")
 ```
+
 We easily visualise divergence and convergence in both module partitions.
-
-
-# Conclusion
-
-`graph4lg` makes available a large range of tools to perform landscape genetic analyses relying upon genetic and landscape graphs. We hope that next improvements will draw on results obtained using these tools in empirical as well as simulation studies.
 
 
 # References

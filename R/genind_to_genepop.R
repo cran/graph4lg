@@ -40,8 +40,12 @@
 #' }
 #' \subsection{Allele coding}{
 #' This function can handle genetic data with different allele coding: 2 or 3
-#' digit coding for microsatellite data or 2 digit coding for SNPs (A,C,T,G
-#' become respectively 01, 02, 03, 04).
+#' digit coding for microsatellite data or SNPs with alleles encoded as A, C,
+#' T, G, or - (for indel). They become respectively 01, 02, 03, 04, 05.
+#' Please be careful, the SNPs option might be less robust to differences in
+#' allelic encoding than the microsatellite one. It is strongly recommended
+#' to load the SNP data as a genind object using the vcfR package function
+#' 'vcfR::vcfR2genind()' with option 'return.alleles = TRUE'.
 #' }
 #' \subsection{Individuals order}{
 #' When individuals in input data are not ordered by populations, individuals
@@ -51,12 +55,12 @@
 #' and populations ordered in alphabetic order.
 #' }
 #' @seealso For more details about GENEPOP file formatting :
-#' \url{https://genepop.curtin.edu.au:443/help_input.html}.
+#' \url{https://f-rousset.r-universe.dev/genepop}.
 #' For the opposite conversion, see \code{\link{genepop_to_genind}}.
 #' The output file can be used to compute pairwise FST matrix
 #' with \code{\link{mat_pw_fst}}
 #' @export
-#' @author P. Savary
+#' @author P. Savary, J.Y. Jeon
 #' @examples
 #' data(data_ex_genind)
 #' x <- data_ex_genind
@@ -77,6 +81,11 @@ genind_to_genepop <- function(x, output = "data.frame"){
   data <- x@tab
   # Get pop_names
   pop_names <- x@pop
+
+  ### Stop if the data does not have pop names
+  if(is.null(pop_names)){
+    stop("Genind input data 'x' must have population names.")
+  }
 
   ### Return a message if there is only one population
   if(length(unique(pop_names)) == 1){
@@ -103,16 +112,16 @@ genind_to_genepop <- function(x, output = "data.frame"){
   }
 
   ### Identify the type of markers and modify SNPs data for GENEPOP usage
-  if(all(unlist(unique(x@all.names)) %in% c("A", "T", "C", "G"))){
+  if(all(unlist(unique(x@all.names)) %in% c("A", "T", "C", "G", "-"))){
     m_type <- "snp"
-    message("Your dataset is treated as a SNP dataset.
-            Alleles initially coded A, T, C, G were respectively coded
-            01, 02, 03 and 04")
-
-    colnames(data) <- gsub(colnames(data),pattern=".A",replacement=".01")
-    colnames(data) <- gsub(colnames(data),pattern=".T",replacement=".02")
-    colnames(data) <- gsub(colnames(data),pattern=".C",replacement=".03")
-    colnames(data) <- gsub(colnames(data),pattern=".G",replacement=".04")
+    message(paste0("Your dataset is treated as a SNP dataset.",
+                   "Alleles initially coded A, T, C, G, - (indel) were ",
+                   "respectively coded 01, 02, 03, 04, and 05"))
+    colnames(data) <- gsub(colnames(data),pattern="\\.A",replacement=".01")
+    colnames(data) <- gsub(colnames(data),pattern="\\.T",replacement=".02")
+    colnames(data) <- gsub(colnames(data),pattern="\\.C",replacement=".03")
+    colnames(data) <- gsub(colnames(data),pattern="\\.G",replacement=".04")
+    colnames(data) <- gsub(colnames(data),pattern="\\.-",replacement=".05")
     #####
   } else {
     m_type <- "msat"
@@ -132,16 +141,46 @@ genind_to_genepop <- function(x, output = "data.frame"){
   loc_all <- tidyr::separate(loc_all, col = 1, sep = "\\.",
                              into = c("locus", "allele"))
 
-  # Avoid problems when allele names have not the same number of characters
-  max_all_chr <- max(nchar(loc_all$allele))
-  for(i in 1:nrow(loc_all)){
-    name_all_chr <- nchar(loc_all[i, "allele"])
-    loc_all[i, "allele"] <- ifelse(name_all_chr < max_all_chr,
-                                   paste0(rep("0", times = max_all_chr - name_all_chr),
-                                          loc_all[i, "allele"]),
-                                   loc_all[i, "allele"])
+  if(length(unique(loc_all$allele)) == 1){
+    stop("There is only 1 allelic code/name in the dataset.")
+  } else if(length(unique(loc_all$allele)) == 2){
+    message("There are only two different allele codes in the dataset.")
+
+    message(paste0("If you are not using a genind object with microsatellite ",
+                   "loci having only 2 alleles each, please check for errors."))
+
+    message(paste0("If you are using a genind object encoding SNP data, ",
+                   "please use 'return.alleles =  TRUE' if you are using the ",
+                   "function 'vcfR::vcfR2genind()' to create the genind object ",
+                   "from the vcf data. This will provide DNA letters/indel info."))
+
+    # If allelic names are encoded as 0-presence, 1-presence,
+    # replace with 1 and 2
+    # if(all(unique(loc_all$allele) %in% c("0", "1"))){
+    #   message(paste0("0 (allelic absence) and 1 (presence) are renamed as",
+    #                  " 01 and 02 because 0000 encodes missing data in genepop."))
+    #   loc_all$allele <- gsub(loc_all$allele, pattern = "1", replacement = "2")
+    #   loc_all$allele <- gsub(loc_all$allele, pattern = "0", replacement = "1")
+    # }
+
   }
 
+  # Avoid problems when allele names have not the same number of characters
+  max_all_chr <- max(nchar(loc_all$allele))
+
+  # If 1-digit allele encoding, add a zero before
+  if(max_all_chr == 1){
+    loc_all$allele <- paste0("0", loc_all$allele)
+  # If heterogeneous allele encoding, add 0s before the shortest to regularize
+  } else if(!all(nchar(loc_all$allele) == max_all_chr)){
+    for(i in 1:nrow(loc_all)){
+      name_all_chr <- nchar(loc_all[i, "allele"])
+      loc_all[i, "allele"] <- ifelse(name_all_chr < max_all_chr,
+                                     paste0(rep("0", times = max_all_chr - name_all_chr),
+                                            loc_all[i, "allele"]),
+                                     loc_all[i, "allele"])
+    }
+  }
 
   loci_names <- as.character(loci_names_l[-which(duplicated(loci_names_l))])
   n.loci <- length(loci_names_l[-which(duplicated(loci_names_l))]  )
@@ -191,7 +230,7 @@ genind_to_genepop <- function(x, output = "data.frame"){
 
       } else {
         # If missing data, set 000000 or 0000
-        if(nchar(loc_all[1, 'allele'] == 6)){
+        if(nchar(loc_all[1, 'allele']) == 6){
           a[j] <- "000000"
         } else {
           a[j] <- "0000"

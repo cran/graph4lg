@@ -53,8 +53,12 @@ GENEPOP software (Rousset, 2008).
 }
 \subsection{Allele coding}{
 This function can handle genetic data with different allele coding: 2 or 3
-digit coding for microsatellite data or 2 digit coding for SNPs (A,C,T,G
-become respectively 01, 02, 03, 04).
+digit coding for microsatellite data or SNPs with alleles encoded as A, C,
+T, G, or - (for indel). They become respectively 01, 02, 03, 04, 05.
+Please be careful, the SNPs option might be less robust to differences in
+allelic encoding than the microsatellite one. It is strongly recommended
+to load the SNP data as a genind object using the vcfR package function
+'vcfR::vcfR2genind()' with option 'return.alleles = TRUE'.
 }
 \subsection{Individuals order}{
 When individuals in input data are not ordered by populations, individuals
@@ -76,11 +80,11 @@ df_genepop <- suppressWarnings(genind_to_genepop(x,
 }
 \seealso{
 For more details about GENEPOP file formatting :
-\url{https://genepop.curtin.edu.au:443/help_input.html}.
+\url{https://f-rousset.r-universe.dev/genepop}.
 For the opposite conversion, see \code{\link{genepop_to_genind}}.
 The output file can be used to compute pairwise FST matrix
 with \code{\link{mat_pw_fst}}
 }
 \author{
-P. Savary
+P. Savary, J.Y. Jeon
 }

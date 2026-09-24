@@ -20,7 +20,9 @@ mat_cost_dist(
 are computed. It can be:\itemize{
 \item{A character string indicating the path to a raster file in format
 .tif or .asc.}
-\item{A \code{RasterLayer} object already loaded in R environment}
+\item{A \code{SpatRaster} object already loaded in R environment}
+\item{A \code{RasterLayer} object already loaded in R environment
+(deprecated in next versions of the package)}
 }
 All the raster cell values must be present in the column 'code' from
 \code{cost} argument.}
@@ -39,8 +41,10 @@ It must have three columns:\itemize{
 \item{x: A numeric or integer indicating the longitude of the points.}
 \item{y: A numeric or integer indicating the latitude of the points.}
 }}
-\item{A \code{SpatialPointsDataFrame} with at least an attribute column
+\item{A point spatial feature (sf) with at least an attribute column
 named "ID" with the point IDs.}
+\item{A \code{SpatialPointsDataFrame} with at least an attribute column
+named "ID" with the point IDs (deprecated in next versions of the package).}
 }
 The point coordinates must be in the same spatial coordinate reference system
 as the raster file.}
@@ -56,7 +60,9 @@ cost distances. It must be:\itemize{
 \item{'gdistance': uses the functions from the package \pkg{gdistance}
 assuming that movement is possible in 8 directions from each cell, that
 a geo-correction is applied to correct for diagonal movement lengths and that
-raster cell values correspond to resistance (and not conductance).}
+raster cell values correspond to resistance (and not conductance). Note that
+if \pkg{gdistance} keeps \pkg{raster} as a dependence, this option will not
+be supported in next versions of the package.}
 \item{'java': uses a .jar file which is downloaded on the user's machine if
 necessary and if java is installed. This option substantially reduces
 computation times and makes possible the parallelisation.}

@@ -15,7 +15,7 @@
 #' @details If the download does not work, you can create a directory named
 #' 'graph4lg_jar' in the directory \code{rappdirs::user_data_dir()} and copy
 #' Graphab software downloaded from
-#' \url{https://thema.univ-fcomte.fr/productions/download.php?name=graphab&version=2.8&username=Graph4lg&institution=R}
+#' \url{https://thema.umlp.fr/productions/download.php?name=graphab&version=3.0.0&username=Graph4lg&institution=R}
 #' @export
 #' @author P. Savary
 #' @examples
@@ -38,31 +38,30 @@ get_graphab <- function(res = TRUE, return = FALSE){
 
   data_dir <- rappdirs::user_data_dir()
 
-  if(!("graphab-2.8.jar" %in% list.files(paste0(data_dir, "/graph4lg_jar")))){
+  if("graphab-2.8.jar" %in% list.files(paste0(data_dir, "/graph4lg_jar"))) {
 
-    if(!dir.exists(paths = paste0(data_dir, "/graph4lg_jar"))){
+    message("Graphab 2.8 is on your machine, but Graphab 3.0 will be used.")
+    message("To keep using Graphab 2.8, please use graph4lg < 2.0.")
+    message("You can download it at:")
+    message("remotes::install_gitlab('psavary3/graph4lg@archive-1-9')")
 
-      dir.create(path = paste0(data_dir, "/graph4lg_jar"))
+  }
+
+  if(!("graphab-3.0.jar" %in% list.files(paste0(data_dir, "/graph4lg2_jar")))){
+
+    if(!dir.exists(paths = paste0(data_dir, "/graph4lg2_jar"))){
+
+      dir.create(path = paste0(data_dir, "/graph4lg2_jar"))
 
     }
 
-    if(!dir.exists(paths = paste0(data_dir, "/graph4lg_jar/plugins"))){
-
-      dir.create(path = paste0(data_dir, "/graph4lg_jar/plugins"))
-
-    }
-
-    url <- "https://thema.univ-fcomte.fr/productions/download.php?name=graphab&version=2.8&username=Graph4lg&institution=R"
-    destfile <- "/graph4lg_jar/graphab-2.8.jar"
-    destfile2 <- "/graph4lg_jar/plugins/graphab-2.8.jar"
+    url <- "https://thema.umlp.fr/productions/download.php?name=graphab&version=3.0.0&username=Graph4lg&institution=R"
+    #url <- "https://thema.umlp.fr/productions/software/graphab/download/graphab-3.0.0.jar"
+    destfile <- "/graph4lg2_jar/graphab-3.0.jar"
 
     utils::download.file(url, paste0(data_dir, "/", destfile),
-                  method = "auto",
-                  mode = "wb")
-
-    file.copy(from = paste0(data_dir, "/", destfile),
-              to = paste0(data_dir, "/", destfile2),
-              overwrite = TRUE)
+                         method = "auto",
+                         mode = "wb")
 
     graphab <- 1
 
@@ -75,7 +74,7 @@ get_graphab <- function(res = TRUE, return = FALSE){
     graphab <- 0
 
     if(res){
-      message("Graphab is already on your machine")
+      message("Graphab 3.0 is already on your machine")
     }
   }
 

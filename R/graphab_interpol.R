@@ -42,23 +42,30 @@
 #' directory that contains the project directory. It should be used when the
 #' project directory is not in the current working directory. Default is NULL.
 #' When 'proj_path = NULL', the project directory is equal to \code{getwd()}.
+#' @param parallel.java An integer indicating how many computer cores are used
+#' to run the .jar file. By default, \code{parallel.java = NULL}, and java sets
+#' it according to local settings.
 #' @param alloc_ram (optional, default = NULL) Integer or numeric value
 #' indicating RAM gigabytes allocated to the java process. Increasing this
 #' value can speed up the computations. Too large values may not be compatible
 #' with your machine settings.
-#' @details See more information in Graphab 2.8 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+#' @details See more information in Graphab 3.0 manual:
+#' \url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 #' Be careful, when capacity has been changed. The last changes are taken into
 #' account for subsequent calculations in a project.
+#' This function does not work for multiple habitat graphs.
 #' @export
 #' @author P. Savary
+#' @references \insertRef{foltete2012software}{graph4lg}
+#' \insertRef{foltete2021graphab}{graph4lg}
+#' \insertRef{savary2024multiple}{graph4lg}
 #' @examples
 #' \dontrun{
-#' graphab_interpol(proj_name = "grphb_ex",
+#' graphab_interpol(proj_name = "graphab_example",
 #'                  name = "F_interp",
 #'                  reso = 20,
 #'                  linkset = "lcp",
-#'                  graph = "graph",
+#'                  graph = "graph_forest",
 #'                  var = "F_d600_p0.5_beta1_graph",
 #'                  dist = 600,
 #'                  prob = 0.5)
@@ -75,6 +82,7 @@ graphab_interpol <- function(proj_name,   # character
                              thr = NULL, # NULL or integer depending on multi
                              summed = FALSE, # logical, only used if thr is integer
                              proj_path = NULL, # if NULL getwd() otherwise a character path
+                             parallel.java = NULL,
                              alloc_ram = NULL){
 
   #########################################
@@ -100,7 +108,22 @@ graphab_interpol <- function(proj_name,   # character
          Please use graphab_project() before.")
   }
 
+  ## Create proj_end_path proj_path/proj_name/proj_name.xml
   proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
+
+  #######################################
+  # Add '' to proj_path for cases with spaces in paths
+  if(all(stringr::str_sub(proj_end_path, 1, 1) != "'",
+         stringr::str_sub(proj_end_path, 1, 1) != "'",
+         stringr::str_detect(string = proj_end_path,
+                             pattern = " "))){
+    proj_end_path_cmd <- paste0("'", proj_end_path, "'")
+  } else {
+    proj_end_path_cmd <- proj_end_path
+  }
+
+  ## Check project version
+  check_graphab_version(proj_path = proj_end_path)
 
   #########################################
   # Check for name class
@@ -113,31 +136,23 @@ graphab_interpol <- function(proj_name,   # character
   if(!is.null(linkset)){
     if(!inherits(linkset, "character")){
       stop("'linkset' must be a character string")
-    } else if (!(paste0(linkset, "-links.csv") %in% list.files(path = paste0(proj_path, "/", proj_name)))){
+    } else if (!check_graphab_object(proj_path = proj_end_path,
+                                     object_type = "linkset",
+                                     name = linkset)){
       stop("The linkset you refer to does not exist.
-           Please use graphab_link() before.")
+           Please use graphab_link() to create it.")
     }
-  } else if (length(list.files(path = paste0(proj_path,
-                                             "/", proj_name),
-                               pattern = "-links.csv")) == 0){
-
-    stop("There is not any linkset in the project you refer to.
-         Please use graphab_link() before.")
-
   }
 
   #########################################
   # Check for graph class
   if(!inherits(graph, "character")){
     stop("'graph' must be a character string")
-  } else if (!(paste0(graph, "-voronoi.shp") %in%
-               list.files(path = paste0(proj_path, "/", proj_name)))){
-    stop("The graph you refer to does not exist")
-  } else if (length(list.files(path = paste0(proj_path,
-                                             "/", proj_name),
-                               pattern = "-voronoi.shp")) == 0){
-    stop("There is not any graph in the project you refer to.
-         Please use graphab_graph() before.")
+  } else if (!check_graphab_object(proj_path = proj_end_path,
+                                   object_type = "graph",
+                                   name = graph)){
+    stop("The graph you refer to does not exist.
+           Please use graphab_graph() to create it.")
   }
 
   #########################################
@@ -145,11 +160,11 @@ graphab_interpol <- function(proj_name,   # character
   if(!inherits(var, "character")){
     stop("'var' must be a character string")
   } else {
-    df <- utils::read.csv(file = paste0(proj_path, "/",
-                                        proj_name, "/patches.csv"),
-                          nrows = 3)
-    if(!(var %in% colnames(df))){
-      stop("'var' must be the name of an already computed variable.")
+
+    ## Project content
+    proj_content <- graphab_show(proj_path = proj_end_path)
+    if(!(var %in% proj_content$Metrics)){
+      stop("'var' must be the name of an already computed metric.")
     }
   }
 
@@ -188,6 +203,14 @@ graphab_interpol <- function(proj_name,   # character
   }
 
   #########################################
+  # Check for parallel.java
+  if(!is.null(parallel.java)){
+    if(!inherits(parallel.java, c("numeric", "integer"))){
+      stop("'parallel.java' must be a numeric or integer value.")
+    }
+  }
+
+  #########################################
   # Check for Graphab
   gr <- get_graphab(res = FALSE, return = TRUE)
 
@@ -201,25 +224,33 @@ graphab_interpol <- function(proj_name,   # character
 
   #########################################
   # Get graphab path
-  version <- "graphab-2.8.jar"
-  path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
+  version <- "graphab-3.0.jar"
+  path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg2_jar/", version)
 
   #########################################
   # Command line
 
-  cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab,
-           "--project", proj_end_path)
+  cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab)
+
+  if(!is.null(parallel.java)){
+    cmd <- c(cmd, "-proc ", as.character(parallel.java))
+  }
+
+  cmd <- c(cmd,
+           "--project", proj_end_path_cmd)
 
   cmd <- c(cmd, "--uselinkset", linkset, "--usegraph", graph, "--interp")
-  cmd <- c(cmd, name, reso,
+  cmd <- c(cmd,
            paste0("var=", var),
            paste0("d=", dist),
-           paste0("p=", prob))
+           paste0("p=", prob),
+           paste0("name=", name),
+           paste0("resol=", reso))
 
   if(!is.null(thr)){
     cmd <- c(cmd, paste0("multi=", thr))
     if(summed){
-      cmd <- c(cmd, "sum")
+      cmd <- c(cmd, "ag=sum")
     }
   }
 

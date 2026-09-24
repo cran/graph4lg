@@ -7,7 +7,8 @@
 graphab_to_igraph(
   proj_name,
   linkset,
-  nodes = "patches",
+  habitat,
+  nodes = NULL,
   weight = "cost",
   proj_path = NULL,
   fig = FALSE,
@@ -24,18 +25,10 @@ create the graph links. The linkset must have been created previously (see
 the function \code{\link{graphab_link}}). It can be complete or planar. The
 graph is given the topology of the selected link set.}
 
-\item{nodes}{A character string indicating whether the nodes of the created
-graph are given all the attributes or metrics computed in Graphab or only
-those specific to a given graph previously created with
-\code{\link{graphab_graph}}
-It can be:\itemize{
-\item{\code{nodes = "patches"}(default): all the attributes and metrics of
-the habitat patches are included as node attributes in \code{igraph} object.}
-\item{\code{nodes = "graph_name"}(default): only the metrics of
-the habitat patches computed from the graph 'graph_name' created with
-\code{\link{graphab_graph}} are included as node attributes in
-\code{igraph} object, along with some basic patch attributes.}
-}}
+\item{habitat}{A character string indicating the name of a habitat type
+created in the Graphab project.}
+
+\item{nodes}{Deprecated parameter from graph4lg < 2.0.}
 
 \item{weight}{A character string ("euclid" or "cost") indicating
 whether to weight the links with Euclidean distance or
@@ -60,23 +53,21 @@ list of objects: a graph object of class \code{igraph} and a
 \code{data.frame} with the nodes spatial coordinates (if crds = TRUE).
 }
 \description{
-The function creates a landscape graph from a link set created
-with Graphab software or different functions of this package and converts
-it into a graph object of class \code{igraph}.
-The graph has weighted links and is undirected.
-Nodes attributes present in the Graphab project are included, including
-connectivity metrics when computed
+The function creates a landscape graph from a link set and a
+set of habitat patches created with Graphab and converts it into a graph
+object of class \code{igraph}. The graph has weighted links and
+is undirected. Nodes attributes present in the habitat layer created with
+Graphab project are included, including connectivity metrics when computed.
 }
 \examples{
 \dontrun{
-proj_path <- system.file('extdata',package='graph4lg')
-proj_name <- "grphb_ex"
-linkset <- "lkst1"
-nodes <- "graph"
+proj_path <- system.file('extdata', package = 'graph4lg')
+proj_name <- "graphab_example"
+linkset <- "forest_link_planar"
+habitat <- "forest"
 graph <- graphab_to_igraph(proj_name = proj_name,
-                           linkset = "lkst1",
-                           nodes = "graph",
-                           links = links,
+                           linkset = linkset,
+                           habitat = habitat,
                            weights = "cost",
                            proj_path = proj_path,
                            crds = FALSE,

@@ -7,7 +7,9 @@
 #' are computed. It can be:\itemize{
 #' \item{A character string indicating the path to a raster file in format
 #' .tif or .asc.}
-#' \item{A \code{RasterLayer} object already loaded in R environment}
+#' \item{A \code{SpatRaster} object already loaded in R environment}
+#' \item{A \code{RasterLayer} object already loaded in R environment
+#' (deprecated in next versions of the package)}
 #' }
 #' All the raster cell values must be present in the column 'code' from
 #' \code{cost} argument.
@@ -25,8 +27,10 @@
 #' \item{x: A numeric or integer indicating the longitude of the points.}
 #' \item{y: A numeric or integer indicating the latitude of the points.}
 #' }}
-#' \item{A \code{SpatialPointsDataFrame} with at least an attribute column
+#' \item{A point spatial feature (sf) with at least an attribute column
 #' named "ID" with the point IDs.}
+#' \item{A \code{SpatialPointsDataFrame} with at least an attribute column
+#' named "ID" with the point IDs (deprecated in next versions of the package).}
 #' }
 #' The point coordinates must be in the same spatial coordinate reference system
 #' as the raster file.
@@ -40,7 +44,9 @@
 #' \item{'gdistance': uses the functions from the package \pkg{gdistance}
 #' assuming that movement is possible in 8 directions from each cell, that
 #' a geo-correction is applied to correct for diagonal movement lengths and that
-#' raster cell values correspond to resistance (and not conductance).}
+#' raster cell values correspond to resistance (and not conductance). Note that
+#' if \pkg{gdistance} keeps \pkg{raster} as a dependence, this option will not
+#' be supported in next versions of the package.}
 #' \item{'java': uses a .jar file which is downloaded on the user's machine if
 #' necessary and if java is installed. This option substantially reduces
 #' computation times and makes possible the parallelisation.}
@@ -99,9 +105,17 @@ mat_cost_dist <- function(raster,
 
   # Check raster argument
 
-  if(inherits(raster, "RasterLayer")){
+  if(inherits(raster, "SpatRaster")){
+
+    r_type <- "SpatRaster"
+
+  } else if(inherits(raster, "RasterLayer")){
 
     r_type <- "RasterLayer"
+
+    warning(paste0("Raster type 'RasterLayer' will be deprecated in ",
+                   "next versions of the package. In the future, please ",
+                   "use SpatRaster from package 'terra'."))
 
   } else if (file.exists(raster)){
 
@@ -111,19 +125,35 @@ mat_cost_dist <- function(raster,
 
   } else {
 
-    stop("'raster' must be either a RasterLayer object or a valid path
-           to a .tif or .asc raster layer file.")
+    stop(paste0("'raster' must be either a SpatRaster object, a RasterLayer ",
+                "object or a valid path to a .tif or ",
+                ".asc raster layer file."))
   }
 
   # Check pts argument
 
-  if(inherits(pts, "SpatialPointsDataFrame")){
+  if(inherits(pts, "sf")){
+
+    if(!("ID" %in% colnames(pts))){
+      stop("'pts' must include an 'ID' column")
+    }
+
+    p_type <- "sf"
+
+  } else if(inherits(pts, "SpatialPointsDataFrame")){
 
     if(!("ID" %in% colnames(pts@data))){
       stop("'pts' must include an 'ID' column")
     }
 
     p_type <- "SpatialPointsDataFrame"
+
+    warning(paste0("Point type 'SpatialPointsDataFrame' will be deprecated in ",
+                   "next versions of the package. In the future, please ",
+                   "use spatial features from package 'sf'."))
+
+    # Convert to sf from SpatialPointsDataFrame
+    pts <- sf::st_as_sf(pts)
 
   } else if (inherits(pts, "data.frame")){
 
@@ -209,9 +239,9 @@ mat_cost_dist <- function(raster,
 
     ############################
 
-    if(r_type == "RasterLayer"){
+    if(r_type %in% c("SpatRaster", "RasterLayer")){
 
-      rast_val <- unique(raster::values(raster))
+      rast_val <- unique(terra::values(raster))
 
       if(any(is.na(rast_val))){
         rast_val <- rast_val[-which(is.na(rast_val))]
@@ -219,6 +249,11 @@ mat_cost_dist <- function(raster,
 
       if(!all(rast_val %in% cost$code)){
         stop("Specify the cost value associated to every raster cell value")
+      }
+
+      if(r_type == "SpatRaster"){
+        # Convert to SpatialLayer for use of gdistance
+        raster <- raster::raster(raster)
       }
 
     } else if (r_type == "RasterFile"){
@@ -235,7 +270,6 @@ mat_cost_dist <- function(raster,
         stop("Specify the cost value associated to every raster cell value")
       }
 
-
     }
     ############################
 
@@ -251,9 +285,14 @@ mat_cost_dist <- function(raster,
 
     }
 
+    # if df or csv, just extract x and y
     if(p_type %in% c("df", "csv")){
-      pts <- suppressWarnings(sp::SpatialPointsDataFrame(coords = pts[, c('x', 'y')], data = pts))
+      crds_matrix <- as.matrix(sf::st_drop_geometry(pts)[, c("x", "y")])
+
+    } else if(p_type %in% c("sf", "SpatialPointsDataFrame")){
+      crds_matrix <- as.matrix(sf::st_coordinates(pts))
     }
+    # if sf or spdf, generate x and y matrices
 
     # Raster reclass
 
@@ -267,8 +306,8 @@ mat_cost_dist <- function(raster,
                                    directions = direction)
     trans <- gdistance::geoCorrection(trans)
     cost_dist <- gdistance::costDistance(x = trans,
-                                         fromCoords = pts,
-                                         toCoords = pts)
+                                         fromCoords = crds_matrix,
+                                         toCoords = crds_matrix)
 
     cost_dist <- cost_dist/reso
     row.names(cost_dist) <- colnames(cost_dist) <- idp
@@ -279,9 +318,7 @@ mat_cost_dist <- function(raster,
 
     cost_dist <- cost_dist[, c("from", "to", "cost_dist")]
 
-
     # Method : java
-
   } else if (method == "java"){
 
     if(Sys.which("java") == ""){
@@ -294,23 +331,23 @@ mat_cost_dist <- function(raster,
 
     data_dir <- rappdirs::user_data_dir()
 
-    if("costdist-0.4.1.jar" %in% list.files(paste0(data_dir, "/graph4lg_jar"))){
+    if("costdist-0.5.jar" %in% list.files(paste0(data_dir, "/graph4lg2_jar"))){
 
-      message("costdist-0.4.1.jar will be used")
+      message("costdist-0.5.jar will be used")
 
     } else {
 
-      message("costdist-0.4.1.jar will be downloaded")
+      message("costdist-0.5.jar will be downloaded")
 
-      if(!dir.exists(paths = paste0(data_dir, "/graph4lg_jar"))){
+      if(!dir.exists(paths = paste0(data_dir, "/graph4lg2_jar"))){
 
-        dir.create(path = paste0(data_dir, "/graph4lg_jar"))
+        dir.create(path = paste0(data_dir, "/graph4lg2_jar"))
 
       }
 
-      url <- "https://thema.univ-fcomte.fr/productions/download.php?name=graphab&prog=costdist&version=0.4.1&username=Graph4lg&institution=R"
+      url <- "https://thema.umlp.fr/productions/download.php?name=graphab&prog=costdist&version=0.5&username=Graph4lg&institution=R"
 
-      destfile <- "/graph4lg_jar/costdist-0.4.1.jar"
+      destfile <- "/graph4lg2_jar/costdist-0.5.jar"
 
       utils::download.file(url, paste0(data_dir, "/", destfile),
                            method = "auto",
@@ -321,12 +358,24 @@ mat_cost_dist <- function(raster,
     # Raster
 
     # Create an ascii file
-    if(r_type == "RasterLayer"){
+    if(r_type %in% c("RasterLayer", "SpatRaster")){
 
-      file_rast <- tempfile(fileext = ".asc")
-      raster::writeRaster(raster,
-                          file = file_rast,
-                          overwrite = TRUE)
+      if(r_type == "RasterLayer"){
+        # Convert to SpatRaster from RasterLayer
+        raster <- terra::rast(raster)
+      }
+
+      # if(r_type == "SpatRaster"){
+      #   # Convert to RasterLayer from SpatRaster
+      #   raster <- raster::raster(raster)
+      # }
+
+      file_rast <- tempfile(fileext = ".tif")
+
+      terra::writeRaster(x = raster,
+                         filename = file_rast,
+                         datatype = "INT2S",
+                         overwrite = TRUE)
       del_rast <- 1
 
     } else if (r_type == "RasterFile"){
@@ -339,9 +388,10 @@ mat_cost_dist <- function(raster,
 
     # Point
 
-    if(p_type == "SpatialPointsDataFrame"){
+    if(p_type %in% c("sf", "SpatialPointsDataFrame")){
 
-      pts <- cbind(pts@data[, 'ID'], pts@coords)
+      sf_crds <- data.frame(sf::st_coordinates(pts))
+      pts <- cbind(pts$ID, sf_crds)
       colnames(pts) <- c('ID', 'x', 'y')
 
     } else if (p_type == "csv"){
@@ -353,7 +403,6 @@ mat_cost_dist <- function(raster,
 
     file_pts <- tempfile(fileext = ".csv")
     utils::write.csv(pts, file = file_pts, row.names = FALSE)
-
 
     # Cost values argument
     ncode <- nrow(cost)
@@ -369,7 +418,7 @@ mat_cost_dist <- function(raster,
     # Run java code
 
     cmd <- c("-Djava.awt.headless=true", "-jar",
-             paste0(data_dir, "/graph4lg_jar/costdist-0.4.1.jar"),
+             paste0(data_dir, "/graph4lg2_jar/costdist-0.5.jar"),
              parallel.java, file_pts, file_rast, file_res, vec_cost)
 
 
@@ -380,7 +429,6 @@ mat_cost_dist <- function(raster,
         stop("'alloc_ram' must be a numeric or an integer")
       }
     }
-
 
     system2(java.path, args = cmd)
 

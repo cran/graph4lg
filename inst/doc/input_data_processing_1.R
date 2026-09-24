@@ -8,7 +8,7 @@ library(graph4lg)
 library(igraph)
 
 
-## ---- echo = FALSE, eval = TRUE-----------------------------------------------
+## ----echo = FALSE, eval = TRUE------------------------------------------------
 # Here, we also rely on a data set created only for the vignettes (`data_tuto`) 
 # and containing several objects:
 
@@ -28,9 +28,9 @@ data_genind <- genepop_to_genind(path = paste0(system.file('extdata',
                                  n.loci = 20, pop_names = as.character(1:10))
 data_genind
 
-## ---- echo = TRUE, eval = FALSE-----------------------------------------------
-#  genind_to_genepop(x = data_genind,
-#                    output = "data_gpop_test.txt")
+## ----echo = TRUE, eval = FALSE------------------------------------------------
+# genind_to_genepop(x = data_genind,
+#                   output = "data_gpop_test.txt")
 
 ## -----------------------------------------------------------------------------
 loci_names <- paste0("LOCI-", as.character(1:20))
@@ -46,7 +46,7 @@ data_paru <- structure_to_genind(path = paste0(system.file('extdata',
 data_paru
 
 ## -----------------------------------------------------------------------------
-head(data_ex_gstud)
+print(head(data_ex_gstud))
 
 ## -----------------------------------------------------------------------------
 gstud_to_genind(x = data_ex_gstud, pop_col = "POP",
@@ -54,22 +54,22 @@ gstud_to_genind(x = data_ex_gstud, pop_col = "POP",
 
 ## -----------------------------------------------------------------------------
 gen_div <- pop_gen_index(data_ex_genind)
-head(gen_div)
+print(head(gen_div))
 
 ## ----eval=FALSE, echo =TRUE, message = FALSE, warning = FALSE-----------------
-#  mat_dps <- mat_gen_dist(x = data_genind, dist = "DPS")
+# mat_dps <- mat_gen_dist(x = data_genind, dist = "DPS")
 
-## ---- message = FALSE, warning = FALSE----------------------------------------
+## ----message = FALSE, warning = FALSE-----------------------------------------
 mat_dps[1:5, 1:5]
 
-## ---- eval=FALSE, echo =TRUE, message = FALSE, warning = FALSE----------------
-#  mat_pg <- mat_gen_dist(x = data_genind, dist = "PG")
+## ----eval=FALSE, echo =TRUE, message = FALSE, warning = FALSE-----------------
+# mat_pg <- mat_gen_dist(x = data_genind, dist = "PG")
 
-## ---- message = FALSE, warning = FALSE----------------------------------------
+## ----message = FALSE, warning = FALSE-----------------------------------------
 mat_pg[1:5, 1:5]
 
 ## -----------------------------------------------------------------------------
-head(pts_pop_simul)
+print(head(pts_pop_simul))
 
 ## -----------------------------------------------------------------------------
 mat_geo <- mat_geo_dist(data = pts_pop_simul, 
@@ -95,8 +95,10 @@ head(mat_geo_us)
 
 
 ## -----------------------------------------------------------------------------
-x <- raster::raster(ncol=10, nrow=10, xmn=0, xmx=100, ymn=0, ymx=100)
-raster::values(x) <- sample(c(1,2,3,4), size = 100, replace = TRUE)
+x <- terra::rast(ncols = 10, nrows = 10, 
+                 xmin = 0, xmax = 100, 
+                 ymin = 0, ymax = 100)
+terra::values(x) <- sample(c(1,2,3,4), size = 100, replace = TRUE)
 pts <- data.frame(ID = 1:4,
                   x = c(10, 90, 10, 90),
                   y = c(90, 10, 90, 10))
@@ -107,12 +109,12 @@ mat_cd <- mat_cost_dist(raster = x,
               method = "gdistance")
 head(mat_cd)
 
-## ---- eval = FALSE------------------------------------------------------------
-#  mat_cost_dist(raster = x,
-#                pts = pts, cost = cost,
-#                method = "java",
-#                parallel.java = 2)
-#  
+## ----eval = FALSE-------------------------------------------------------------
+# mat_cost_dist(raster = x,
+#               pts = pts, cost = cost,
+#               method = "java",
+#               parallel.java = 2)
+# 
 
 ## -----------------------------------------------------------------------------
 mat_g1 <- mat_geo_dist(pts_pop_ex, 
@@ -137,7 +139,7 @@ convert_res
 
 ## -----------------------------------------------------------------------------
 df_dist <- pw_mat_to_df(pw_mat = mat_geo)
-head(df_dist)
+print(head(df_dist))
 
 ## -----------------------------------------------------------------------------
 mat_dist <- df_to_pw_mat(data = df_dist, 

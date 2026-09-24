@@ -1,7 +1,7 @@
 Package: graph4lg
 Type: Package
 Title: Build Graphs for Landscape Genetics Analysis
-Version: 1.8.0
+Version: 2.0.0
 Authors@R: 
     c(person(given = "Paul",
              family = "Savary",
@@ -17,12 +17,17 @@ Authors@R:
              role = "ctb"),
       person(given = "Alexandrine",
              family = "Daniel",
-             role = "ctb"))
+             role = "ctb",
+             comment = c(ORCID = "0000-0003-3379-281X")),
+      person(given = "Jong Yoon",
+             family = "Jeon",
+             role = "ctb",
+             comment = c(ORCID = "0000-0002-2840-8425")))
 Maintainer: Paul Savary <psavary@protonmail.com>
 Description: Build graphs for landscape genetics analysis. This set of 
 	functions can be used to import and convert spatial and genetic data 
 	initially in different formats, import landscape graphs created with 
-	'GRAPHAB' software (Foltete et al., 2012) <doi:10.1016/j.envsoft.2012.07.002>, 
+	'Graphab' software (Foltete et al., 2021) <doi:10.1016/j.simpa.2021.100065>, 
 	make diagnosis plots of isolation by distance relationships in order to 
 	choose how to build genetic graphs, create graphs with a large range of 
 	pruning methods, weight their links with several genetic distances, plot 
@@ -33,24 +38,28 @@ Description: Build graphs for landscape genetics analysis. This set of
 	commonly used in landscape genetics to create graphs, described by Dyer et 
 	Nason (2004) <doi:10.1111/j.1365-294X.2004.02177.x> and Greenbaum et 
 	Fefferman (2017) <doi:10.1111/mec.14059>, and to analyse distance data 
-	(van Strien et al., 2015) <doi:10.1038/hdy.2014.62>.
-Depends: R(>= 3.1.0)
+	(van Strien et al., 2015) <doi:10.1038/hdy.2014.62>. Recent updates introduce
+	multiple habitat graph functionalities (as described by Savary et al., 2024)
+	<doi:10.1007/s10980-024-01947-4>.
+Depends: R (>= 4.0)
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
 Imports: adegenet, ggplot2, stringr, igraph, stats, spatstat.geom,
         spatstat.linnet, Matrix, vegan, utils, methods, pegas, MASS,
-        tidyr, sp, sf, hierfstat, rappdirs, gdistance, raster, foreign,
+        tidyr, sf, hierfstat, rappdirs, gdistance, raster, terra,
         ecodist, Rdpack
 Suggests: knitr, rmarkdown
 RdMacros: Rdpack
-RoxygenNote: 7.2.1
 VignetteBuilder: knitr, rmarkdown
+Config/roxygen2/version: 8.1.0
 NeedsCompilation: no
-Packaged: 2023-01-30 00:23:37 UTC; paul
-Author: Paul Savary [aut, cre] (<https://orcid.org/0000-0002-2104-9941>),
-  Gilles Vuidel [ctb] (<https://orcid.org/0000-0001-6330-6136>),
+Packaged: 2026-09-23 19:52:53 UTC; psavary
+Author: Paul Savary [aut, cre] (ORCID: <https://orcid.org/0000-0002-2104-9941>),
+  Gilles Vuidel [ctb] (ORCID: <https://orcid.org/0000-0001-6330-6136>),
   Tyler Rudolph [ctb],
-  Alexandrine Daniel [ctb]
+  Alexandrine Daniel [ctb] (ORCID:
+    <https://orcid.org/0000-0003-3379-281X>),
+  Jong Yoon Jeon [ctb] (ORCID: <https://orcid.org/0000-0002-2840-8425>)
 Repository: CRAN
-Date/Publication: 2023-01-30 14:00:05 UTC
+Date/Publication: 2026-09-24 10:40:02 UTC

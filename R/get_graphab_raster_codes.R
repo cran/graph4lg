@@ -5,10 +5,9 @@
 #' @param proj_name A character string indicating the Graphab project name.
 #' The project name is also the name of the project directory in which the
 #' file proj_name.xml will be created.
-#' @param mode A character string equal to either 'all' (default) or 'habitat'
-#' indicating whether the returned codes are all the codes of the source raster
-#' used for creating the project or only the code corresponding to the
-#' habitat patches.
+#' @param mode A character string equal to 'all' (default). Option 'habitat'
+#' is no longer possible in graph4lg > 1.9, given that 'habitat' can be defined
+#' from vector layers, and not only from raster codes anymore.
 #' @param proj_path (optional) A character string indicating the path to the
 #' directory that contains the project directory. It should be used when the
 #' project directory is not in the current working directory. Default is NULL.
@@ -20,7 +19,7 @@
 #' @author P. Savary
 #' @examples
 #' \dontrun{
-#' proj_name <- "grphb_ex"
+#' proj_name <- "graphab_example"
 #' get_graphab_raster_codes(proj_name = proj_name,
 #'                mode = "all")
 #' }
@@ -60,8 +59,8 @@ get_graphab_raster_codes <- function(proj_name,
   # Check for mode
   if(!inherits(mode, "character")){
     stop("'mode' must be a character string.")
-  } else if (!(mode %in% c("all", "habitat"))){
-    stop("'mode' must be equal to 'all' or 'habitat'.")
+  } else if (!(mode == "all")){
+    stop("'mode' must be equal to 'all' in graph4lg > 1.9 (no more 'habitat').")
   }
 
   #########################################################
@@ -88,36 +87,24 @@ get_graphab_raster_codes <- function(proj_name,
     if(stringr::str_sub(na_code, -2, -1) == ".0"){
       na_code <- stringr::str_sub(na_code, 1, -3)
     }
-
   }
 
   ###############################################
   # Get the code values
-
-  if(mode == "all"){
-
-    first_code <- min(which(file_data[, 1] == "<codes>")) + 1
-    last_code <- min(which(file_data[, 1] == "</codes>")) - 1
-    vec_codes <- file_data[first_code:last_code, 1]
-
-  } else if(mode == "habitat"){
-
-    first_code <- min(which(file_data[, 1] == "<patchCodes>")) + 1
-    last_code <- min(which(file_data[, 1] == "</patchCodes>")) - 1
-    vec_codes <- file_data[first_code:last_code, 1]
-
-  }
+  first_code <- min(which(file_data[, 1] == "<codes>")) + 1
+  last_code <- min(which(file_data[, 1] == "</codes>")) - 1
+  vec_codes <- file_data[first_code:last_code, 1]
 
   # Extract the codes
   vec_codes <- unlist(lapply(vec_codes,
-                      FUN = function(x){stringr::str_sub(x, 6, -7)}))
+                             FUN = function(x){stringr::str_sub(x, 6, -7)}))
 
   # Remove No data if present
   if(na_pres){
     if(na_code %in% vec_codes){
-    vec_codes <- vec_codes[-which(vec_codes == na_code)]
-    # Print a message
-    message(paste0("No data value is equal to ", na_code))
+      vec_codes <- vec_codes[-which(vec_codes == na_code)]
+      # Print a message
+      message(paste0("No data value is equal to ", na_code))
     }
   }
 

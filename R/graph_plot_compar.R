@@ -155,7 +155,7 @@ graph_plot_compar <- function(x, y,
     geom_segment(data = graph_df[which(graph_df$link != "1"), ],
                  aes(x = .data$x, y = .data$y,
                      xend = .data$xend, yend = .data$yend,
-                     color = .data$link, size = .data$width))+
+                     color = .data$link, linewidth = .data$width))+
     scale_size_identity()+
     geom_point(data = crds, aes(x = .data$x, y = .data$y),
                size = 6, color = "#999999") +
@@ -165,6 +165,7 @@ graph_plot_compar <- function(x, y,
     labs(x="Longitude", y="Latitude", color = "Topological comparison")+
     scale_color_manual(values = palette_topo,
                        labels = c("In both graphs", "In x only", "In y only"))+
+    scale_linewidth(range = c(0.25, 1.5)) +
     theme(legend.position = "bottom")
   #theme(panel.background = element_rect(fill = 'black', colour = 'white'))
 

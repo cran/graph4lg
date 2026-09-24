@@ -8,10 +8,14 @@ graphab_link(
   proj_name,
   distance = "cost",
   name,
+  habitat = NULL,
   cost = NULL,
   topo = "planar",
+  inter = FALSE,
+  maxcost = NULL,
   remcrosspath = FALSE,
   proj_path = NULL,
+  parallel.java = NULL,
   alloc_ram = NULL
 )
 }
@@ -31,6 +35,14 @@ corresponding cost-distance and the length of the least-cost path in meters
 (if \code{distance='euclid'})}
 
 \item{name}{A character string indicating the name of the created linkset.}
+
+\item{habitat}{(optional, default=NULL) A character string indicating the
+name of the habitat types whose patches will be connected by the least-cost
+paths. If \code{name='all'}, all existing habitats are considered.
+If a single habitat is indicated (e.g., `habitat = 'forest'`), then
+only this one is used. If several habitats are indicated, they are merged
+before the computation (e.g., `habitat = c('forest', 'grass')`). If NULL,
+each is separately considered.}
 
 \item{cost}{This argument could be:\itemize{
 \item{A \code{data.frame} indicating the cost values associated to each
@@ -52,6 +64,13 @@ complete graphs with \code{\link{graphab_graph}}.}
 A link is computed between every pair of patches.}
 }}
 
+\item{inter}{(optional, default = FALSE) A logical indicating whether only
+links among different habitat types are computed (if TRUE, no "intra-type"
+links).}
+
+\item{maxcost}{(optional, default = NULL) A value specifying the maximum
+accumulated cost of a least-cost path. The computation stops beyond.}
+
 \item{remcrosspath}{(optional, default = FALSE) A logical indicating whether
 links crossing patches are removed (TRUE).}
 
@@ -59,6 +78,10 @@ links crossing patches are removed (TRUE).}
 directory that contains the project directory. It should be used when the
 project directory is not in the current working directory. Default is NULL.
 When 'proj_path = NULL', the project directory is equal to \code{getwd()}.}
+
+\item{parallel.java}{An integer indicating how many computer cores are used
+to run the .jar file. By default, \code{parallel.java = NULL}, and java sets
+it according to local settings.}
 
 \item{alloc_ram}{(optional, default = NULL) Integer or numeric value
 indicating RAM gigabytes allocated to the java process. Increasing this
@@ -73,19 +96,25 @@ Graphab project.
 By default, links crossing patches are not ignored nor broken into
 two links. For example, a link from patches A to C crossing patch B
 is created. It takes into account the distance inside patch B. It can be a
-problem when computing BC index. See more information in Graphab 2.8 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+problem when computing BC index. See more information in Graphab 3.0 manual:
+\url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 }
 \examples{
 \dontrun{
 df_cost <- data.frame(code = 1:5,
                       cost = c(1, 10, 100, 1000, 1))
-graphab_link(proj_name = "grphb_ex",
+graphab_link(proj_name = "graphab_example",
+            habitat = "forest",
             distance = "cost",
             name = "lcp",
             cost = df_cost,
             topo = "complete")
 }
+}
+\references{
+\insertRef{foltete2012software}{graph4lg}
+\insertRef{foltete2021graphab}{graph4lg}
+\insertRef{savary2024multiple}{graph4lg}
 }
 \author{
 P. Savary, T. Rudolph

@@ -8,13 +8,15 @@ graphab_metric(
   proj_name,
   graph,
   metric,
-  multihab = FALSE,
+  multihab = NULL,
+  resfile = NULL,
   dist = NULL,
   prob = 0.05,
   beta = 1,
   cost_conv = FALSE,
   return_val = TRUE,
   proj_path = NULL,
+  parallel.java = NULL,
   alloc_ram = NULL
 )
 }
@@ -90,14 +92,17 @@ them. It then maximizes \eqn{{e}^{-\alpha d_{ij}}} for patches i and j.
 To use patch capacity values different from the patch area, please use
 directly Graphab software.}
 
-\item{multihab}{A logical (default = FALSE) indicating whether the
-'multihabitat' mode is used when computing the metric. It only applies to
-the following metrics: 'EC', 'F', 'IF' and 'BC'. If TRUE, then the project
-must have been created with the option \code{nomerge=TRUE}. It then returns
-several columns with metric values including the decomposition of the
-computation according to the type of habitat of every patch.
-Be careful, this option is in development and we cannot guarantee the
-results are correct.}
+\item{multihab}{(optional, default = NULL) A character string indicating
+whether the metric value should be decomposed across the different habitat
+types and their pairwise combinations. If `multihab='all'`, all the
+pairwise combinations are considered, including the within-habitat case.
+If `multihab='inter'`, only the inter-habitat types combinations are
+considered. Note that this argument is only required if the graph on which
+you compute the metrics is based on several habitat types.}
+
+\item{resfile}{(optional, default = NULL) A character string giving the
+name of the text file storing the results of the computation. Must be
+of the form 'file.txt'.}
 
 \item{dist}{A numeric or integer value specifying the distance at which
 dispersal probability is equal to \code{prob}. This argument is mandatory
@@ -121,12 +126,16 @@ using a log-log linear regression. See also \code{\link{convert_cd}}
 function.}
 
 \item{return_val}{Logical (default = TRUE) indicating whether metric values
-are returned in R (TRUE) or only stored in the patch attribute layer (FALSE)}
+are returned in R (TRUE) or only stored in the patch attribute layers (FALSE)}
 
 \item{proj_path}{(optional) A character string indicating the path to the
 directory that contains the project directory. It should be used when the
 project directory is not in the current working directory. Default is NULL.
 When 'proj_path = NULL', the project directory is equal to \code{getwd()}.}
+
+\item{parallel.java}{An integer indicating how many computer cores are used
+to run the .jar file. By default, \code{parallel.java = NULL}, and java sets
+it according to local settings.}
 
 \item{alloc_ram}{(optional, default = NULL) Integer or numeric value
 indicating RAM gigabytes allocated to the java process. Increasing this
@@ -137,14 +146,16 @@ with your machine settings.}
 If \code{return_val=TRUE}, the function returns a \code{data.frame}
 with the computed metric values and the corresponding patch ID when the
 metric is local or delta metric, or the numeric value of the global metric.
+If the metric is computed on a graph whose nodes belong to different habitat
+categories, the returned table includes several habitat categories.
 }
 \description{
 The function computes connectivity metrics on a graph from a
 link set in a Graphab project
 }
 \details{
-The metrics are described in Graphab 2.8 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+The metrics are described in Graphab 3.0 manual:
+\url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 Graphab software makes possible the computation of other metrics.
 Be careful, when the same metric is computed several times, the option
 \code{return=TRUE} is not returning the right columns. In these cases,
@@ -152,13 +163,20 @@ use \code{\link{get_graphab_metric}}.
 }
 \examples{
 \dontrun{
-graphab_metric(proj_name = "grphb_ex",
-               graph = "graph",
-               metric = "PC",
+graphab_metric(proj_name = "graphab_example",
+               graph = "graph_forest",
+               metric = "F",
+               multihab = "all",
                dist = 1000,
                prob = 0.05,
-               beta = 1)
+               beta = 1,
+               cost_conv = TRUE)
 }
+}
+\references{
+\insertRef{foltete2012software}{graph4lg}
+\insertRef{foltete2021graphab}{graph4lg}
+\insertRef{savary2024multiple}{graph4lg}
 }
 \author{
 P. Savary

@@ -13,6 +13,7 @@ graphab_modul(
   nb = NULL,
   return = TRUE,
   proj_path = NULL,
+  parallel.java = NULL,
   alloc_ram = NULL
 )
 }
@@ -55,6 +56,10 @@ directory that contains the project directory. It should be used when the
 project directory is not in the current working directory. Default is NULL.
 When 'proj_path = NULL', the project directory is equal to \code{getwd()}.}
 
+\item{parallel.java}{An integer indicating how many computer cores are used
+to run the .jar file. By default, \code{parallel.java = NULL}, and java sets
+it according to local settings.}
+
 \item{alloc_ram}{(optional, default = NULL) Integer or numeric value
 indicating RAM gigabytes allocated to the java process. Increasing this
 value can speed up the computations. Too large values may not be compatible
@@ -76,17 +81,22 @@ such as the weight \eqn{w_{ij}} of the link between patches i and j is:
 \deqn{w_{ij} = (a_{i} a_{j})^\beta e^{-\alpha d_{ij}}}.
 This function does not allow users to convert automatically Euclidean
 distances into cost-distances.
-See more information in Graphab 2.8 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+See more information in Graphab 3.0 manual:
+\url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 }
 \examples{
 \dontrun{
-graphab_modul(proj_name = "grphb_ex",
-               graph = "graph",
+graphab_modul(proj_name = "graphab_example",
+               graph = "graph_forest",
                dist = 1000,
                prob = 0.05,
                beta = 1)
 }
+}
+\references{
+\insertRef{foltete2012software}{graph4lg}
+\insertRef{foltete2021graphab}{graph4lg}
+\insertRef{savary2024multiple}{graph4lg}
 }
 \author{
 P. Savary

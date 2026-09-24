@@ -31,19 +31,25 @@
 #' directory that contains the project directory. It should be used when the
 #' project directory is not in the current working directory. Default is NULL.
 #' When 'proj_path = NULL', the project directory is equal to \code{getwd()}.
+#' @param parallel.java An integer indicating how many computer cores are used
+#' to run the .jar file. By default, \code{parallel.java = NULL}, and java sets
+#' it according to local settings.
 #' @param alloc_ram (optional, default = NULL) Integer or numeric value
 #' indicating RAM gigabytes allocated to the java process. Increasing this
 #' value can speed up the computations. Too large values may not be compatible
 #' with your machine settings.
 #' @details By default, intra-patch distances are considered for metric
-#' calculation. See more information in Graphab 2.8 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+#' calculation. See more information in Graphab 3.0 manual:
+#' \url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 #' @export
 #' @author P. Savary
+#' @references \insertRef{foltete2012software}{graph4lg}
+#' \insertRef{foltete2021graphab}{graph4lg}
+#' \insertRef{savary2024multiple}{graph4lg}
 #' @examples
 #' \dontrun{
-#' graphab_graph(proj_name = "grphb_ex",
-#'               linkset = "lcp",
+#' graphab_graph(proj_name = "graphab_example",
+#'               linkset = "forest_link_planar",
 #'               name = "graph")
 #' }
 
@@ -53,6 +59,7 @@ graphab_graph <- function(proj_name,         # character
                           thr = NULL, # threshold
                           cost_conv = FALSE, # FALSE (default) or true
                           proj_path = NULL, # if NULL getwd() otherwise a character path
+                          parallel.java = NULL,
                           alloc_ram = NULL){
 
   #########################################
@@ -78,29 +85,47 @@ graphab_graph <- function(proj_name,         # character
          Please use graphab_project() before.")
   }
 
+  ## Create proj_end_path proj_path/proj_name/proj_name.xml
   proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
+
+  #######################################
+  # Add '' to proj_path for cases with spaces in paths
+  if(all(stringr::str_sub(proj_end_path, 1, 1) != "'",
+         stringr::str_sub(proj_end_path, 1, 1) != "'",
+         stringr::str_detect(string = proj_end_path,
+                             pattern = " "))){
+    proj_end_path_cmd <- paste0("'", proj_end_path, "'")
+  } else {
+    proj_end_path_cmd <- proj_end_path
+  }
+
+  ## Check project version
+  check_graphab_version(proj_path = proj_end_path)
 
   #########################################
   # Check for linkset class
   if(!is.null(linkset)){
     if(!inherits(linkset, "character")){
       stop("'linkset' must be a character string")
-    } else if (!(paste0(linkset, "-links.csv") %in% list.files(path = paste0(proj_path, "/", proj_name)))){
+    } else if (!check_graphab_object(proj_path = proj_end_path,
+                                    object_type = "linkset",
+                                    name = linkset)){
       stop("The linkset you refer to does not exist.
-           Please use graphab_link() before.")
+           Please use graphab_link() to create it.")
     }
-  } else if (length(list.files(path = paste0(proj_path,
-                                             "/", proj_name),
-                               pattern = "-links.csv")) == 0){
-
-    stop("There is not any linkset in the project you refer to.
-         Please use graphab_link() before.")
-
   } else {
+    message("You did not provide any 'linkset' name.")
+    # Check project content
+    project_objects <- graphab_show(proj_path = proj_end_path)
 
-    ngraph <- length(list.files(path = paste0(proj_path, "/", proj_name),
-                                pattern = "-links.csv"))
-    message(paste0(ngraph, " graph(s) will be created"))
+    if(length(project_objects[["Linksets"]]) > 1){
+      ngraph <- length(project_objects[["Linksets"]])
+      message(paste0("There are ", ngraph, " linksets in the project."))
+      message(paste0(ngraph, " graph(s) will be created."))
+    } else {
+      stop(paste0("The project does not have any linkset.",
+                  "You must create one with graphab_link()."))
+    }
   }
 
   #########################################
@@ -128,6 +153,14 @@ graphab_graph <- function(proj_name,         # character
   }
 
   #########################################
+  # Check for parallel.java
+  if(!is.null(parallel.java)){
+    if(!inherits(parallel.java, c("numeric", "integer"))){
+      stop("'parallel.java' must be a numeric or integer value.")
+    }
+  }
+
+  #########################################
   # Check for Graphab
   gr <- get_graphab(res = FALSE, return = TRUE)
 
@@ -141,14 +174,20 @@ graphab_graph <- function(proj_name,         # character
 
   #########################################
   # Get graphab path
-  version <- "graphab-2.8.jar"
-  path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
+  version <- "graphab-3.0.jar"
+  path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg2_jar/", version)
 
   #########################################
   # Command line
 
-  cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab,
-           "--project", proj_end_path)
+  cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab)
+
+  if(!is.null(parallel.java)){
+    cmd <- c(cmd, "-proc ", as.character(parallel.java))
+  }
+
+  cmd <- c(cmd,
+           "--project", proj_end_path_cmd)
 
   if(!is.null(linkset)){
     cmd <- c(cmd, "--uselinkset", linkset)
@@ -184,26 +223,17 @@ graphab_graph <- function(proj_name,         # character
   if(length(rs) == 1){
     if(rs == 1){
       message("An error occurred")
-    } else {
-      if(file.exists(paste0(proj_path, "/", proj_name, "/", name, "-voronoi.shp"))){
-        message(paste0("Graph '", name, "' has been created in the project ",
-                       proj_name))
-      } else {
-        message("The graph creation did not succeed.")
-      }
-    }
-  } else {
-    if(file.exists(paste0(proj_path, "/", proj_name, "/", name, "-voronoi.shp"))){
-      message(paste0("Graph '", name, "' has been created in the project ",
-                     proj_name))
-    } else {
-      message("The graph creation did not succeed.")
     }
   }
 
+  ## Check whether the graph exists
+  if(check_graphab_object(proj_path = proj_end_path,
+                          object_type = "graph",
+                          name = name)){
+    message(paste0("Graph '", name, "' has been created in the project '",
+                   proj_name, "'."))
+  } else {
+    message("An error occurred")
+  }
+
 }
-
-
-
-
-

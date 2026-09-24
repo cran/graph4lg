@@ -22,20 +22,20 @@ When 'proj_path = NULL', the project directory is equal to \code{getwd()}.}
 }
 \value{
 A data.frame with the link properties (from, to, cost-distance,
-Euclidean distance)
+Euclidean distance), but not their spatial information (no spatial lines).
 }
 \description{
 The function gets a linkset computed in the Graphab project
 }
 \details{
-See more information in Graphab 2.8 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}.
+See more information in Graphab 3.0 manual:
+\url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}.
 This function works if \code{link{get_graphab}} function works correctly.
 }
 \examples{
 \dontrun{
-get_graphab_linkset(proj_name = "grphb_ex",
-               linkset = "lkst1")
+get_graphab_linkset(proj_name = "graphab_example",
+               linkset = "forest_link_planar")
 }
 }
 \author{

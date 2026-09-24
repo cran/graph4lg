@@ -64,6 +64,7 @@
 #' @export
 #' @author P. Savary
 #' @references \insertRef{van2015isolation}{graph4lg}
+#' #' @references \insertRef{savary2021analysing}{graph4lg}
 #' @examples
 #' data("data_tuto")
 #' mat_gen <- data_tuto[[1]]

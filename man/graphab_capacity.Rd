@@ -6,6 +6,7 @@
 \usage{
 graphab_capacity(
   proj_name,
+  habitat,
   mode = "area",
   patch_codes = NULL,
   exp = NULL,
@@ -16,6 +17,7 @@ graphab_capacity(
   cost_conv = FALSE,
   weight = FALSE,
   proj_path = NULL,
+  parallel.java = NULL,
   alloc_ram = NULL
 )
 }
@@ -24,25 +26,27 @@ graphab_capacity(
 The project name is also the name of the project directory in which the
 file proj_name.xml is. It can be created with \code{\link{graphab_project}}}
 
+\item{habitat}{A character string indicating the name of the habitat type
+whose patches will get a new capacity value. When the habitat type is defined
+from the source raster codes, all \code{mode} options are available. When
+it is of type 'vector', \code{mode} can only be `ext_file` or `neigh`.
+Only one habitat type can be treated at a time.}
+
 \item{mode}{A character string indicating the way capacities are
 computed. It must be either:\itemize{
 \item{\code{mode='area'}(default): The capacity of the patches is computed
 as the area of each habitat patch. The argument \code{exp} makes it
-possible to raise area to a power given by an exposant.}
+possible to raise area to a power given by an exponent.}
 \item{\code{mode='ext_file'}: The capacity of the patches is given by an
 external .csv file. See argument \code{ext_file} below.}
-\item{\code{mode='neigh'}: The capacity is computed depending on the
-neighbouring raster cells from each habitat patch. The number of cells
-with a value given by \code{codes} argument is summed up to the
+\item{\code{mode='neigh'}: The capacity is computed as a function of the
+neighboring raster cells of each habitat patch. The number of cells
+with a value given by the \code{codes} argument is summed up to the
 distance \code{thr}. This number can be weighted according to the
 \code{weight} argument.}
 }}
 
-\item{patch_codes}{(optional, default=NULL) An integer value or vector
-specifying the codes corresponding to the habitat pixel whose corresponding
-patches are included to compute the capacity as the area of the habitat
-when \code{mode='area'}. Patches corresponding to other initial habitat
-codes are weighted by 0.}
+\item{patch_codes}{(default=NULL) Deprecated parameter from verson 1.8.}
 
 \item{exp}{An integer value specifying the power to which patch area are
 raised when \code{mode='area'}. When not specified, \code{exp=1} by default.}
@@ -50,9 +54,9 @@ raised when \code{mode='area'}. When not specified, \code{exp=1} by default.}
 \item{ext_file}{A character string specifying the name of the .csv file in
 which patch capacities are stored. It must be located either in the working
 directory or in the directory defined by \code{proj_path}. It must have
-as many rows as there are patches in the project and its column names
-must include 'Id' and 'Capacity'. The 'Id' column must correspond to the
-patch ID in the 'patches' layer (see \code{\link{get_graphab_metric}}).
+as many rows as there are patches of the considered habitat type. Its column
+names must include 'Id' and 'Capacity'. The 'Id' column must correspond to
+the patches' ID in the 'patches' layer (see \code{\link{get_graphab_metric}}).
 The 'Capacity' column must contain the corresponding patch capacities to
 assign each patch.}
 
@@ -86,6 +90,10 @@ directory that contains the project directory. It should be used when the
 project directory is not in the current working directory. Default is NULL.
 When 'proj_path = NULL', the project directory is equal to \code{getwd()}.}
 
+\item{parallel.java}{An integer indicating how many computer cores are used
+to run the .jar file. By default, \code{parallel.java = NULL}, and java sets
+it according to local settings.}
+
 \item{alloc_ram}{(optional, default = NULL) Integer or numeric value
 indicating RAM gigabytes allocated to the java process. Increasing this
 value can speed up the computations. Too large values may not be compatible
@@ -96,16 +104,21 @@ The function computes custom capacities of patches
 in the Graphab project
 }
 \details{
-See more information in Graphab 2.8 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+See more information in Graphab 3.0 manual:
+\url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 Be careful, when capacity has been changed. The last changes are taken into
 account for subsequent calculations in a project.
 }
 \examples{
 \dontrun{
-graphab_capacity(proj_name = "grphb_ex",
+graphab_capacity(proj_name = "graphab_example",
                  mode = "area")
 }
+}
+\references{
+\insertRef{foltete2012software}{graph4lg}
+\insertRef{foltete2021graphab}{graph4lg}
+\insertRef{savary2024multiple}{graph4lg}
 }
 \author{
 P. Savary

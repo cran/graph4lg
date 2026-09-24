@@ -8,7 +8,7 @@ library(graph4lg)
 library(igraph)
 
 
-## ---- echo = FALSE, eval = TRUE-----------------------------------------------
+## ----echo = FALSE, eval = TRUE------------------------------------------------
 data("data_tuto")
 
 mat_dps <- data_tuto[[1]]
@@ -28,7 +28,7 @@ plot_w_hist(graph = land_graph)
 
 ## -----------------------------------------------------------------------------
 miw_lg <- compute_node_metric(graph = land_graph, metrics = "miw")
-head(miw_lg)
+print(head(miw_lg))
 
 ## -----------------------------------------------------------------------------
 land_graph <- add_nodes_attr(graph = land_graph,
@@ -36,8 +36,8 @@ land_graph <- add_nodes_attr(graph = land_graph,
                              data = miw_lg,
                              index = "ID")
 
-## ---- eval = FALSE------------------------------------------------------------
-#  mat_dps <- mat_gen_dist(x = data_simul_genind, dist = "DPS")
+## ----eval = FALSE-------------------------------------------------------------
+# mat_dps <- mat_gen_dist(x = data_simul_genind, dist = "DPS")
 
 ## -----------------------------------------------------------------------------
 gen_comp_graph <- gen_graph_topo(mat_w = mat_dps,

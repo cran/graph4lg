@@ -263,13 +263,13 @@ plot_graph_lg <- function(graph,
     if(length(unique(igraph::E(graph)$weight)) == 1){
       graph_df$l_w <- 0.5
     } else {
-      graph_df$l_w <- sc01(igraph::E(graph)$weight)/2 + 0.5
+      graph_df$l_w <- sc01(igraph::E(graph)$weight) #/2 + 0.5 before
     }
   } else if (link_width == "inv_w"){
     if(length(unique(igraph::E(graph)$weight)) == 1){
       graph_df$l_w <- 0.5
     } else {
-      graph_df$l_w <- sc01(1/igraph::E(graph)$weight)/2 + 0.5
+      graph_df$l_w <- sc01(1/igraph::E(graph)$weight) #/2 + 0.5 before
     }
   }
 
@@ -306,7 +306,7 @@ plot_graph_lg <- function(graph,
   g <- ggplot() +
     geom_segment(data = graph_df, aes(x = .data$x, y = .data$y,
                                       xend = .data$xend, yend = .data$yend,
-                                      size = .data$l_w),
+                                      linewidth = .data$l_w),
                  color = "black") +
     geom_point(data = crds, aes(x = .data$x, y = .data$y,
                                 size = .data$n_size,
@@ -315,6 +315,7 @@ plot_graph_lg <- function(graph,
                                label = .data$ID),
               size = 4, color = "black", fontface = "bold") +
     scale_size_identity() +
+    scale_linewidth(range = c(0.25, 1.5)) +
     scale_color_manual(values = pal) +
     theme_bw() +
     labs(x = xlab,

@@ -56,7 +56,7 @@ same links in both linksets.
 }
 \examples{
 \dontrun{
-link_compar(proj_name = "grphb_ex",
+link_compar(proj_name = "graphab_example",
               linkset1 = "lcp1",
               linkset2 = "lcp2"
               buffer_width = 200)

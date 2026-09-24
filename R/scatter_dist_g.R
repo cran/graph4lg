@@ -99,9 +99,9 @@ scatter_dist_g <- function(mat_y, mat_x,
   # row and column names of 'mat_x' and 'mat_y'
   if(!inherits(graph, "igraph")){
     stop("graph must be an object of class 'igraph'.")
-  } else if (!(igraph::is.weighted(graph))){
+  } else if (!(igraph::is_weighted(graph))){
     stop("graph must a weighted graph.")
-  } else if (igraph::is.directed(graph)){
+  } else if (igraph::is_directed(graph)){
     stop("graph must a non-directed graph.")
   } else if (is.null(igraph::V(graph)$name)){
     stop("graph must have node names.")
@@ -177,16 +177,18 @@ scatter_dist_g <- function(mat_y, mat_x,
     dat <- dat[-which(is.na(dat$x_val)), ]
   }
 
+  # Make the subset
+  dat_graph_val <- dat[which(!is.na(dat$graph_val)),]
   # Create the plot
   scat <- ggplot() +
     geom_point(data = dat,
-               aes_string(x = 'x_val', y = 'y_val'),
+               aes(x = .data$x_val, y = .data$y_val),
                color = pts_col_1, size = 1, shape = 16) +
     geom_smooth(data = dat,
-                aes_string(x = 'x_val', y = 'y_val'),
+                aes(x = .data$x_val, y = .data$y_val),
                 method = "loess", color = "black") +
-    geom_point(data = dat[which(!is.na(dat$graph_val)),],
-               aes_string(x = 'x_val', y = 'graph_val'),
+    geom_point(data = dat_graph_val,
+               aes(x = .data$x_val, y = .data$graph_val),
                color = pts_col_2, size = 1.5, shape = 16) +
     labs(x = "x",
          y = "y") +

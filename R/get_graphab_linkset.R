@@ -13,16 +13,16 @@
 #' project directory is not in the current working directory. Default is NULL.
 #' When 'proj_path = NULL', the project directory is equal to \code{getwd()}.
 #' @return A data.frame with the link properties (from, to, cost-distance,
-#' Euclidean distance)
-#' @details See more information in Graphab 2.8 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}.
+#' Euclidean distance), but not their spatial information (no spatial lines).
+#' @details See more information in Graphab 3.0 manual:
+#' \url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}.
 #' This function works if \code{link{get_graphab}} function works correctly.
 #' @export
 #' @author P. Savary
 #' @examples
 #' \dontrun{
-#' get_graphab_linkset(proj_name = "grphb_ex",
-#'                linkset = "lkst1")
+#' get_graphab_linkset(proj_name = "graphab_example",
+#'                linkset = "forest_link_planar")
 #' }
 
 
@@ -53,25 +53,38 @@ get_graphab_linkset <- function(proj_name,
          Please use graphab_project() before.")
   }
 
+  proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
+
+  ## Check project version
+  check_graphab_version(proj_path = proj_end_path)
 
   #########################################
-  # Check for linkset class
+  # Check for linkset class and the existence of the linkset
   if(!inherits(linkset, "character")){
     stop("'linkset' must be a character string")
-  } else if (length(list.files(path = paste0(proj_path, "/", proj_name),
-                               pattern = "-links.csv")) == 0){
-    stop("There is not any linkset in the project you refer to.
-         Please use graphab_link() before.")
-  } else if (!(paste0(linkset, "-links.csv") %in% list.files(path = paste0(proj_path,
-                                                                           "/", proj_name)))){
+  } else if (!check_graphab_object(proj_path = proj_end_path,
+                                   object_type = "linkset",
+                                   name = linkset)){
     stop("The linkset you refer to does not exist.
            Please use graphab_link() before.")
   }
 
-  df <- foreign::read.dbf(file = paste0(proj_path, "/",
-                                        proj_name, "/",
-                                        linkset, "-links.dbf"))
+  ## Link all the project files
+  proj_files <- list.files(path = paste0(proj_path, "/", proj_name),
+                           recursive = TRUE, full.names = TRUE)
 
+  ## Find the file which matches the linkset .pgkg file name
+  linkset_file <- proj_files[which(!is.na(
+    stringr::str_match(string = proj_files,
+                       pattern = paste0("/", linkset, "-links.gpkg"))))]
+
+  ## Load the data from the linkset file
+  df <- suppressWarnings(
+    sf::st_drop_geometry(
+      sf::read_sf(linkset_file,
+                  as_tibble = FALSE)
+    )
+  )
 
   return(df)
 }

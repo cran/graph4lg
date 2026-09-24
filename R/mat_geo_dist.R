@@ -5,11 +5,11 @@
 #' Coordinate Reference System or in a polar coordinates system.
 #'
 #' @param data An object of class :\itemize{
-#' \item \code{data.frame} with 3 columns: 2 columns with the point spatial
+#' \item A \code{data.frame} with 3 columns: 2 columns with the point spatial
 #' coordinates and another column with point IDs
-#' \item \code{SpatialPointsDataFrame} }
-#' @param ID (if \code{data} is of class \code{data.frame}) A character string
-#' indicating the name of the column of \code{data} with the point IDs
+#' \item An \code{sf} point spatial feature layer}
+#' @param ID (if \code{data} is of class \code{data.frame} or 'sf') A character
+#' string indicating the name of the column of \code{data} with the point IDs.
 #' @param x (if \code{data} is of class \code{data.frame}) A character string
 #' indicating the name of the column of \code{data} with the point longitude
 #' @param y (if \code{data} is of class \code{data.frame}) A character string
@@ -79,19 +79,27 @@ mat_geo_dist <- function(data,
 
 
   # If 'data' is a Spatial Points data.frame
-  if(inherits(data, "SpatialPointsDataFrame")){
+  if(inherits(data, "sf")){
+
+    # Get pts coordinates
+    pts_coords <- sf::st_coordinates(data)
 
     # Check whether locations are not duplicated (and display a warning message
     # in such a case)
-    if(any(duplicated(data@coords))){
+    if(any(duplicated(pts_coords))){
       warning("At least 1 point location appears twice in
-              the 'SpatialPointsDataFrame'.")
+              the 'sf' point data.")
     }
 
     # Check whether the points have an ID
-    if(is.null(ID) ) {
+    if(is.null(ID)) {
       stop("You have to specify the name of the ID column of the points in the
-           attribute table, as an input 'id'")
+           attribute table, as an input 'ID'")
+    }
+
+    # Check whether data has an ID column
+    if(!(ID %in% colnames(data))){
+      stop("Input 'ID' must be in the attribute table of 'data'.")
     }
 
     # Check whether the argument 'x' is specified
@@ -106,19 +114,26 @@ mat_geo_dist <- function(data,
       warning("Unused argument 'y'")
     }
 
-
     #####################################################################
     #####################################################################
 
     # Check whether the data have projected coordinates
-    if(stringr::str_sub(raster::crs(data), 7, 13) == "longlat"){
+
+    # If NA for a sf object, stop
+    if(is.na(sf::st_is_longlat(data))){
+
+      stop("'data' must have a spatial coordinates reference system.")
+
+    # If polar coordinates
+    } else if(sf::st_is_longlat(data)){
 
       if(crds_type == "proj"){
-        stop("Your SpatialPointsDataFrame has polar coordinates
+        stop("Your sf dataset has polar coordinates,
              you cannot use 'crds_type = 'proj'")
       } else {
 
-        data <- cbind(data.frame(ID = data$ID), data.frame(data@coords))
+        data <- cbind(data.frame(ID = sf::st_drop_geometry(data)[, ID]),
+                      data.frame(pts_coords))
         colnames(data) <- c("ID", "x", "y")
 
         df_lk <- expand.grid(data[, ID], data[, ID])
@@ -138,7 +153,9 @@ mat_geo_dist <- function(data,
                                                 method = gc_formula)
         }
 
-        mat <- graph4lg::df_to_pw_mat(data = df_lk, from = "ID1", to = "ID2", value = "dist")
+        mat <- graph4lg::df_to_pw_mat(data = df_lk,
+                                      from = "ID1", to = "ID2",
+                                      value = "dist")
 
 
       }
@@ -148,34 +165,29 @@ mat_geo_dist <- function(data,
       # Projected coordinates
 
       if(crds_type == "polar"){
-        stop("Your SpatialPointsDataFrame has projected coordinates
+        stop("Your sf dataset has projected coordinates
              you cannot use 'crds_type = 'polar'")
 
       } else {
 
         # Check whether the data have projected coordinates in a common CRS
-        if(!(stringr::str_sub(raster::crs(data), 7, 9) %in% c("lcc",
-                                                              "utm", "mer"))){
-          message("The CRS of your SpatialPointsDataFrame is not common,
-              ensure it has projected coordinates.")
-        }
+        # if(!(stringr::str_sub(raster::crs(data), 7, 9) %in% c("lcc",
+        #                                                       "utm", "mer"))){
+        #   message("The CRS of your SpatialPointsDataFrame is not common,
+        #       ensure it has projected coordinates.")
+        # }
 
-
-        # Get the coordinates of the points
-        coords <- data@coords
 
         # Compute the Euclidean distances between the points
-        mat <- as.matrix(stats::dist(coords,
+        mat <- as.matrix(stats::dist(pts_coords,
                                      method = "euclidean",
                                      diag = TRUE,
                                      upper = TRUE))
         # Give names to the rows and columns of the distance matrix
-        name <- data@data[, ID]
+        name <- sf::st_drop_geometry(data)[, ID]
         row.names(mat) <- colnames(mat) <- name
 
-
       }
-
     }
 
   } else if (inherits(data, "data.frame")){
@@ -206,7 +218,7 @@ mat_geo_dist <- function(data,
               it is the case.")
 
       # Get the coordinates of the points
-      coords <- data[, c(y, x)]
+      coords <- data[, c(x, y)]
 
       # Compute the Euclidean distances between the points
       mat <- as.matrix(stats::dist(coords,
@@ -240,13 +252,14 @@ mat_geo_dist <- function(data,
                                               method = gc_formula)
       }
 
-      mat <- graph4lg::df_to_pw_mat(data = df_lk, from = "ID1", to = "ID2", value = "dist")
+      mat <- graph4lg::df_to_pw_mat(data = df_lk,
+                                    from = "ID1", to = "ID2",
+                                    value = "dist")
 
     }
 
   } else {
-    stop("Input 'data' must be of class 'data.frame' or
-         'SpatialPointsDataFrame'.")
+    stop("Input 'data' must be of class 'data.frame' or 'sf'.")
   }
 
   return(mat)

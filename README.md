@@ -4,7 +4,6 @@
 # graph4lg
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 ## Overview
@@ -26,6 +25,28 @@ You can install the released version of graph4lg from
 
 ``` r
 install.packages("graph4lg")
+```
+
+To install the development version stored on Gitlab, use the following
+
+``` r
+remotes::install_gitlab("psavary3/graph4lg")
+```
+
+Until `graph4lg.1.8`, all the functions using the Graphab software
+program used `graphab.2.8.jar`. The new functions included in Graphab
+3.0 are available in the functions of `graph4lg.2.0` (and next), which
+now calls `graphab.3.0.jar`. As a consequence, users cannot reproduce
+the analyses performed with `graphab.2.8.jar` using the last version of
+`graph4lg`.
+
+To ensure reproducibility and compatibility with former versions of the
+package, it is possible to install the previous version of `graph4lg`,
+compatible with `graphab.2.8.jar` from Gitlab with the following
+command:
+
+``` r
+remotes::install_gitlab("psavary3/graph4lg@archive-1-9")
 ```
 
 ## Example

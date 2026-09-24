@@ -6,11 +6,13 @@
 \usage{
 graphab_pointset(
   proj_name,
-  linkset,
+  linkset = NULL,
+  name,
   pointset,
-  id = "ID",
-  return_val = TRUE,
+  id = NULL,
+  return_val = NULL,
   proj_path = NULL,
+  parallel.java = NULL,
   alloc_ram = NULL
 )
 }
@@ -19,65 +21,60 @@ graphab_pointset(
 The project name is also the name of the project directory in which the
 file proj_name.xml is.}
 
-\item{linkset}{A character string indicating the name of the link set used.
-The link set is here used to get the defined cost values and compute the
-distance from the point to the patches. Link sets can be created
-with \code{\link{graphab_link}}.}
+\item{linkset}{Deprecated parameter from graph4lg < 2.0}
 
-\item{pointset}{Can be either;\itemize{
+\item{name}{A character string indicating the name of the new habitat type
+created by adding this point set to the project.}
+
+\item{pointset}{Can be either:\itemize{
 \item{A character string indicating the path (absolute or relative) to a
-shapefile point layer}
+geopackage point layer with its extension (.gpkg).}
 \item{A character string indicating the path to a .csv file with three
 columns: ID, x and y, respectively indicating the point ID, longitude
 and latitude.}
 \item{A data.frame with three columns:
 ID, x and y, respectively indicating the point ID, longitude and latitude.}
-\item{A SpatialPointsDataFrame}
-}
-The point ID column must be 'ID' by default but can also be specified
-by the \code{id} argument in all three cases.}
+}}
 
-\item{id}{A character string indicating the name of the column in either
-the .csv table, data.frame or attribute table, corresponding to the ID
-of the points. By default, it should be 'ID'. This column is used for naming
-the points when returning the output.}
+\item{id}{Deprecated parameter from graph4lg < 2.0}
 
-\item{return_val}{Logical (default=TRUE) indicating whether the metrics
-associated with closest habitat patches from the points are returned to
-users.}
+\item{return_val}{Deprecated parameter from graph4lg < 2.0}
 
 \item{proj_path}{(optional) A character string indicating the path to the
 directory that contains the project directory. It should be used when the
 project directory is not in the current working directory. Default is NULL.
 When 'proj_path = NULL', the project directory is equal to \code{getwd()}.}
 
+\item{parallel.java}{An integer indicating how many computer cores are used
+to run the .jar file. By default, \code{parallel.java = NULL}, and java sets
+it according to local settings.}
+
 \item{alloc_ram}{(optional, default = NULL) Integer or numeric value
 indicating RAM gigabytes allocated to the java process. Increasing this
 value can speed up the computations. Too large values may not be compatible
 with your machine settings.}
 }
-\value{
-If \code{return_val=TRUE}, the function returns a \code{data.frame}
-with the properties of the nearest patch to every point in the point set,
-as well as the distance from each point to the nearest patch.
-}
 \description{
-The function adds a spatial point set to the Graphab project,
-allowing users to identify closest habitat patch from each point and
-get corresponding connectivity metrics.
+The function adds a spatial point set to the Graphab project.
+These points will define a new habitat type with 0-capacity at first.
 }
 \details{
 Point coordinates must be in the same coordinate reference system
 as the habitat patches (and initial raster layer). See more information in
-Graphab 2.8 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+Graphab 3.0 manual:
+\url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 }
 \examples{
 \dontrun{
-graphab_pointset(proj_name = "grphb_ex",
-               graph = "graph",
-               pointset = "pts.shp")
+graphab_pointset(proj_name = "graphab_example",
+                 name = "pts_pop",
+                 pointset = "pts_pop.gpkg")
 }
+}
+\references{
+\insertRef{foltete2012software}{graph4lg}
+\insertRef{foltete2021graphab}{graph4lg}
+\insertRef{savary2024multiple}{graph4lg}
 }
 \author{
 P. Savary

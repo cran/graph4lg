@@ -1,6 +1,6 @@
 ---
 title: "1 - Landscape and genetic data processing with `graph4lg`"
-author: "UMR ThéMA - UBFC-CNRS, UMR Biogéosciences - UBFC-CNRS, ARP-Astrance"
+author: "UMR 6049 ThéMA - CNRS - Univ. Marie et Louis Pasteur, Besançon, France"
 date: "Paul SAVARY"
 output:
   html_vignette:
@@ -29,7 +29,7 @@ library(igraph)
 
 # Introduction
 
-The rationale of `graph4lg` package in R is to make easier the construction and analysis of genetic and landscape graphs in landscape genetic studies (hence the name `graph4lg`, meaning Graphs for Landscape Genetics). This package provides users with tools for:
+The rationale of the `graph4lg` package in R is to make the construction and analysis of genetic and landscape graphs easier for landscape genetic studies (hence the name `graph4lg`, meaning Graphs for Landscape Genetics). This package provides users with tools for:
 
 * Landscape and genetic data processing
 * Genetic graph construction and analysis
@@ -37,7 +37,7 @@ The rationale of `graph4lg` package in R is to make easier the construction and 
 * Landscape and genetic graph comparisons
 
 
-Each one of the included tutorials focuses on one of these points. This first tutorial will focus on **landscape and genetic data processing**. It will describe the package functions allowing users to:
+Each one of the vignettes associated with this package focuses on one of these points. This first vignette will focus on **landscape and genetic data processing**. It will describe the package functions allowing users to:
 
 * Load genetic data and convert them in/from several formats
 * Assess genetic diversity
@@ -45,10 +45,9 @@ Each one of the included tutorials focuses on one of these points. This first tu
 * Convert data objects in R to make analyses easier
 
 
+## Data used in this vignette
 
-## Data used in this tutorial
-
-The package already includes genetic and spatial simulated data sets allowing users to discover its different functionalities. The first data set (`data_simul`) was simulated with CDPOP [@landguth2010cdpop] on a simulated landscape. It consists of 1500 individuals from 50 populations genotyped at 20 microsatellite loci. Individuals dispersed less when the cost-distance between populations was large. A landscape graph was created with Graphab [@foltete2012software] whose nodes were the 50 simulated populations and the links were weighted by cost-distance values between populations. The project created with Graphab was included into the package such that the landscape graphs and the cost-distance matrix can be easily imported into the R environment.
+The package already includes simulated data sets for genetic and spatial data, allowing users to discover its different functionalities. The first data set (`data_simul`) was simulated with CDPOP [@landguth2010cdpop] on a simulated landscape. It consists of 1500 individuals from 50 populations genotyped for 20 microsatellite loci. Individuals dispersed less when the cost-distance between populations was large. A landscape graph was created with Graphab [@foltete2012software, @foltete2021graphab] whose nodes were the 50 simulated populations and the links were weighted by cost-distance values between populations. The project created with Graphab was included into the package such that the landscape graphs and the cost-distance matrix can be easily imported into the R environment.
 
 The second data set (`data_ex`) was simulated as the first one but included only 10 populations. It is used to generate quick examples.
 
@@ -69,16 +68,16 @@ mat_ld <- data_tuto[[6]]
 
 # Genetic data loading and format conversions
 
-The first type of functions from this package allows users to **process genetic data**. These functions load genetic data in R environment and convert them when necessary.
+The first type of functions from this package allows users to **process genetic data**. These functions load genetic data in an R environment and convert them when necessary.
 
-In order to make the package user-friendly and compatible with genetic data commonly used in landscape genetics, the functions `genepop_to_genind`, `structure_to_genind`, `gstud_to_genind` and `loci_to_genind` allow users to convert genetic data from formats used respectively in the `gstudio` [@dyer2009geneticstudio] and `pegas` [@paradis2010pegas] packages in R and in STRUCTURE [@pritchard2000inference] and GENEPOP [@raymond1995genepop] software into R objects with the class attribute `genind` from ADEGENET package [@jombart2008adegenet]. The **format `genind`** makes possible the use of time-efficient functions from `adegenet` package (coded in C). This package was developed and is regularly maintained by Thibaut Jombart [(his website)](https://thibautjombart.netlify.app/). The function `genind_to_genepop` enables to convert `genind` object into text files in format `genepop` in order to perform analyses with this commonly used R package and executable software. All these functions work with **microsatellite data (with 2 or 3-digits allele coding)**. 
+In order to make the package user-friendly and compatible with genetic data commonly used in landscape genetics, the functions `genepop_to_genind`, `structure_to_genind`, `gstud_to_genind` and `loci_to_genind` allow users to convert genetic data from formats used respectively in the `gstudio` [@dyer2009geneticstudio] and `pegas` [@paradis2010pegas] packages in R and in STRUCTURE [@pritchard2000inference] and GENEPOP [@raymond1995genepop] software into R objects with the class attribute `genind` from ADEGENET package [@jombart2008adegenet]. The **`genind` format** makes it possible to use time-efficient functions from the `adegenet` package (coded in C). This package was developed and is regularly maintained by Thibaut Jombart [(his website)](https://thibautjombart.netlify.app/). The `genind_to_genepop` function enables to convert `genind` object into text files in the `genepop` format in order to perform analyses with this commonly used R package and executable software. All these functions work with **microsatellite data (with 2 or 3-digits allele coding)**. 
 
-The package is **compatible with SNPs data** as soon as they have been loaded into a `genind` object (see package `vcfR` for example).
+The package is **compatible with SNPs data** as long as they have been loaded into a `genind` object (ideally using the `vcfR` package with the `return.alleles = TRUE` option in the `vcfR::vcfR2genind()` function).
 
 
 ## GENEPOP to genind
 
-The GENEPOP software [@raymond1995genepop] developed by M. Raymond and F. Rousset (Montpellier, France) can be used as an executable file, with or without graphical user interface, or as an R package. It is frequently used to compute F~ST~ values and to test for Hardy-Weinberg equilibrium, linkage disequilibrium or genetic differentiation. Besides, when performing simulations with CDPOP [@landguth2010cdpop], individual genotypes can be saved as GENEPOP files at the end of the simulation.
+The GENEPOP software [@raymond1995genepop] developed by M. Raymond and F. Rousset (Montpellier, France) can be used as an executable file, with or without graphical user interface, or as an R package [(GENEPOP git repository)](https://f-rousset.r-universe.dev/genepop). It is frequently used to compute F~ST~ values and to test for Hardy-Weinberg equilibrium, linkage disequilibrium or genetic differentiation. Besides, when performing simulations with CDPOP [@landguth2010cdpop], individual genotypes can be saved as GENEPOP files at the end of the simulation.
 
 The function `genepop_to_genind` loads a GENEPOP file (.txt extension) and converts it into a `genind` object. To use it, the path to the file, the total number and names of the loci and the population names must be indicated.
 
@@ -95,7 +94,7 @@ We get a `genind` object. It contains the genotypes of the 1500 individuals from
 
 ## genind to GENEPOP
 
-The `genind_to_genepop` function performs the reverse conversion, i.e. converts a `genind` object into a GENEPOP file. This file is created and saved in the working directory defined earlier.
+The `genind_to_genepop` function performs the reverse conversion, i.e., it converts a `genind` object into a GENEPOP file. This file is created and saved in the working directory defined earlier.
 
 
 ```{r, echo = TRUE, eval = FALSE}
@@ -103,11 +102,11 @@ genind_to_genepop(x = data_genind,
                   output = "data_gpop_test.txt")
 ```
 
-This function can for example create a GENEPOP file to test for between population genetic differentiation or to compute fixation indices with GENEPOP software.
+This function can create, for example, a GENEPOP file to test for pairwise population genetic differentiation or to compute fixation indices with GENEPOP software.
 
 ## STRUCTURE to genind
 
-STRUCTURE software [@pritchard2000inference] is frequently used in population genetics and landscape genetics. It enables to create population clusters through a Bayesian approach aiming at minimising the deviation from Hardy-Weinberg equilibrium when gathering populations with one another. The input files have a particular structure. The function `structure_to_genind` converts this type of file into a `genind` object.
+The STRUCTURE software [@pritchard2000inference] is frequently used in population genetics and landscape genetics. It enables to create population clusters through a Bayesian approach aiming at minimising the deviation from Hardy-Weinberg equilibrium when merging populations together. The input files have a particular structure. The function `structure_to_genind` converts this type of file into a `genind` object.
 
 To use the function, we need to indicate the path to the file, the names of the loci, the individual ID and the population names in the same order as in the original file.
 
@@ -127,11 +126,11 @@ data_paru
 
 ## gstud to genind
 
-Packages `gstudio` and `popgraph` developed by R. Dyer [@dyer2009geneticstudio] use as input data R `data.frames` with columns of class `locus`. These `data.frame` objects constitute `gstud` objects. Given these packages are often used to create genetic graphs, we created a function to convert them into the `genind` format. 
+The `gstudio` and `popgraph` packages, developed by R. Dyer [@dyer2009geneticstudio], use R `data.frames` as input data, with columns of class `locus`. These `data.frame` objects are `gstud` objects. Given these packages are often used to create genetic graphs, we created a function to convert them into the `genind` format. 
 
 A `gstud` object generally has the following structure (simulations with 10 populations as an example):
 ```{r}
-head(data_ex_gstud)
+print(head(data_ex_gstud))
 ```
 
 To convert it with the function `gstud_to_genind`, we indicate the name of the `data.frame` and of the columns containing population names and individual names:
@@ -147,10 +146,10 @@ Once a genetic dataset has been loaded in the R environment, the function `pop_g
 
 ```{r}
 gen_div <- pop_gen_index(data_ex_genind)
-head(gen_div)
+print(head(gen_div))
 ```
 
-By default, it computes all the available indices, i.e. the number of individuals ("Nb_ind"), the total allelic richness ("A"), the expected heterozygosity ("He") and the observed heterozygosity ("Ho").
+By default, it computes all the available indices, i.e., the number of individuals ("Nb_ind"), the total allelic richness ("A"), the expected heterozygosity ("He"), and the observed heterozygosity ("Ho").
 
 # Distance calculations
 
@@ -158,7 +157,7 @@ In landscape genetics, apart from local population or landscape properties at th
 
 ## Genetic distances 
 
-From a `genind` object, the function `mat_gen_dist` calculates several types of **between population genetic distances**:
+From a `genind` object, the `mat_gen_dist` function calculates several types of **between population genetic distances**:
 
 + F~ST~ [@weir1984estimating] or linearised F~ST~ [@rousset1997genetic] (options '`dist=FST`' and '`dist=FST_lin`').
 
@@ -196,7 +195,7 @@ mat_pg[1:5, 1:5]
 
 The package also calculates **Euclidean geographical distances** between populations with the function `mat_geo_dist`. It takes as arguments:
 
-* `data`: A `data.frame` with 3 columns corresponding to point ID, longitude (x) and latitude (y) whose column names are specified in other arguments below. It can also be a `SpatialPointsDataFrame` created in R or by importing a shapefile layer.
+* `data`: A `data.frame` with 3 columns corresponding to point ID, longitude (x) and latitude (y) whose column names are specified in other arguments below. It can also be an `sf` point spatial feature created in R or by importing a shapefile layer with the `sf` package.
 * `ID`: population or point ID
 * `x`: population or point longitude
 * `y`: population or point latitude
@@ -207,7 +206,7 @@ When geographical coordinates are given in a **projected coordinate reference sy
 
 Example with the 50 point projected coordinates included in the `pts_pop_simul` data set:
 ```{r}
-head(pts_pop_simul)
+print(head(pts_pop_simul))
 ```
 ```{r}
 mat_geo <- mat_geo_dist(data = pts_pop_simul, 
@@ -245,13 +244,13 @@ The function `mat_cost_dist` makes possible the computation of **cost-distances 
 The `raster` input can be either:
 
 * the path (`character string`) to a raster file in format .tif or .asc, 
-* a `RasterLayer` object already loaded in R environment.
+* a `SpatRaster` object already loaded in R environment with package `terra`.
 
 The point (`pts`) input can be either:
 
 * the path (`character string`) to a .csv file, 
 * a `data.frame` already loaded in R environment 
-* a `SpatialPointsDataFrame` created in R or by importing a shapefile layer.
+* an `sf` point spatial feature created in R or by importing a shapefile layer with the `sf` package.
 
 In all cases, this object must have three data columns indicating the point ID, x (longitude) and y (latitude) in a projected coordinate reference system.
 
@@ -260,8 +259,10 @@ To do the computation, we need to create a `data.frame` with two columns (`code`
 By default, the computation is performed with `costDistance` function from `gdistance` package (`method = "gdistance"`). For example :
 
 ```{r}
-x <- raster::raster(ncol=10, nrow=10, xmn=0, xmx=100, ymn=0, ymx=100)
-raster::values(x) <- sample(c(1,2,3,4), size = 100, replace = TRUE)
+x <- terra::rast(ncols = 10, nrows = 10, 
+                 xmin = 0, xmax = 100, 
+                 ymin = 0, ymax = 100)
+terra::values(x) <- sample(c(1,2,3,4), size = 100, replace = TRUE)
 pts <- data.frame(ID = 1:4,
                   x = c(10, 90, 10, 90),
                   y = c(90, 10, 90, 10))
@@ -273,7 +274,7 @@ mat_cd <- mat_cost_dist(raster = x,
 head(mat_cd)
 ```
 
-`gdistance` cannot perform the computation anymore when the raster size and the number of points increase. Using another coding language than R is a way to overcome this limitation. That is why the function `mat_cost_dist` includes **another method for computing cost distances**. It relies upon the .jar file `costdist-0.3.jar` (Java language), developed by Gilles Vuidel (UMR TheMA, Besancon, France). It is automatically downloaded by the user at the first use of the function `mat_cost_dist` with the argument `method = "java"`, provided Java is installed in the user's machine. This program makes possible the **parallelisation of the computation**. The argument `parallel.java` takes values between 1 and the number of cores in the user's machine - 1, thereby setting the number of cores used for the computation.
+`gdistance` cannot perform the computation anymore when the raster size and the number of points increase. Using another coding language than R is a way to overcome this limitation. That is why the function `mat_cost_dist` includes **another method for computing cost distances**. It relies upon the .jar file `costdist-0.5.jar` (Java language), developed by Gilles Vuidel (UMR TheMA, Besancon, France). It is automatically downloaded by the user at the first use of the function `mat_cost_dist` with the argument `method = "java"`, provided Java is installed in the user's machine. This program makes possible the **parallelisation of the computation**. The argument `parallel.java` takes values between 1 and the number of cores in the user's machine - 1, thereby setting the number of cores used for the computation.
 
 For example, when using `method="java"`, the command should be:
 ```{r, eval = FALSE}
@@ -293,13 +294,15 @@ Besides, **depending on the input data types**, computation times can vary:
 * When using `method="java"`, the best option is to provide a .asc raster file and a .csv point file.
 * When using `method="gdistance"`, the best option is to provide a `RasterLayer` object in R and a `SpatialPointsDataFrame` object in R.
 
+**N.B.:** the `method="gdistance"` option relies on the `RasterLayer` format of the `raster` package. This package is progressively replaced by `terra`, which offers more stable functions and has more stable dependencies. In the future, this option might not be continued if `gdistance` does not update their dependency. 
+
 # Processing tools
 
 The functions presented in the last sections create objects in R, such as `data.frame` and `matrix`. The package includes functions to process these objects, ordering them, comparing them and converting them.
 
 ## Reorder a matrix
 
-In landscape genetics, when comparing two matrices of distances between the same sets of elements (e.g. doing a Mantel test to assess isolation by distance patterns), the two matrices must be ordered the same way. The function `reorder_mat` reorders a symmetric matrix according to a specified order of its row/column names. 
+In landscape genetics, when comparing two matrices of distances between the same sets of elements (e.g., doing a Mantel test to assess isolation by distance patterns), the two matrices must be ordered in the same way. The function `reorder_mat` reorders a symmetric matrix according to a specified order of its row/column names. 
 
 For example, when computing a geographical distance from a `data.frame` in which the `ID` column contains integer values, the resulting distance matrix is ordered in the increasing order of these ID (1, 2, 3, ...., 10). If the same IDs are character strings, the resulting distance matrix will be ordered in alphabetical order ("1", "10", "2", "3", ..., "9"). In the following example, we illustrate how to reorder a matrix in such a case.
 
@@ -322,7 +325,7 @@ row.names(mat_g2)
 
 Cost-distances are expressed in cost units arbitrarily defined based on the cost values assigned to every land cover type when creating resistance surfaces. However, species dispersal distances are usually known as distances expressed in metric units. When we know that the probability that a species covers 10 km is 5 %, we can ask what is the equivalent of this distance in cost distance units according to the assumed cost value scenario. It can be useful in order to prune a landscape graph with a given distance threshold or simply to get an idea of the order of magnitude of cost-distance values. 
 
-To that purpose, a **regression** of the **between population cost-distance** values against the corresponding **geographical distances** can be performed. It estimates the relationship between both types of distance. Then, the resulting parameter estimates enable to convert a geographical distance into its cost-distance equivalent according to the cost scenario. 
+For that purpose, a **regression** of the **between population cost-distance** values against the corresponding **geographical distances** can be performed. It estimates the relationship between both types of distance. Then, the resulting parameter estimates enable to convert a geographical distance into its cost-distance equivalent according to the cost scenario. 
 
 The function `convert_cd` performs the linear regression or log-log linear regression between the geographical distance matrix and the cost-distance matrix, in the same way as @tournant2013evaluating and as performed by Graphab software.
 
@@ -337,7 +340,7 @@ convert_res <- convert_cd(mat_euc = mat_geo, mat_ld = mat_ld,
 convert_res
 ```
 
-In this case, we can see that 10 km are equivalent to 1.606 cost-distance units. The log-log linear model estimates the relationship between geographical distance (GD) and cost-distance (CD) such that: $log(CD)=-2.2512+1.0458 \times log(GD)$. The determination coefficient $R^2$ associated to this linear model is 0.69. 
+In this case, we can see that 10 km are equivalent to 1.606 cost-distance units. The log-log linear model estimates the relationship between geographical distance (GD) and cost-distance (CD) such that: $log(CD)=-2.2512+1.0458 \times log(GD)$. The determination coefficient $R^2$ associated with this linear model is 0.69. 
 
 A figure is returned as the fourth element of `convert_res`. The black dot represented on this figure refers to the 10 km value on the regression line characterising the relationship between cost-distance and geographical distance.
 
@@ -346,13 +349,13 @@ A figure is returned as the fourth element of `convert_res`. The black dot repre
 
 Distance values can be stored in two main ways. First, they can be stored in pairwise distance matrices. The distance between point $i$ and point $j$ is the value at the $i_{th}$ row and the $j_{th}$ column, and also at the $j_{th}$ row and the $i_{th}$ column. Such a matrix is the required input of analyses such as Mantel tests and can be used to create graphs when considered as an adjacency matrix.
 
-However, it is quite a *heavy* object and these values can be stored in smaller objects called edge lists, which are basically tables with three columns: from, to, distance. 
+However, it is quite an *heavy* object and these values can be stored in smaller objects called edge lists, which are basically tables with three columns: from, to, distance. 
 
 The function `pw_mat_to_df` converts a pairwise `matrix` into an edge list stored in a `data.frame` object.
 
 ```{r}
 df_dist <- pw_mat_to_df(pw_mat = mat_geo)
-head(df_dist)
+print(head(df_dist))
 ```
 
 The resulting object `df_dist` is a `data.frame` with 4 columns: `id_1`, `id_2`, `id_link` and `value`. 
@@ -371,6 +374,6 @@ mat_dist[1:5, 1:5]
 
 # Conclusion
 
-In the next tutorial, we present **how to construct and analyse genetic graphs with `graph4lg`.**
+In the next vignette, we present **how to construct and analyse genetic graphs with `graph4lg`.**
 
 # References

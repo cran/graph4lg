@@ -17,8 +17,7 @@
 #' of \eqn{a_{kd}} (homozygotes)
 #' \eqn{f_{a_{kd}i}} is allele \eqn{a_{kd}} frequency in
 #' individual \eqn{i} (0, 0.5 or 1).
-#' More information in :
-#' \href{https://pubmed.ncbi.nlm.nih.gov/7510853/}{Bowcock et al., 1994}
+#' More information in Bowcock et al. (1994) (\doi{doi:10.1038/368455a0})
 #' and Microsatellite Analyser software (MSA) manual.
 #' This function uses functions from \pkg{adegenet} package
 #' Note that in the paper of Bowcock et al. (1994), the denominator is 2D.

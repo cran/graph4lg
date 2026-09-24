@@ -37,9 +37,9 @@ pop_rare_gen_index <- function(x,
   data_dir <- rappdirs::user_data_dir()
 
   # Check for the directory
-  if(!dir.exists(paths = paste0(data_dir, "/graph4lg_jar"))){
-    dir.create(path = paste0(data_dir, "/graph4lg_jar"))
-    stop(paste0("The directory ", paste0(data_dir, "/graph4lg_jar"),
+  if(!dir.exists(paths = paste0(data_dir, "/graph4lg2_jar"))){
+    dir.create(path = paste0(data_dir, "/graph4lg2_jar"))
+    stop(paste0("The directory ", paste0(data_dir, "/graph4lg2_jar"),
                 " has been created. You must now copy the adze-1.0 software ",
                 "in this directory, as well as the 'paramfile_adze' file."))
   }
@@ -47,17 +47,17 @@ pop_rare_gen_index <- function(x,
   # Check for the software
   if(!any(c("adze-1.0",
             "adze-1.0.exe") %in% list.files(paste0(data_dir,
-                                                   "/graph4lg_jar")))){
+                                                   "/graph4lg2_jar")))){
     stop(paste0("You must copy the adze-1.0 software in the directory ",
-                paste0(data_dir, "/graph4lg_jar"),
+                paste0(data_dir, "/graph4lg2_jar"),
                 " as well as the 'paramfile_adze' file."))
   }
 
   # Check for the param file
   if(!("paramfile_adze" %in% list.files(paste0(data_dir,
-                                                   "/graph4lg_jar")))){
+                                                   "/graph4lg2_jar")))){
     stop(paste0("You must copy the paramfile_adze file in the directory ",
-                paste0(data_dir, "/graph4lg_jar")))
+                paste0(data_dir, "/graph4lg2_jar")))
   }
 
   # Check whether 'x' is a 'genind' object
@@ -123,10 +123,10 @@ pop_rare_gen_index <- function(x,
   }
 
   # Path to adze and to param_file
-  path_to_adze <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/adze-1.0")
+  path_to_adze <- paste0(rappdirs::user_data_dir(), "/graph4lg2_jar/adze-1.0")
 
   param_file <- paste0(rappdirs::user_data_dir(),
-                       "/graph4lg_jar/paramfile_adze")
+                       "/graph4lg2_jar/paramfile_adze")
 
   # data_file
   data_file <- tempfile(fileext = ".txt")

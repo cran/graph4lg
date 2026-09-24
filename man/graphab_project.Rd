@@ -7,12 +7,8 @@
 graphab_project(
   proj_name,
   raster,
-  habitat,
-  nomerge = FALSE,
-  minarea = 0,
   nodata = NULL,
-  maxsize = NULL,
-  con8 = FALSE,
+  parallel.java = NULL,
   alloc_ram = NULL,
   proj_path = NULL
 )
@@ -26,31 +22,13 @@ file proj_name.xml will be created.}
 or of its path. If the path is not specified, the raster must be present in
 the current working directory. Raster cell values must be in INT2S encoding.}
 
-\item{habitat}{An integer or numeric value or vector indicating the
-code.s (cell value.s) of the habitat cells in the raster file.}
-
-\item{nomerge}{(optional, default=FALSE) A logical indicating whether
-contiguous patches corresponding to different pixel codes are merged
-(FALSE, default) or not merged (TRUE).
-Be careful, the \code{nomerge = TRUE} option is in development and we cannot
-guarantee the results are correct.}
-
-\item{minarea}{(optional, default=0) An integer or numeric value specifiying
-the minimum area in hectares for a habitat patch size to become a graph node.}
-
 \item{nodata}{(optional, default=NULL) An integer or numeric value
 specifying the code in the raster file associated with nodata value
 (often corresponding to peripheric cells)}
 
-\item{maxsize}{(optional, default=NULL) An integer or numeric value
-specifying the maximum side length of the rectangular full extent of each
-habitat patch in metric units. If this side length exceeds \code{maxsize} m,
-then several patches are created.
-(often corresponding to peripheric cells)}
-
-\item{con8}{(optional, default=FALSE) A logical indicating whether a
-neighborhood of 8 pixels (TRUE) is used for patch definition. By default,
-\code{con8=4}, corresponding to 4 pixel neighborhood.}
+\item{parallel.java}{An integer indicating how many computer cores are used
+to run the .jar file. By default, \code{parallel.java = NULL}, and java sets
+it according to local settings.}
 
 \item{alloc_ram}{(optional, default = NULL) Integer or numeric value
 indicating RAM gigabytes allocated to the java process. Increasing this
@@ -69,18 +47,21 @@ which habitat patches can be delimited.
 \details{
 A habitat patch consists of the central pixel with its eight
 neighbors if they are of the same value (8-connexity) and the path
-geometry is not simplified. See more information in Graphab 2.8 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+geometry is not simplified. See more information in Graphab 3.0 manual:
+\url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 }
 \examples{
 \dontrun{
-proj_name <- "grphb_ex"
-raster <- "rast_ex.tif"
-habitat <- 5
+proj_name <- "graphab_example"
+raster <- "rast_simul50.tif"
 graphab_project(proj_name = proj_name,
-               raster = raster,
-               habitat = habitat)
+               raster = raster)
 }
+}
+\references{
+\insertRef{foltete2012software}{graph4lg}
+\insertRef{foltete2021graphab}{graph4lg}
+\insertRef{savary2024multiple}{graph4lg}
 }
 \author{
 P. Savary, T. Rudolph

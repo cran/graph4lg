@@ -103,6 +103,7 @@ res_dmc <- dist_max_corr(mat_gd = mat_gen,
 }
 \references{
 \insertRef{van2015isolation}{graph4lg}
+#' @references \insertRef{savary2021analysing}{graph4lg}
 }
 \author{
 P. Savary

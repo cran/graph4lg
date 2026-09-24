@@ -17,6 +17,7 @@ graphab_interpol(
   thr = NULL,
   summed = FALSE,
   proj_path = NULL,
+  parallel.java = NULL,
   alloc_ram = NULL
 )
 }
@@ -70,6 +71,10 @@ directory that contains the project directory. It should be used when the
 project directory is not in the current working directory. Default is NULL.
 When 'proj_path = NULL', the project directory is equal to \code{getwd()}.}
 
+\item{parallel.java}{An integer indicating how many computer cores are used
+to run the .jar file. By default, \code{parallel.java = NULL}, and java sets
+it according to local settings.}
+
 \item{alloc_ram}{(optional, default = NULL) Integer or numeric value
 indicating RAM gigabytes allocated to the java process. Increasing this
 value can speed up the computations. Too large values may not be compatible
@@ -80,22 +85,28 @@ The function creates a raster with interpolated connectivity
 metric values from a metric already computed in the Graphab project.
 }
 \details{
-See more information in Graphab 2.8 manual:
-\url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+See more information in Graphab 3.0 manual:
+\url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 Be careful, when capacity has been changed. The last changes are taken into
 account for subsequent calculations in a project.
+This function does not work for multiple habitat graphs.
 }
 \examples{
 \dontrun{
-graphab_interpol(proj_name = "grphb_ex",
+graphab_interpol(proj_name = "graphab_example",
                  name = "F_interp",
                  reso = 20,
                  linkset = "lcp",
-                 graph = "graph",
+                 graph = "graph_forest",
                  var = "F_d600_p0.5_beta1_graph",
                  dist = 600,
                  prob = 0.5)
 }
+}
+\references{
+\insertRef{foltete2012software}{graph4lg}
+\insertRef{foltete2021graphab}{graph4lg}
+\insertRef{savary2024multiple}{graph4lg}
 }
 \author{
 P. Savary

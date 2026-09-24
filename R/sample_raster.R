@@ -3,7 +3,8 @@
 #' @description The function samples points or patches on a categorical raster
 #' layer.
 #'
-#' @param raster A RasterLayer object corresponding to a categorical raster layer
+#' @param raster A SpatRaster (from terra) object corresponding to a
+#' categorical raster layer.
 #' @param class An integer value or vector with the value(s) corresponding to
 #' the code values of the raster layer within which points will be sampled.
 #' @param nb_pts An integer value indicating the number of points to be sampled
@@ -39,9 +40,9 @@
 #' \item{y: The point or patch centroid latitude}
 #' \item{area: The area of the sampled patch (only if \code{by_patch = TRUE})}
 #' }}
-#' \item{'pts_layer': A \code{SpatialPointsDataFrame} layer corresponding
+#' \item{'pts_layer': A point spatial feature layer (sf) corresponding
 #' to the sampled point (points or patch centroids)}
-#' \item{'poly_layer': A \code{SpatialPolygonsDataFrame} layer corresponding
+#' \item{'poly_layer': A polygon spatial feature layer (sf) corresponding
 #' to the sampled patch polygons}
 #' }
 #' @param desc A logical value indicating whether the result should be
@@ -75,8 +76,8 @@ sample_raster <- function(raster,
   # ------- Check the function arguments
 
   # raster
-  if(!inherits(raster, c("RasterLayer"))){
-    stop("'RasterLayer' must be either a 'RasterLayer' object.")
+  if(!inherits(raster, c("SpatRaster"))){
+    stop("'raster' must be a 'SpatRaster' object.")
   }
 
   # nb_pts
@@ -135,6 +136,16 @@ sample_raster <- function(raster,
     stop("'output' must be equal to either 'df', 'pts_layer' or 'poly_layer'.")
   }
 
+  # output cannot be 'poly_layer' if 'by_patch' is FALSE
+  if(all(c(!by_patch, output == "poly_layer"))){
+    stop("'output' cannot be 'poly_layer' if 'by_patch' is FALSE.")
+  }
+
+  # prop_area cannot be TRUE if 'by_patch' is FALSE
+  if(all(c(!by_patch, prop_area))){
+    stop("'prop_area' cannot be TRUE if 'by_patch' is FALSE.")
+  }
+
   # desc
   if(!(desc %in% c(TRUE, FALSE))){
     # If desc is not TRUE nor FALSE, then return an error
@@ -146,31 +157,44 @@ sample_raster <- function(raster,
   # ------ Edge definition
 
   # Get the extent of the raster
-  extent_r <- raster::extent(raster)
+  extent_r <- terra::ext(raster)
 
   if(edge_size == 0){
 
     # If edge_size is 0, then sample in the whole raster
-    polyg_sample <- methods::as(extent_r, "SpatialPolygons")
+    bbox_polyg <- c(extent_r[1], # xmin
+                    extent_r[3], # ymin
+                    extent_r[2], # xmax
+                    extent_r[4]) # ymax
 
   } else {
 
     # If edge_size != 0, then sample in the raster without its edges
-    extent_r@xmin <- extent_r@xmin + edge_size
-    extent_r@ymin <- extent_r@ymin + edge_size
 
-    extent_r@xmax <- extent_r@xmax - edge_size
-    extent_r@ymax <- extent_r@ymax - edge_size
+    # Check that edge_size is not too large
+    if(extent_r[2] - extent_r[1] < 2 * edge_size){
+      warning("'edge_size' seems too large given `raster` extent.")
+    } else if(extent_r[4] - extent_r[3] < 2 * edge_size){
+      warning("'edge_size' seems too large given `raster` extent.")
+    }
 
-    polyg_sample <- methods::as(extent_r, "SpatialPolygons")
-
+    bbox_polyg <- c(extent_r[1] + edge_size, # xmin +
+                    extent_r[3] + edge_size, # ymin +
+                    extent_r[2] - edge_size, # xmax -
+                    extent_r[4] - edge_size) # ymax -
   }
 
+  # Name the elements of the bounding box
+  names(bbox_polyg) <- c("xmin","ymin","xmax","ymax")
+
+  # Make a polygon from bbox with sf
+  polyg_sample <- sf::st_as_sfc(sf::st_bbox(bbox_polyg))
+
   # Define the CRS of the polygon in which we sample
-  raster::crs(polyg_sample) <- raster::crs(raster)
+  sf::st_crs(polyg_sample) <- sf::st_crs(raster)
 
   # Crop the raster with the polygon
-  rast_without_edge <- raster::crop(raster, polyg_sample)
+  rast_without_edge <- terra::crop(raster, polyg_sample)
 
   # ____________________________
   # ____________________________
@@ -179,12 +203,12 @@ sample_raster <- function(raster,
   # Copy the raster and remove values other than the class code
   # (allows for multiple values in class)
   r_class <- rast_without_edge
-  r_class[which(!(raster::values(r_class) %in% class))] <- NA
+  r_class[which(!(terra::values(r_class) %in% class))] <- NA
 
   # Check whether there remains some non-NA values
   # otherwise return an error.
-  if(length(unique(raster::values(r_class))) == 1){
-    if(is.na(unique(raster::values(r_class)))){
+  if(length(unique(terra::values(r_class))) == 1){
+    if(is.na(unique(terra::values(r_class)))){
       stop("The 'class' value must be a class code value
            from 'raster'")
     }
@@ -195,13 +219,15 @@ sample_raster <- function(raster,
   # ------ Clump to define habitat patches
 
   # Clump
-  r_clump <- raster::clump(r_class, directions = neighborhood)
+  r_clump <- terra::patches(r_class,
+                            values = TRUE,
+                            directions = neighborhood)
 
   # Check whether there is only one patch
 
   # If it is the case, then r_clump contains either only 1 value
-  if(length(unique(raster::values(r_clump))) == 1){
-    if(unique(raster::values(r_clump)) == 1){
+  if(length(unique(terra::values(r_clump))) == 1){
+    if(unique(terra::values(r_clump)) == 1){
       message("There is only one patch as all class code values were given
             as 'class' argument.")
       # Error if by_patch is TRUE, given that sampling cannot take place
@@ -211,9 +237,9 @@ sample_raster <- function(raster,
       }
     }
     # or contains 1 and NA values
-  } else if(length(unique(raster::values(r_clump))) == 2){
+  } else if(length(unique(terra::values(r_clump))) == 2){
 
-    if(unique(raster::values(r_clump))[2] == 1){
+    if(unique(terra::values(r_clump))[2] == 1){
       message("There is only one patch as all class code values were given
             as 'class' argument.")
       # Error if by_patch is TRUE, given that sampling cannot take place
@@ -239,7 +265,7 @@ sample_raster <- function(raster,
   if(surf_min != 0){
     val_sup <- val_tab[which(val_tab$Freq < surf_min), ]
     val_sup <- as.numeric(as.character(val_sup$val_cl))
-    r_clump[which(raster::values(r_clump) %in% val_sup)] <- NA
+    r_clump[which(terra::values(r_clump) %in% val_sup)] <- NA
   }
 
   # ____________________________
@@ -260,7 +286,7 @@ sample_raster <- function(raster,
     # ------ Sample in polygons
 
     # Convert raster to polygon, dissolved neighboring same values
-    r_poly <- raster::rasterToPolygons(r_clump, dissolve = TRUE)
+    r_poly <- terra::as.polygons(r_clump, values = FALSE, aggregate = TRUE)
 
     # We copy it for further use.
     # Row numbers of the polygons in initial r_poly will be polygon IDs later on
@@ -271,8 +297,13 @@ sample_raster <- function(raster,
 
     # Get a df with the data (ID), the patch centroid coordinates and patch areas
     df_poly <- data.frame(cbind(c(1:nrow(r_poly)),
-                                suppressWarnings(sf::st_coordinates(sf::st_centroid(r_poly))),
-                                sf::st_area(r_poly)))
+                                suppressWarnings(
+                                  sf::st_coordinates(
+                                    sf::st_centroid(r_poly)
+                                  )
+                                ),
+                                as.numeric(sf::st_area(r_poly))
+    ))
     colnames(df_poly) <- c("ID", "x", "y", "area")
 
   }
@@ -310,17 +341,22 @@ sample_raster <- function(raster,
 
     # ____________________________
     # Sample points
-    samp_init <- raster::sampleRandom(r_clump, nb_pts/2, sp = TRUE)
-    samp_init <- cbind(data.frame(ID = 1:nrow(samp_init)),
-                       data.frame(sp::coordinates(samp_init)))
-    colnames(samp_init) <- c("ID", "x", "y")
+    samp_init <- terra::spatSample(r_clump,
+                                   nb_pts/2,
+                                   xy = TRUE,
+                                   na.rm = TRUE)
+    samp_init$ID <- 1:nrow(samp_init)
+    samp_init <- samp_init[, c("ID", "x", "y")]
     df_init_samp <- samp_init
   }
 
   # ____________________________
   # We compute the pairwise distances between the selected points or centroids
-  mat_rast <- suppressMessages(graph4lg::mat_geo_dist(df_init_samp,
-                                                      ID = "ID", x = "x", y = "y"))
+  mat_rast <- suppressMessages(
+    graph4lg::mat_geo_dist(df_init_samp,
+                           ID = "ID",
+                           x = "x", y = "y")
+  )
 
   # ____________________________
   # Diagonal values are 0 but become dist_min + 1 in order to
@@ -394,16 +430,21 @@ sample_raster <- function(raster,
     } else {
 
       # We sample nb_pts/2 points randomly
-      df_step_samp <- raster::sampleRandom(r_clump, nb_pts/2, sp = TRUE)
-      df_step_samp <- cbind(data.frame(ID = 1:nrow(df_step_samp)),
-                            data.frame(sp::coordinates(df_step_samp)))
-      colnames(df_step_samp) <- c("ID", "x", "y")
+      df_step_samp <- terra::spatSample(r_clump,
+                                        nb_pts/2,
+                                        xy = TRUE,
+                                        na.rm = TRUE)
+      df_step_samp$ID <- 1:nrow(df_step_samp)
+      df_step_samp <- df_step_samp[, c("ID", "x", "y")]
 
     }
 
     # We compute the pairwise distances between the points
-    mat_rast <- suppressMessages(graph4lg::mat_geo_dist(df_step_samp,
-                                                        ID = "ID", x = "x", y = "y"))
+    mat_rast <- suppressMessages(
+      graph4lg::mat_geo_dist(df_step_samp,
+                             ID = "ID",
+                             x = "x", y = "y")
+    )
 
     # Diagonal values are 0 but become dist + 1 in order to
     # select different points separated by less than dist.
@@ -429,8 +470,11 @@ sample_raster <- function(raster,
     df_samp$ID <- 1:nrow(df_samp)
 
     # We compute the pairwise distances between the points
-    mat_rast <- suppressMessages(graph4lg::mat_geo_dist(df_samp,
-                                                        ID = "ID", x = "x", y = "y"))
+    mat_rast <- suppressMessages(
+      graph4lg::mat_geo_dist(df_samp,
+                             ID = "ID",
+                             x = "x", y = "y")
+    )
 
     # Diagonal values are 0 but become dist + 1 in order to
     # select different points separated by less than dist.
@@ -490,9 +534,11 @@ sample_raster <- function(raster,
       gini_area <- gini_coeff(df_samp$area)
     }
 
-    mat_dist <- suppressMessages(graph4lg::mat_geo_dist(data = df_samp,
-                                                        ID = "ID",
-                                                        x = "x", y = "y"))
+    mat_dist <- suppressMessages(
+      graph4lg::mat_geo_dist(data = df_samp,
+                             ID = "ID",
+                             x = "x", y = "y")
+    )
 
     gini_dist <- gini_coeff(ecodist::lower(mat_dist))
 
@@ -533,36 +579,34 @@ sample_raster <- function(raster,
     #_____________________________________
     # If output is a points layer, then we create it
 
-    xy <- df_samp[,c('x','y')]
+    xy <- df_samp[, c('x','y')]
     mxy <- as.matrix(xy)
 
     list_pts <- list()
     for(i in 1:nrow(xy)){
       list_pts[[i]] <- sf::st_point(mxy[i, ])
     }
+
+    # Create the point layer
     pts_lay <- sf::st_sfc(list_pts)
 
-    pts_lay <- sf::st_sf(pts_lay,
-                         df_samp[, c("ID")])
-
-    pts_lay_spat <- sf::as_Spatial(pts_lay, IDs = "ID")
-
     # Add df_samp as attribute table
-    pts_lay_spat@data <- df_samp
+    pts_lay <- sf::st_sf(pts_lay, df_samp)
 
     # Define CRS
-    raster::crs(pts_lay_spat) <- raster::crs(raster)
+    sf::st_crs(pts_lay) <- sf::st_crs(raster)
 
-    out <- pts_lay_spat
+    out <- pts_lay
 
-  } else if(output == "polygon_layer"){
+  } else if(output == "poly_layer"){
 
     #_____________________________________
     # If output is a polygon layer, we create it from r_poly_copy saved earlier
-    poly_lay <- r_poly_copy[df_samp$ID, ]
+    poly_geom <- sf::st_as_sf(r_poly_copy[df_samp$ID, ])
+    geom <- sf::st_as_sfc(poly_geom)
 
     # We add df_samp as attribute table
-    poly_lay@data <- df_samp
+    poly_lay <- sf::st_sf(geom, df_samp)
 
     out <- poly_lay
 

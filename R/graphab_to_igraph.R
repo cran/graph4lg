@@ -1,11 +1,10 @@
 #' Create landscape graphs from Graphab link set
 #'
-#' @description The function creates a landscape graph from a link set created
-#' with Graphab software or different functions of this package and converts
-#' it into a graph object of class \code{igraph}.
-#' The graph has weighted links and is undirected.
-#' Nodes attributes present in the Graphab project are included, including
-#' connectivity metrics when computed
+#' @description The function creates a landscape graph from a link set and a
+#' set of habitat patches created with Graphab and converts it into a graph
+#' object of class \code{igraph}. The graph has weighted links and
+#' is undirected. Nodes attributes present in the habitat layer created with
+#' Graphab project are included, including connectivity metrics when computed.
 #'
 #' @param proj_name A character string indicating the project name. It is also
 #' the name of the directory in which proj_name.xml file is found. By default,
@@ -14,18 +13,9 @@
 #' create the graph links. The linkset must have been created previously (see
 #' the function \code{\link{graphab_link}}). It can be complete or planar. The
 #' graph is given the topology of the selected link set.
-#' @param nodes A character string indicating whether the nodes of the created
-#' graph are given all the attributes or metrics computed in Graphab or only
-#' those specific to a given graph previously created with
-#' \code{\link{graphab_graph}}
-#' It can be:\itemize{
-#' \item{\code{nodes = "patches"}(default): all the attributes and metrics of
-#' the habitat patches are included as node attributes in \code{igraph} object.}
-#' \item{\code{nodes = "graph_name"}(default): only the metrics of
-#' the habitat patches computed from the graph 'graph_name' created with
-#' \code{\link{graphab_graph}} are included as node attributes in
-#' \code{igraph} object, along with some basic patch attributes.}
-#' }
+#' @param habitat A character string indicating the name of a habitat type
+#' created in the Graphab project.
+#' @param nodes Deprecated parameter from graph4lg < 2.0.
 #' @param proj_path (optional) A character string indicating the path to the
 #' directory that contains the project directory ('proj_name'). By default,
 #' 'proj_name' is searched into the current working directory
@@ -47,14 +37,13 @@
 #' @references \insertRef{foltete2012software}{graph4lg}
 #' @examples
 #' \dontrun{
-#' proj_path <- system.file('extdata',package='graph4lg')
-#' proj_name <- "grphb_ex"
-#' linkset <- "lkst1"
-#' nodes <- "graph"
+#' proj_path <- system.file('extdata', package = 'graph4lg')
+#' proj_name <- "graphab_example"
+#' linkset <- "forest_link_planar"
+#' habitat <- "forest"
 #' graph <- graphab_to_igraph(proj_name = proj_name,
-#'                            linkset = "lkst1",
-#'                            nodes = "graph",
-#'                            links = links,
+#'                            linkset = linkset,
+#'                            habitat = habitat,
 #'                            weights = "cost",
 #'                            proj_path = proj_path,
 #'                            crds = FALSE,
@@ -64,7 +53,8 @@
 
 graphab_to_igraph <- function(proj_name,
                               linkset,
-                              nodes = "patches",
+                              habitat,
+                              nodes = NULL,
                               weight = "cost",
                               proj_path = NULL,
                               fig = FALSE,
@@ -102,78 +92,91 @@ graphab_to_igraph <- function(proj_name,
 
   proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
 
+  ## Check project version
+  check_graphab_version(proj_path = proj_end_path)
+
   #########################################
   # Check for linkset class
   if(!inherits(linkset, "character")){
-    stop("'linkset' must be a character string")
-  } else if (length(list.files(path = paste0(proj_path, "/", proj_name),
-                               pattern = "-links.csv")) == 0){
-    stop("There is not any linkset in the project you refer to.
-         Please use graphab_link() before.")
-  } else if (!(paste0(linkset, "-links.csv") %in%
-               list.files(path = paste0(proj_path, "/", proj_name)))){
+    stop("'linkset' must be a character string specifying the name of the
+         first link set involved in the comparison.")
+  } else if (!(check_graphab_object(proj_path = proj_end_path,
+                                    object_type = "linkset",
+                                    name = linkset))){
     stop("The linkset you refer to does not exist.
            Please use graphab_link() before.")
   }
 
   #########################################
-  # Check for nodes
-  if(!inherits(nodes, "character")){
-    stop("'nodes' must be a character string.")
-  } else if(!file.exists(paste0("./", proj_name, "/patches.csv"))){
-    df_nodes <- foreign::read.dbf(file = paste0(proj_path, "/",
-                                                proj_name, "/patches.dbf"))
-  } else {
-    df_nodes <- utils::read.csv(file = paste0(proj_path, "/",
-                                              proj_name, "/patches.csv"))
+  # Check for habitat class and mode compatibility
+  if(!inherits(habitat, "character")){
+    stop("'habitat' must be a character string")
+  } else if(!(check_graphab_object(proj_path = proj_end_path,
+                                   object_type = "habitat",
+                                   name = habitat))){
+    stop("The habitat type you refer to does not exist.
+         Please use graphab_habitat() before.")
   }
 
   #########################################
-  # Select nodes columns if nodes == graph_name
-
-  if(nodes != "patches"){
-
-    if (length(list.files(path = paste0(proj_path, "/",
-                                        proj_name),
-                          pattern = "-voronoi.shp")) == 0){
-      stop("There is not any graph in the project you refer to.
-         Please use graphab_graph() before.")
-    } else if(!(paste0(nodes,
-                       "-voronoi.shp") %in%
-                list.files(path = paste0(proj_path, "/", proj_name)))){
-      stop("The graph you refer to does not exist")
-
-    } else {
-
-      char_graph <- nchar(nodes)
-      col_graph <- which(stringr::str_sub(colnames(df_nodes),
-                                          -(char_graph + 1),
-                                          -1) == paste0("_", nodes))
-      df_nodes <- df_nodes[, c(1:4, col_graph)]
-
-    }
-
+  # Check for nodes
+  if(!is.null(nodes)){
+    stop(paste0("Argument 'nodes' is deprecated and not used anymore ",
+                "in graph4lg >= 2.0. You now need to provide a habitat type."))
   }
-  #######################################
-  # Get links
 
-  df_links <- get_graphab_linkset(proj_name = proj_name,
+  #########################################
+  # Load the habitat table with or without coordinates
+
+  # Load the habitat patch layer
+  patches <- suppressWarnings(
+    sf::read_sf(paste0(proj_path, "/", proj_name, "/",
+                       habitat, "/patches.gpkg"),
+                as_tibble = FALSE))
+  if(crds){
+    # Get its centroid coordinates
+    coords <- suppressWarnings(
+      data.frame(
+      sf::st_coordinates(
+        sf::st_centroid(patches))))
+    # Rename and re-arrange
+    coords$ID <- patches$Id
+    coords <- coords[, c("ID", "X", "Y")]
+    colnames(coords) <- c("ID", "x", "y")
+  }
+  # Make patches aspatial from now on
+  patches <- data.frame(
+    sf::st_drop_geometry(patches[, -which(colnames(patches) == "the_geom")]))
+
+  #########################################
+  # Load the linkset
+  links <- get_graphab_linkset(proj_name = proj_name,
                                   linkset = linkset,
                                   proj_path = proj_path)
+
+  #########################################
+  # Check whether the linkset includes only links of this habitat type
+  if(!all(links$id1 %in% patches$Id)){
+    stop(paste0("You must include a linkset defined only for this habitat. ",
+                "You are providing a linkset connecting multiple habitats."))
+  } else if(!all(links$id2 %in% patches$Id)){
+    stop(paste0("You must include a linkset defined only for this habitat. ",
+                "You are providing a linkset connecting multiple habitats."))
+  }
 
   # If as many node ID in df_nodes and in df_links, then there is not any
   # isolated node and the graph can be created directly from the edge list
   # derived from df_links
-  if(length(unique(df_nodes$Id)) == length(unique(c(df_links$ID1,
-                                                    df_links$ID2)))){
-    edge_list <- as.matrix(df_links[, c('ID1','ID2')])
+  if(length(unique(patches$Id)) == length(unique(c(links$id1,
+                                                    links$id2)))){
+    edge_list <- as.matrix(links[, c('id1','id2')])
     graph <- igraph::graph_from_edgelist(edge_list, directed = FALSE)
     # We add a weight to the links of the complete graph
     # which have many links with null weights
     if (weight == "cost"){
-      igraph::E(graph)$weight <- df_links[, "Dist"]
+      igraph::E(graph)$weight <- links[, "dist"]
     } else if (weight == "euclid"){
-      igraph::E(graph)$weight <- df_links[, "DistM"]
+      igraph::E(graph)$weight <- links[, "distm"]
     } else {
       stop("You must specify a correct 'weight' option ('cost' or 'euclid').")
     }
@@ -188,7 +191,7 @@ graphab_to_igraph <- function(proj_name,
     # The function is then slower.
 
     # We create a vector with the number ID of the patches.
-    veca <- as.character(1:nrow(df_nodes))
+    veca <- as.character(1:nrow(patches))
     # We create a data.frame with all the unique possible combinations
     # of patches linked by a potential link
     df <- data.frame(expand.grid(veca, veca))
@@ -198,29 +201,29 @@ graphab_to_igraph <- function(proj_name,
     df[, 1:2] <- lapply(df[, 1:2], function(x){as.character(x)})
     # The unique Id is given by "ID1-ID2" with ID1 < ID2 as in Graphab
     df$Id <- paste0(df$Var1, "-", df$Var2)
-    df$DistM <- df$Dist <- rep(0, nrow(df))
-    colnames(df)[1:2] <- c("ID1", "ID2")
-    df <- df[, c("Id", "ID1", "ID2", "Dist", "DistM")]
+    df$distm <- df$dist <- rep(0, nrow(df))
+    colnames(df)[1:2] <- c("id1", "id2")
+    df <- df[, c("Id", "id1", "id2", "dist", "distm")]
 
     # df should have the same column names as df_links
-    if(all(colnames(df_links) == colnames(df))){
-      df <- df[-which(df$Id %in% df_links$Id), ]
-      df <- rbind(df, df_links)
+    if(all(colnames(links) == colnames(df))){
+      df <- df[-which(df$Id %in% links$Id), ]
+      df <- rbind(df, links)
     } else {
       stop("Error probably due to unusual structure
            of the links spatial layer.")
     }
 
     # We extract the edgelist and create a complete unweighted graph
-    edge_list <- as.matrix(df[, c('ID1', 'ID2')])
+    edge_list <- as.matrix(df[, c('id1', 'id2')])
     graph <- igraph::graph_from_edgelist(edge_list, directed = FALSE)
 
     # We add a weight to the links of the complete graph
     # which have many links with null weights
     if (weight == "cost"){
-      igraph::E(graph)$weight <- df[, "Dist"]
+      igraph::E(graph)$weight <- df[, "dist"]
     } else if (weight == "euclid"){
-      igraph::E(graph)$weight <- df[, "DistM"]
+      igraph::E(graph)$weight <- df[, "distm"]
     } else {
       stop("You must specify a correct 'weight' option ('cost' or 'euclid').")
     }
@@ -243,39 +246,22 @@ graphab_to_igraph <- function(proj_name,
   igraph::V(graph)$name <- 1:length(igraph::V(graph))
 
   graph <- add_nodes_attr(graph = graph, input = "df",
-                          data = df_nodes, index = "Id")
-
-
-  if(crds){
-
-    #sp_patches <- suppressWarnings(rgdal::readOGR(dsn = paste0(getwd(), "/", proj_name),
-    #                                             layer = "patches"))
-
-    sp_patches <- suppressWarnings(sf::as_Spatial(sf::st_read(dsn = paste0(proj_path,
-                                                                           "/", proj_name),
-                                                              layer = "patches")))
-
-    coords <- data.frame(cbind(sp_patches$Id,
-                               sp::coordinates(sp_patches)))
-    names(coords) <- c("ID", "x", "y")
-
-  }
+                          data = patches, index = "Id")
 
   if(fig){
     if(crds){
       plot_spg <- plot_graph_lg(graph, mode = "spatial",
                                 crds = coords,
-                                node_size = "Area",
+                                node_size = "area",
                                 link_width = "inv_w")
     } else {
       plot_spg <- plot_graph_lg(graph, mode = "aspatial",
                                 link_width = "inv_w",
                                 node_inter = "distance",
-                                node_size = "Area")
+                                node_size = "area")
     }
     print(plot_spg)
   }
-
 
   if(crds){
     res <- list(graph, coords)

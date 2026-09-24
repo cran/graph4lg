@@ -119,8 +119,8 @@ patch_areas <- function(raster,
   # ------- Check the function arguments
 
   # raster
-  if(!inherits(raster, c("RasterLayer"))){
-    stop("'RasterLayer' must be either a 'RasterLayer' object.")
+  if(!inherits(raster, c("SpatRaster"))){
+    stop("'raster' must be a 'SpatRaster' object.")
   }
 
   # edge_size
@@ -142,37 +142,49 @@ patch_areas <- function(raster,
   }
   surf_min <- round(surf_min, digits = 0)
 
-
   # ____________________________
   # ____________________________
   # ------ Edge definition
 
   # Get the extent of the raster
-  extent_r <- raster::extent(raster)
+  extent_r <- terra::ext(raster)
 
   if(edge_size == 0){
 
     # If edge_size is 0, then sample in the whole raster
-    polyg_sample <- methods::as(extent_r, "SpatialPolygons")
+    bbox_polyg <- c(extent_r[1], # xmin
+                    extent_r[3], # ymin
+                    extent_r[2], # xmax
+                    extent_r[4]) # ymax
 
   } else {
 
     # If edge_size != 0, then sample in the raster without its edges
-    extent_r@xmin <- extent_r@xmin + edge_size
-    extent_r@ymin <- extent_r@ymin + edge_size
 
-    extent_r@xmax <- extent_r@xmax - edge_size
-    extent_r@ymax <- extent_r@ymax - edge_size
+    # Check that edge_size is not too large
+    if(extent_r[2] - extent_r[1] < 2 * edge_size){
+      warning("'edge_size' seems too large given `raster` extent.")
+    } else if(extent_r[4] - extent_r[3] < 2 * edge_size){
+      warning("'edge_size' seems too large given `raster` extent.")
+    }
 
-    polyg_sample <- methods::as(extent_r, "SpatialPolygons")
-
+    bbox_polyg <- c(extent_r[1] + edge_size, # xmin +
+                    extent_r[3] + edge_size, # ymin +
+                    extent_r[2] - edge_size, # xmax -
+                    extent_r[4] - edge_size) # ymax -
   }
 
+  # Name the elements of the bounding box
+  names(bbox_polyg) <- c("xmin","ymin","xmax","ymax")
+
+  # Make a polygon from bbox with sf
+  polyg_sample <- sf::st_as_sfc(sf::st_bbox(bbox_polyg))
+
   # Define the CRS of the polygon in which we sample
-  raster::crs(polyg_sample) <- raster::crs(raster)
+  sf::st_crs(polyg_sample) <- sf::st_crs(raster)
 
   # Crop the raster with the polygon
-  rast_without_edge <- raster::crop(raster, polyg_sample)
+  rast_without_edge <- terra::crop(raster, polyg_sample)
 
   # ____________________________
   # ____________________________
@@ -181,12 +193,12 @@ patch_areas <- function(raster,
   # Copy the raster and remove values other than the class code
   # (allows for multiple values in class)
   r_class <- rast_without_edge
-  r_class[which(!(raster::values(r_class) %in% class))] <- NA
+  r_class[which(!(terra::values(r_class) %in% class))] <- NA
 
   # Check whether there remains some non-NA values
   # otherwise return an error.
-  if(length(unique(raster::values(r_class))) == 1){
-    if(is.na(unique(raster::values(r_class)))){
+  if(length(unique(terra::values(r_class))) == 1){
+    if(is.na(unique(terra::values(r_class)))){
       stop("The 'class' value must be a class code value
            from 'raster'")
     }
@@ -197,7 +209,9 @@ patch_areas <- function(raster,
   # ------ Clump to define habitat patches
 
   # Clump
-  r_clump <- raster::clump(r_class, directions = neighborhood)
+  r_clump <- terra::patches(r_class,
+                            values = TRUE,
+                            directions = neighborhood)
 
   # Get clump values corresponding to the ID of each patch
   val_cl <- as.vector(r_clump)
@@ -209,7 +223,7 @@ patch_areas <- function(raster,
 
   colnames(val_tab) <- c("ID", "area")
 
-  val_tab$area <- val_tab$area * raster::res(raster)[1] * raster::res(raster)[2]
+  val_tab$area <- val_tab$area * terra::res(raster)[1] * terra::res(raster)[2]
 
   return(val_tab)
 

@@ -23,14 +23,17 @@
 #' \deqn{w_{ij} = (a_{i} a_{j})^\beta e^{-\alpha d_{ij}}}.
 #' This function does not allow users to convert automatically Euclidean
 #' distances into cost-distances.
-#' See more information in Graphab 2.8 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+#' See more information in Graphab 3.0 manual:
+#' \url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 #' @export
 #' @author P. Savary
+#' @references \insertRef{foltete2012software}{graph4lg}
+#' \insertRef{foltete2021graphab}{graph4lg}
+#' \insertRef{savary2024multiple}{graph4lg}
 #' @examples
 #' \dontrun{
-#' graphab_modul(proj_name = "grphb_ex",
-#'                graph = "graph",
+#' graphab_modul(proj_name = "graphab_example",
+#'                graph = "graph_forest",
 #'                dist = 1000,
 #'                prob = 0.05,
 #'                beta = 1)
@@ -45,6 +48,7 @@ graphab_modul <- function(proj_name, # character
                            nb = NULL, # number of components
                            return = TRUE, #
                            proj_path = NULL, # if null getwd() otherwise a character path
+                           parallel.java = NULL,
                            alloc_ram = NULL){
 
   #########################################
@@ -70,19 +74,32 @@ graphab_modul <- function(proj_name, # character
          Please use graphab_project() before.")
   }
 
+  ## Create proj_end_path proj_path/proj_name/proj_name.xml
   proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
+
+  #######################################
+  # Add '' to proj_path for cases with spaces in paths
+  if(all(stringr::str_sub(proj_end_path, 1, 1) != "'",
+         stringr::str_sub(proj_end_path, 1, 1) != "'",
+         stringr::str_detect(string = proj_end_path,
+                             pattern = " "))){
+    proj_end_path_cmd <- paste0("'", proj_end_path, "'")
+  } else {
+    proj_end_path_cmd <- proj_end_path
+  }
+
+  ## Check project version
+  check_graphab_version(proj_path = proj_end_path)
 
   #########################################
   # Check for graph class
   if(!inherits(graph, "character")){
     stop("'graph' must be a character string")
-  } else if (!(paste0(graph, "-voronoi.shp") %in%
-               list.files(path = paste0(proj_path, "/", proj_name)))){
-    stop("The graph you refer to does not exist")
-  } else if (length(list.files(path = paste0(proj_path, "/", proj_name),
-                               pattern = "-voronoi.shp")) == 0){
-    stop("There is not any graph in the project you refer to.
-         Please use graphab_graph() before.")
+  } else if (!check_graphab_object(proj_path = proj_end_path,
+                                   object_type = "graph",
+                                   name = graph)){
+    stop("The graph you refer to does not exist.
+           Please use graphab_graph() to create it.")
   }
 
   #########################################
@@ -115,6 +132,14 @@ graphab_modul <- function(proj_name, # character
   }
 
   #########################################
+  # Check for parallel.java
+  if(!is.null(parallel.java)){
+    if(!inherits(parallel.java, c("numeric", "integer"))){
+      stop("'parallel.java' must be a numeric or integer value.")
+    }
+  }
+
+  #########################################
   # Check for Graphab
   gr <- get_graphab(res = FALSE, return = TRUE)
 
@@ -128,14 +153,20 @@ graphab_modul <- function(proj_name, # character
 
   #########################################
   # Get graphab path
-  version <- "graphab-2.8.jar"
-  path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
+  version <- "graphab-3.0.jar"
+  path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg2_jar/", version)
 
   #########################################
   # Command line
 
-  cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab,
-           "--project", proj_end_path,
+  cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab)
+
+  if(!is.null(parallel.java)){
+    cmd <- c(cmd, "-proc ", as.character(parallel.java))
+  }
+
+  cmd <- c(cmd,
+           "--project", proj_end_path_cmd,
            "--usegraph", graph,
            "--cluster",
            paste0("d=", dist),

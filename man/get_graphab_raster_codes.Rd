@@ -11,10 +11,9 @@ get_graphab_raster_codes(proj_name, mode = "all", proj_path = NULL)
 The project name is also the name of the project directory in which the
 file proj_name.xml will be created.}
 
-\item{mode}{A character string equal to either 'all' (default) or 'habitat'
-indicating whether the returned codes are all the codes of the source raster
-used for creating the project or only the code corresponding to the
-habitat patches.}
+\item{mode}{A character string equal to 'all' (default). Option 'habitat'
+is no longer possible in graph4lg > 1.9, given that 'habitat' can be defined
+from vector layers, and not only from raster codes anymore.}
 
 \item{proj_path}{(optional) A character string indicating the path to the
 directory that contains the project directory. It should be used when the
@@ -31,7 +30,7 @@ The function extracts unique raster codes from a Graphab project
 }
 \examples{
 \dontrun{
-proj_name <- "grphb_ex"
+proj_name <- "graphab_example"
 get_graphab_raster_codes(proj_name = proj_name,
                mode = "all")
 }

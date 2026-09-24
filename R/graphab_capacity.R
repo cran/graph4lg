@@ -6,32 +6,33 @@
 #' @param proj_name A character string indicating the Graphab project name.
 #' The project name is also the name of the project directory in which the
 #' file proj_name.xml is. It can be created with \code{\link{graphab_project}}
+#' @param habitat A character string indicating the name of the habitat type
+#' whose patches will get a new capacity value. When the habitat type is defined
+#' from the source raster codes, all \code{mode} options are available. When
+#' it is of type 'vector', \code{mode} can only be `ext_file` or `neigh`.
+#' Only one habitat type can be treated at a time.
 #' @param mode A character string indicating the way capacities are
 #' computed. It must be either:\itemize{
 #' \item{\code{mode='area'}(default): The capacity of the patches is computed
 #' as the area of each habitat patch. The argument \code{exp} makes it
-#' possible to raise area to a power given by an exposant.}
+#' possible to raise area to a power given by an exponent.}
 #' \item{\code{mode='ext_file'}: The capacity of the patches is given by an
 #' external .csv file. See argument \code{ext_file} below.}
-#' \item{\code{mode='neigh'}: The capacity is computed depending on the
-#' neighbouring raster cells from each habitat patch. The number of cells
-#' with a value given by \code{codes} argument is summed up to the
+#' \item{\code{mode='neigh'}: The capacity is computed as a function of the
+#' neighboring raster cells of each habitat patch. The number of cells
+#' with a value given by the \code{codes} argument is summed up to the
 #' distance \code{thr}. This number can be weighted according to the
 #' \code{weight} argument.}
 #' }
-#' @param patch_codes (optional, default=NULL) An integer value or vector
-#' specifying the codes corresponding to the habitat pixel whose corresponding
-#' patches are included to compute the capacity as the area of the habitat
-#' when \code{mode='area'}. Patches corresponding to other initial habitat
-#' codes are weighted by 0.
+#' @param patch_codes (default=NULL) Deprecated parameter from verson 1.8.
 #' @param exp An integer value specifying the power to which patch area are
 #' raised when \code{mode='area'}. When not specified, \code{exp=1} by default.
 #' @param ext_file A character string specifying the name of the .csv file in
 #' which patch capacities are stored. It must be located either in the working
 #' directory or in the directory defined by \code{proj_path}. It must have
-#' as many rows as there are patches in the project and its column names
-#' must include 'Id' and 'Capacity'. The 'Id' column must correspond to the
-#' patch ID in the 'patches' layer (see \code{\link{get_graphab_metric}}).
+#' as many rows as there are patches of the considered habitat type. Its column
+#' names must include 'Id' and 'Capacity'. The 'Id' column must correspond to
+#' the patches' ID in the 'patches' layer (see \code{\link{get_graphab_metric}}).
 #' The 'Capacity' column must contain the corresponding patch capacities to
 #' assign each patch.
 #' @param thr (optional, default=NULL) An integer or numeric value indicating
@@ -58,27 +59,30 @@
 #' directory that contains the project directory. It should be used when the
 #' project directory is not in the current working directory. Default is NULL.
 #' When 'proj_path = NULL', the project directory is equal to \code{getwd()}.
+#' @param parallel.java An integer indicating how many computer cores are used
+#' to run the .jar file. By default, \code{parallel.java = NULL}, and java sets
+#' it according to local settings.
 #' @param alloc_ram (optional, default = NULL) Integer or numeric value
 #' indicating RAM gigabytes allocated to the java process. Increasing this
 #' value can speed up the computations. Too large values may not be compatible
 #' with your machine settings.
-#' @details See more information in Graphab 2.8 manual:
-#' \url{https://sourcesup.renater.fr/www/graphab/download/manual-2.8-en.pdf}
+#' @details See more information in Graphab 3.0 manual:
+#' \url{https://thema.umlp.fr/productions/software/graphab/download/manual-3.0-en.pdf}
 #' Be careful, when capacity has been changed. The last changes are taken into
 #' account for subsequent calculations in a project.
 #' @export
 #' @author P. Savary
+#' @references \insertRef{foltete2012software}{graph4lg}
+#' \insertRef{foltete2021graphab}{graph4lg}
+#' \insertRef{savary2024multiple}{graph4lg}
 #' @examples
 #' \dontrun{
-#' graphab_capacity(proj_name = "grphb_ex",
+#' graphab_capacity(proj_name = "graphab_example",
 #'                  mode = "area")
 #' }
 
-
-
-
-
 graphab_capacity <- function(proj_name,         # character
+                             habitat, # character
                              mode = "area", # character
                              patch_codes = NULL, # NULL or integer vector
                              exp = NULL, # integer
@@ -89,6 +93,7 @@ graphab_capacity <- function(proj_name,         # character
                              cost_conv = FALSE, # FALSE (default) or TRUE
                              weight = FALSE, # default FALSE, but TRUE for link weighting
                              proj_path = NULL, # if NULL getwd() otherwise a character path
+                             parallel.java = NULL,
                              alloc_ram = NULL){
 
   #########################################
@@ -114,10 +119,83 @@ graphab_capacity <- function(proj_name,         # character
          Please use graphab_project() before.")
   }
 
+  ## Create proj_end_path proj_path/proj_name/proj_name.xml
   proj_end_path <- paste0(proj_path, "/", proj_name, "/", proj_name, ".xml")
 
+  #######################################
+  # Add '' to proj_path for cases with spaces in paths
+  if(all(stringr::str_sub(proj_end_path, 1, 1) != "'",
+         stringr::str_sub(proj_end_path, 1, 1) != "'",
+         stringr::str_detect(string = proj_end_path,
+                             pattern = " "))){
+    proj_end_path_cmd <- paste0("'", proj_end_path, "'")
+  } else {
+    proj_end_path_cmd <- proj_end_path
+  }
 
-  # Distinguish the modes
+  ## Check project version
+  check_graphab_version(proj_path = proj_end_path)
+
+  ## Get the project information
+  project_info <- graphab_project_desc(proj_name = proj_name,
+                                       proj_path = proj_path)
+  project_habitat <- project_info[["Habitats"]]
+  project_linkset <- project_info[["Linksets"]]
+  project_raster <- project_info[["Source raster"]]
+
+  #########################################
+  # Check for parallel.java
+  if(!is.null(parallel.java)){
+    if(!inherits(parallel.java, c("numeric", "integer"))){
+      stop("'parallel.java' must be a numeric or integer value.")
+    }
+  }
+
+  # Get graphab path
+  version <- "graphab-3.0.jar"
+  path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg2_jar/", version)
+
+  #########################################
+  # Check for habitat class and mode compatibility
+  if(!inherits(habitat, "character")){
+    stop("'habitat' must be a character string")
+  } else if(!(habitat %in% project_habitat[["Habitat names"]])){
+    stop("The habitat type you refer to does not exist.
+         Please use graphab_habitat() before.")
+  } else {
+
+    # Get habitat info and type
+    habitat_df <- project_habitat[["Habitat table"]]
+    habitat_df <- habitat_df[which(habitat_df$name == habitat), ]
+
+    # If vector habitat, mode area is not possible
+    if(all(c(habitat_df$type == "Vector", mode == "area"))){
+      stop("mode='area' cannot be used with vector habitat types.")
+    }
+
+  }
+
+  #########################################
+  # Check for patch_codes class
+  if(!is.null(patch_codes)){
+    stop(paste0("Argument 'patch_codes' is deprecated and not used anymore ",
+                "in graph4lg >= 2.0. Please use graph4lg <= 1.8 if you ",
+                "really need to use an older version of graphab_capacity(). ",
+                "Please note that most functionalities have been conserved, ",
+                "yet with a new syntax."))
+  }
+
+  #########################################
+  # Check for weight and cost_conv
+  if(!inherits(weight, "logical")){
+    stop("'weight' must be a logical.")
+  } else if(!inherits(cost_conv, "logical")){
+    stop("'cost_conv' must be a logical.")
+  }
+
+
+  ######## Commands distinguished by modes
+  ########################################################
   if(mode == "area"){
 
     # Check for not null parameters and return a message if not used
@@ -129,18 +207,26 @@ graphab_capacity <- function(proj_name,         # character
       message("Argument 'thr' is not used when 'mode='area''.")
     } else if(!is.null(ext_file)){
       message("Argument 'ext_file' is not used when 'mode='area''.")
+    } else if(weight){
+      message("Argument 'weight' is not used when 'mode='area''.")
+    } else if(cost_conv){
+      message("Argument 'cost_conv' is not used when 'mode='area''.")
     }
 
-
-    # Get graphab path
-    version <- "graphab-2.8.jar"
-    path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
     #### Command line
-    cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab,
-             "--project", proj_end_path,
+
+    cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab)
+
+    if(!is.null(parallel.java)){
+      cmd <- c(cmd, "-proc ", as.character(parallel.java))
+    }
+
+    cmd <- c(cmd,
+             "--project", proj_end_path_cmd,
+             "--usehabitat", habitat,
              "--capa",  "area")
 
-
+    # Add the exponent associated with area when needed
     if(!is.null(exp)){
       if(!inherits(exp, c("numeric", "integer"))){
         stop("'exp' argument must be a numeric or integer value")
@@ -151,35 +237,15 @@ graphab_capacity <- function(proj_name,         # character
       }
     }
 
+    # Add the habitat raster codes in the command with a weight of 1
+    # (space in the df value for multiple codes, need to split and paste)
+    cmd <- c(cmd,
+             paste0(paste(unlist(stringr::str_split(habitat_df$rast_codes,
+                                                    ", ")),
+                          collapse = ","),
+                    "=1"))
 
-    if(!is.null(patch_codes)){
-      if(!inherits(patch_codes, c("numeric", "integer"))){
-        stop("'patch_codes' argument must be a numeric or integer vector/value")
-      } else {
-
-
-        # Get habitat codes
-        hab_codes <- get_graphab_raster_codes(proj_name = proj_name,
-                                              mode = "habitat",
-                                              proj_path = proj_path)
-
-        # Check whether all habitat codes are in patch_codes
-        if(!all(hab_codes %in% patch_codes)){
-          # Distinguish the habitat codes
-          hab_w <- patch_codes
-          hab_now <- hab_codes[!(hab_codes %in% patch_codes)]
-
-          cmd <- c(cmd,
-                   paste0(paste(hab_w, collapse = ","), "=1"),
-                   paste0(paste(hab_now, collapse = ","), "=0"))
-        } else {
-          cmd <- c(cmd, paste0(paste(patch_codes, collapse = ","), "=1"))
-        }
-
-      }
-    }
-
-
+    ########################################################
   } else if (mode == "ext_file"){
 
     # Check for not null parameters and return a message if not used
@@ -191,10 +257,11 @@ graphab_capacity <- function(proj_name,         # character
       message("Argument 'thr' is not used when 'mode='ext_file''.")
     } else if(!is.null(exp)){
       message("Argument 'exp' is not used when 'mode='ext_file''.")
-    } else if(!is.null(patch_codes)){ # NEW
-      message("Argument 'patch_codes' is not used when 'mode='ext_file''.")
+    } else if(weight){
+      message("Argument 'weight' is not used when 'mode='ext_file''.")
+    } else if(cost_conv){
+      message("Argument 'cost_conv' is not used when 'mode='ext_file''.")
     }
-
 
     ############
     # Check ext_file
@@ -213,10 +280,15 @@ graphab_capacity <- function(proj_name,         # character
       # Open ext_file to check for column names
       capa_file <- utils::read.csv(file = ext_file)
 
-      patches <- foreign::read.dbf(file = paste0(proj_path, "/",
-                                                 proj_name, "/patches.dbf"))
+      patches <- suppressWarnings(
+        sf::st_drop_geometry(
+          sf::read_sf(
+            paste0(proj_path, "/",
+                   proj_name, "/",
+                   habitat, "/patches.gpkg"),
+            query = "SELECT * FROM patches",
+            as_tibble = FALSE)))
       nb_patches <- nrow(patches)
-
 
       # Check for column names
       if(!all(c("Id", "Capacity") %in% colnames(capa_file))){
@@ -230,20 +302,35 @@ graphab_capacity <- function(proj_name,         # character
                     "the patches in the project."))
       }
 
+      #######################################
+      # Add '' to ext_file for cases with spaces in paths
+      if(all(stringr::str_sub(ext_file, 1, 1) != "'",
+             stringr::str_sub(ext_file, 1, 1) != "'",
+             stringr::str_detect(string = ext_file,
+                                 pattern = " "))){
+        ext_file_cmd <- paste0("'", ext_file, "'")
+      } else {
+        ext_file_cmd <- ext_file
+      }
+
     }
 
-    ###############################################################
-    # Get graphab path
-    version <- "graphab-2.8.jar"
-    path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
+    ################
     #### Command line
-    cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab,
-             "--project", proj_end_path,
-             "--capa",  paste0("file=", ext_file),
+
+    cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab)
+
+    if(!is.null(parallel.java)){
+      cmd <- c(cmd, "-proc ", as.character(parallel.java))
+    }
+
+    cmd <- c(cmd,
+             "--project", proj_end_path_cmd,
+             "--usehabitat", habitat,
+             "--capa",  paste0("file=", ext_file_cmd),
              "id=Id", "capa=Capacity")
 
-
-
+    ########################################################
   } else if(mode == "neigh"){
 
 
@@ -252,8 +339,6 @@ graphab_capacity <- function(proj_name,         # character
       message("Argument 'ext_file' is not used when 'mode='neigh''.")
     } else if(!is.null(exp)){
       message("Argument 'exp' is not used when 'mode='neigh''.")
-    } else if(!is.null(patch_codes)){
-      message("Argument 'patch_codes' is not used when 'mode='neigh''.")
     }
 
     #######################
@@ -268,19 +353,19 @@ graphab_capacity <- function(proj_name,         # character
 
     #######################
     # Check for codes
+
+    ### Source raster codes
+    raster_codes <- get_graphab_raster_codes(proj_name = proj_name,
+                                             mode = 'all',
+                                             proj_path = proj_path)
+
     if(is.null(codes)){
       stop("'codes' must be integer values when 'mode='neigh''.")
     } else if (!(inherits(codes, c("integer", "numeric")))){
       stop("'codes' must be numeric or integer values.")
-    } else {
-      list_codes <- graph4lg::get_graphab_raster_codes(proj_name = proj_name,
-                                                       mode = "all",
-                                                       proj_path = proj_path)
-      if(!(all(codes %in% list_codes))){
-        stop("All 'codes' values must be values existing in the source raster.")
-      }
+    } else if(!(all(codes %in% raster_codes))){
+      stop("All 'codes' values must be values existing in the source raster.")
     }
-
 
     #######################
     # Check for linkset
@@ -288,40 +373,29 @@ graphab_capacity <- function(proj_name,         # character
       stop("'linkset' must be a character string when 'mode='neigh''.")
     } else if(!inherits(linkset, "character")){
       stop("'linkset' must be a character string when 'mode='neigh''.")
-    } else if (!(paste0(linkset, "-links.csv") %in% list.files(path = paste0(proj_path, "/", proj_name)))){
+    } else if (!(linkset %in% project_linkset[["Linkset names"]])){
       stop("The linkset you refer to does not exist.
            Please use graphab_link() before.")
     }
 
-    #########################################
-    # Check for cost_conv
-    if(!is.logical(cost_conv)){
-      stop("'cost_conv' must be a logical (TRUE or FALSE).")
-    }
-
-    #########################################
-    # Check for weight
-    if(!is.logical(weight)){
-      stop("'weight' must be a logical (TRUE or FALSE).")
-    }
-
-
     ###### Print used costs and codes
-    df_cost <- graph4lg::get_graphab_linkset_cost(proj_name = proj_name,
-                                                  linkset = linkset,
-                                                  proj_path = proj_path)
-    print(paste0("The following cost parameters will be used for ",
-                 "computing capacities neighbouring the patches"))
+    df_cost <- project_linkset[["Linkset cost parameters"]][[linkset]]
+    print(paste0("The following cost parameters will be used to ",
+                 "weight the distances to neighbouring patches when ",
+                 "computing the new capacities."))
     print(df_cost)
 
-
-    ###############################################################
-    # Get graphab path
-    version <- "graphab-2.8.jar"
-    path_to_graphab <- paste0(rappdirs::user_data_dir(), "/graph4lg_jar/", version)
+    ###################
     #### Command line
-    cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab,
-             "--project", proj_end_path,
+    cmd <- c("-Djava.awt.headless=true", "-jar", path_to_graphab)
+
+    if(!is.null(parallel.java)){
+      cmd <- c(cmd, "-proc ", as.character(parallel.java))
+    }
+
+    cmd <- c(cmd,
+             "--project", proj_end_path_cmd,
+             "--usehabitat", habitat,
              "--uselinkset", linkset,
              "--capa")
 
@@ -341,12 +415,9 @@ graphab_capacity <- function(proj_name,         # character
     ###########
     # Add weight if necessary
     if(weight){
-
       cmd <- c(cmd, "weight")
-
       message(paste0("Weighting parameter: ",
                      "p(", thr, ") = 0.05"))
-
     }
 
     #########################################################################
@@ -357,7 +428,8 @@ graphab_capacity <- function(proj_name,         # character
 
   }
 
-
+  ##############################################################################
+  ##############################################################################
   #########################################
   # Check for Graphab
   gr <- get_graphab(res = FALSE, return = TRUE)
@@ -379,21 +451,21 @@ graphab_capacity <- function(proj_name,         # character
     }
   }
 
-
   #########################################
   # Run the command line
   rs <- system2(java.path, args = cmd, stdout = TRUE)
-
 
   if(length(rs) == 1){
     if(rs == 1){
       message("An error occurred")
     } else {
-      message(paste0("Patch capacities have been updated. ",
+      message(paste0("Patch capacities of '", habitat,
+                     "' habitat have been updated. ",
                      "Use 'get_graphab_metric()' to get values"))
     }
   } else {
-    message(paste0("Patch capacities have been updated. ",
+    message(paste0("Patch capacities of '", habitat,
+                   "' habitat have been updated. ",
                    "Use 'get_graphab_metric()' to get values"))
   }
 

@@ -22,8 +22,9 @@ weight to rare alleles}
 \item{If 'dist = 'PG'', then the multilocus genetic distance is computed as
 in popgraph::popgraph function, following several steps of PCA and SVD
 (Dyer et Nason, 2004).}
-\item{If 'dist = 'DPS'', then the genetic distance used is equal to
-1 - the proportion of shared alleles (Bowcock, 1994)}
+\item{If 'dist = 'DPS'', then the genetic distance used is akin to
+1 - the proportion of shared alleles (Bowcock, 1994). The formula used
+is the same as in the MSA software.}
 \item{If 'dist = 'FST'', then the genetic distance used is the pairwise
 FST (Weir et Cockerham, 1984)}
 \item{If 'dist = 'FST_lin'', then the genetic distance used is the linearised

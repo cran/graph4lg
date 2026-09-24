@@ -20,7 +20,8 @@ sample_raster(
 )
 }
 \arguments{
-\item{raster}{A RasterLayer object corresponding to a categorical raster layer}
+\item{raster}{A SpatRaster (from terra) object corresponding to a
+categorical raster layer.}
 
 \item{class}{An integer value or vector with the value(s) corresponding to
 the code values of the raster layer within which points will be sampled.}
@@ -66,9 +67,9 @@ returning an error.}
 \item{y: The point or patch centroid latitude}
 \item{area: The area of the sampled patch (only if \code{by_patch = TRUE})}
 }}
-\item{'pts_layer': A \code{SpatialPointsDataFrame} layer corresponding
+\item{'pts_layer': A point spatial feature layer (sf) corresponding
 to the sampled point (points or patch centroids)}
-\item{'poly_layer': A \code{SpatialPolygonsDataFrame} layer corresponding
+\item{'poly_layer': A polygon spatial feature layer (sf) corresponding
 to the sampled patch polygons}
 }}
 

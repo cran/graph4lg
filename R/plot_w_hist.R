@@ -64,10 +64,13 @@ plot_w_hist <- function(graph,
 
   # Plot the histogram
   hist <- ggplot(data = graph_df,
-                 aes_string(x = 'weight')) +
-    geom_histogram(binwidth = b_w, fill = fill, color = "#776F62", size = .2) +
-    labs(x="Link weight",
-         y="Number of node pairs") +
+                 aes(x = .data$weight)) +
+    geom_histogram(binwidth = b_w,
+                   fill = fill,
+                   linewidth = .1,
+                   color = "#776F62") +
+    labs(x = "Link weight",
+         y = "Number of node pairs") +
     theme_bw()
 
   #print(hist)

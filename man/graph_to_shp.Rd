@@ -60,6 +60,13 @@ Create shapefile layers in the directory specified with the parameter
 The function enables to export a spatial graph to
 shapefile layers.
 }
+\details{
+Note that exporting shapefile layers can limit the number of digits
+you can include in numeric fields, as well as the length of column names.
+Column names are renamed to allow the export but the number of digits can
+generate errors. You are strongly encouraged to use \code{graph_to_gpkg()} in
+the latter case.
+}
 \examples{
 \dontrun{
 data(data_tuto)
